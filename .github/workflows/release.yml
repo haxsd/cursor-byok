@@ -1,9 +1,16 @@
 name: Release desktop app
 
+# 触发方式：
+#   1. 打标签（推荐，与版本号一致）：git tag v1.0.0 && git push origin v1.0.0
+#   2. 在 Actions 页面手动触发（用于验证构建是否能通过）
+#
+# 说明：本分支只构建 Windows 安装包与便携版 exe。
+# 需要 macOS / Linux 产物时，把下面 publish 任务的 matrix 补齐即可（见上游 release.yml）。
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -44,6 +51,8 @@ jobs:
             exit 1
           fi
 
+      # 三处版本号必须一致，且标签名必须是 v<版本号>；
+      # 手动触发时跳过标签校验，只校验三处版本号一致。
       - name: Read and verify app version
         id: version
         shell: bash
@@ -53,12 +62,15 @@ jobs:
           cargo_version=$(sed -n '/^version = / { s/version = "\([^"]*\)"/\1/p; q; }' apps/desktop/src-tauri/Cargo.toml)
           test "${version}" = "${package_version}"
           test "${version}" = "${cargo_version}"
-          test "${GITHUB_REF_TYPE}" = "tag"
-          test "${GITHUB_REF_NAME}" = "v${version}"
-          git fetch origin main:refs/remotes/origin/main
-          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
-            echo "Release tag must point to a commit contained in origin/main" >&2
-            exit 1
+          if [[ "${GITHUB_REF_TYPE}" = "tag" ]]; then
+            test "${GITHUB_REF_NAME}" = "v${version}"
+            git fetch origin main:refs/remotes/origin/main
+            if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+              echo "Release tag must point to a commit contained in origin/main" >&2
+              exit 1
+            fi
+          else
+            echo "Manual run: skipping tag checks for version ${version}"
           fi
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
@@ -67,8 +79,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
+          REF_TYPE: ${{ github.ref_type }}
         shell: bash
         run: |
+          if [[ "${REF_TYPE}" != "tag" ]]; then
+            echo "Manual run: building without publishing a release."
+            echo "should_publish=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
           state=$(gh release view "v${VERSION}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' 2>/dev/null || true)
           if [[ "${state}" = "published" ]]; then
             echo "Version ${VERSION} is already published; nothing to do."
@@ -78,46 +96,23 @@ jobs:
           fi
 
   publish:
-    name: Publish (${{ matrix.platform }})
+    name: Publish (windows-x86_64)
     needs: prepare
-    if: needs.prepare.outputs.should_publish == 'true'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: linux-x86_64
-            os: ubuntu-22.04
-            args: ""
-            target: ""
           - platform: windows-x86_64
             os: windows-latest
             args: "--bundles nsis"
             target: ""
-          - platform: macos-aarch64
-            os: macos-15
-            args: "--target aarch64-apple-darwin"
-            target: aarch64-apple-darwin
-          - platform: macos-x86_64
-            os: macos-15-intel
-            args: "--target x86_64-apple-darwin"
-            target: x86_64-apple-darwin
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux system dependencies
-        if: matrix.platform == 'linux-x86_64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
-
       - uses: dtolnay/rust-toolchain@stable
-
-      - name: Install Rust target
-        if: matrix.target != ''
-        run: rustup target add ${{ matrix.target }}
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -133,73 +128,71 @@ jobs:
         working-directory: apps/desktop
         run: npm ci
 
+      # 打标签时由 tauri-action 直接建 Release 并上传安装包；
+      # 手动触发时只产出 Actions 产物，便于先验证构建是否通过。
       - uses: tauri-apps/tauri-action@v1
+        if: needs.prepare.outputs.should_publish == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ contains(matrix.platform, 'macos') && '-' || '' }}
         with:
           projectPath: apps/desktop
           tagName: v__VERSION__
           releaseName: Cursor BYOK v__VERSION__
-          releaseBody: ${{ contains(needs.prepare.outputs.version, '-') && 'Beta release. Download the installer for your platform from the assets below.' || 'Download the installer for your platform from the assets below.' }}
+          releaseBody: 从下方资源中下载安装包（`-setup.exe`）或免安装的便携版压缩包。
           releaseDraft: true
           prerelease: false
           uploadUpdaterJson: true
           args: ${{ matrix.args }}
 
-      - name: Package legacy Linux updater asset
-        if: matrix.platform == 'linux-x86_64'
-        shell: bash
+      - name: Build without publishing (manual run)
+        if: needs.prepare.outputs.should_publish != 'true'
         env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          mkdir -p legacy-update
-          tar -czf "legacy-update/cursor-byok-${VERSION}-linux-amd64.tar.gz" -C target/release cursor-byok-desktop
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        working-directory: apps/desktop
+        run: npm run tauri:build -- ${{ matrix.args }}
 
-      - name: Package and sign legacy Windows updater asset
-        if: matrix.platform == 'windows-x86_64'
+      # 便携版：打包成单文件 exe 的压缩包，并生成签名，
+      # 供应用内的便携更新（portable-latest.json）使用。
+      - name: Package and sign portable Windows build
+        if: needs.prepare.outputs.should_publish == 'true'
         shell: pwsh
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
-          New-Item -ItemType Directory -Force legacy-update | Out-Null
-          $asset = "legacy-update/cursor-byok-$env:VERSION-windows-amd64.zip"
+          New-Item -ItemType Directory -Force portable | Out-Null
+          $asset = "portable/cursor-byok-$env:VERSION-windows-amd64.zip"
           Compress-Archive -LiteralPath target/release/cursor-byok-desktop.exe -DestinationPath $asset
           Push-Location apps/desktop
           npm exec tauri signer sign -- "../../$asset"
           Pop-Location
           $entries = @(tar -tf $asset)
           if ($entries.Count -ne 1 -or [System.IO.Path]::GetFileName($entries[0]) -ne 'cursor-byok-desktop.exe') {
-            throw "Windows updater archive must contain only cursor-byok-desktop.exe"
+            throw "Portable archive must contain only cursor-byok-desktop.exe"
           }
           if (!(Test-Path "$asset.sig")) {
-            throw "Windows updater archive signature was not generated"
+            throw "Portable archive signature was not generated"
           }
-
-      - name: Package legacy macOS updater asset
-        if: contains(matrix.platform, 'macos')
-        shell: bash
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          mkdir -p legacy-update
-          archive=$(find "target/${{ matrix.target }}/release/bundle/macos" -maxdepth 1 -name '*.app.tar.gz' -print -quit)
-          test -n "${archive}"
-          legacy_platform=macos-arm64
-          if [[ "${{ matrix.platform }}" = "macos-x86_64" ]]; then
-            legacy_platform=macos-amd64
-          fi
-          cp "${archive}" "legacy-update/cursor-byok-${VERSION}-${legacy_platform}.tar.gz"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: legacy-update-${{ matrix.platform }}
-          path: legacy-update/*
+          name: portable-windows
+          path: portable/*
           if-no-files-found: error
+
+      - name: Upload manual build output
+        if: needs.prepare.outputs.should_publish != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: manual-build-windows
+          path: |
+            target/release/cursor-byok-desktop.exe
+            apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: warn
 
   finalize:
     name: Publish GitHub Release
@@ -211,35 +204,32 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: legacy-update-*
-          path: legacy-update
+          pattern: portable-*
+          path: portable
           merge-multiple: true
 
-      - name: Generate legacy update manifest
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          node .github/scripts/generate-legacy-update.mjs \
-            --version "${VERSION}" \
-            --repository "${GITHUB_REPOSITORY}" \
-            --assets-dir legacy-update \
-            --output legacy-update/update.json \
-            --notes "Cursor BYOK v${VERSION}"
-
-      - name: Generate signed Windows portable update manifest
+      # 便携更新清单：应用内检查更新时读取它
+      - name: Generate signed portable update manifest
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           asset="cursor-byok-${VERSION}-windows-amd64.zip"
-          test -f "legacy-update/${asset}"
-          test -f "legacy-update/${asset}.sig"
+          test -f "portable/${asset}"
+          test -f "portable/${asset}.sig"
           node .github/scripts/generate-portable-update.mjs \
             --version "${VERSION}" \
             --repository "${GITHUB_REPOSITORY}" \
             --asset "${asset}" \
-            --signature "legacy-update/${asset}.sig" \
-            --output legacy-update/portable-latest.json
+            --signature "portable/${asset}.sig" \
+            --output "portable/portable-latest.json"
 
+      - name: Upload portable assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: gh release upload "v${VERSION}" portable/* --clobber
+
+      # 把 Tauri 生成的 latest.json 里的下载地址换成本仓库的资源直链
       - name: Normalize Tauri updater download URLs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -269,12 +259,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.prepare.outputs.version }}
         run: gh release upload "v${VERSION}" tauri-update/latest.json --clobber
-
-      - name: Upload legacy updater assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: gh release upload "v${VERSION}" legacy-update/* --clobber
 
       - name: Publish the completed release
         env:
