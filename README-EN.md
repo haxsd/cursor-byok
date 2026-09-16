@@ -105,6 +105,35 @@ Verification performed on this fork:
 - the sum of the usage buckets equals the aggregate figures returned by the service, so nothing is dropped;
 - the language-to-currency mapping was exercised against the real module with 14 assertions (zh/en × currency × price list × money formatting), all passing.
 
+## Publishing installers
+
+This repository is wired to GitHub Actions: **pushing a tag builds and publishes the Windows installer automatically**.
+
+```bash
+# 1. set the same version in all three files
+#    apps/desktop/package.json
+#    apps/desktop/src-tauri/Cargo.toml
+#    apps/desktop/src-tauri/tauri.conf.json
+
+# 2. commit, push, then tag (the tag must be v<version>)
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+The release then appears on the Releases page with:
+
+| Asset | Description |
+| --- | --- |
+| `Cursor BYOK_<version>_x64-setup.exe` | NSIS installer, double-click to install |
+| `cursor-byok-<version>-windows-amd64.zip` | Portable build, unzip and run (a single `cursor-byok-desktop.exe`) |
+| `latest.json` / `portable-latest.json` | Manifests used by the in-app update check |
+
+To validate a build without publishing, run the `Release desktop app` workflow manually from the Actions tab; it only produces workflow artifacts.
+
+The workflow builds Windows only. To add macOS / Linux, restore the corresponding `matrix` entries and platform steps in `.github/workflows/release.yml` (upstream's `release.yml` is the reference).
+
+Signing: update packages are signed with this fork's own key. The private key lives in the repository's Actions secrets and the public key in `plugins.updater.pubkey` in `tauri.conf.json`. **Back up the private key and its password** — without them no further update package can be signed (see the notes under `.tauri/`).
+
 ## Syncing with upstream
 
 ```bash
