@@ -44,14 +44,18 @@
 
 #### 价格表
 
-DeepSeek-V4.1-Flash 官方单价（元 / 百万 token）：
+DeepSeek-V4.1-Flash 官方单价，**两种币种各自一套**（都是官方公布的原价，不是按汇率折算的）：
 
-| 项目 | 低谷时段 | 高峰时段 |
-| --- | --- | --- |
-| 输入（缓存未命中） | ¥1.00 | ¥2.00 |
-| 输入（缓存命中） | ¥0.02 | ¥0.04 |
-| 输出 | ¥4.00 | ¥8.00 |
-| 缓存写入 | ¥0（DeepSeek 不单独收取） | ¥0 |
+| 项目 | 人民币 · 低谷 | 人民币 · 高峰 | 美元 · 低谷 | 美元 · 高峰 |
+| --- | --- | --- | --- | --- |
+| 输入（缓存未命中） | ¥1.00 | ¥2.00 | $0.15 | $0.30 |
+| 输入（缓存命中） | ¥0.02 | ¥0.04 | $0.003 | $0.006 |
+| 输出 | ¥4.00 | ¥8.00 | $0.60 | $1.20 |
+| 缓存写入 | ¥0 | ¥0 | $0 | $0 |
+
+（单位：每百万 token。DeepSeek 不单独收取缓存写入费用。）
+
+**币种跟随界面语言**：简体中文界面用人民币计价，英文界面用美元计价。两种币种在设置里各自维护一套完整价格，切换语言不会互相覆盖。
 
 时段规则：**UTC 周一至周五 01:00–04:00、06:00–10:00 为高峰期**，其余时间（含周末全天）为低谷期，低谷价为高峰价的一半。
 
@@ -71,7 +75,7 @@ DeepSeek-V4.1-Flash 官方单价（元 / 百万 token）：
 | 文件 | 职责 |
 | --- | --- |
 | `apps/desktop/src/features/home/metrics/peakOffPeakPricing.ts` | 时段判断、逐小时计价、超长范围分段取数 |
-| `apps/desktop/src/features/home/metrics/tokenCost.ts` | 价格换算、金额与单价格式化（货币符号集中在此） |
+| `apps/desktop/src/features/home/metrics/tokenCost.ts` | 币种规则、价格换算、金额与单价格式化 |
 | `apps/desktop/src/features/home/metrics/HomeMetrics.tsx` | 首页「价值估算」卡片与悬浮说明 |
 | `apps/desktop/src/features/settings/PricingSettingsCard.tsx` | 「Token 定价」设置卡片，支持两种计价方式 |
 | `server/src/store/settings.rs` | 价格设置的持久化结构与默认值 |
@@ -81,7 +85,7 @@ DeepSeek-V4.1-Flash 官方单价（元 / 百万 token）：
 - **高峰 / 低谷分别计价**（默认）：填两套单价，按上面的规则逐小时计算；
 - **全时段固定单价**：只填一套单价，适用于定价不分时段的模型。
 
-界面上的货币符号统一为人民币 `¥`，如需换成其他币种，改 `tokenCost.ts` 里的 `CURRENCY_SYMBOL` 并填入对应币种的单价即可。
+设置卡片里编辑的是**当前界面语言对应币种**的那套价格；要改另一种币种的价格，切换界面语言后再编辑即可。币种与符号的映射集中在 `tokenCost.ts` 的 `currencyOf` 与 `CURRENCY_SYMBOLS` 里。
 
 ### 3. 语言
 
@@ -123,9 +127,10 @@ make build-desktop
 
 - `npm run check`：TypeScript 类型检查与生产构建全部通过；
 - `cargo fmt --check`、`cargo clippy -D warnings`、`cargo check --workspace --all-targets` 通过；
-- `cargo test -p cursor-server`：16 个测试套件、241 项测试全部通过；
+- `cargo test -p cursor-server`：16 个测试套件、242 项测试全部通过；
 - 逐小时计价与独立复算脚本对账，四项费用完全一致；
-- 分桶用量之和与服务端汇总数据相等，不存在漏算。
+- 分桶用量之和与服务端汇总数据相等，不存在漏算；
+- 币种跟随语言的映射用真实模块跑过 14 项断言（中/英 × 币种 × 价格表 × 金额格式化）全部通过。
 
 > [!NOTE]
 > **Windows 上请把仓库的行尾策略设为按原样检出**，否则 `prefix_stability` 会因为提示词模板被检出成 CRLF 而失败（`include_str!` 会把 CRLF 一起编进模板）：

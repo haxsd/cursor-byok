@@ -1,12 +1,13 @@
 import type { OverviewTokenUsageBucket } from "../../../shared/api";
 import { formatCompactInteger, formatInteger } from "../../../shared/utils/numberFormat";
 import { useAppStore } from "../../../shared/store/appStore";
+import { useI18n } from "../../../i18n/store";
 import { Icon } from "../../../shared/ui/Icon";
 import { useTooltip, type TooltipAnchor } from "../../../shared/ui/Tooltip";
 import { informationOutlineIcon } from "../../../shared/ui/icons";
 import { CacheHitRateChart } from "./CacheHitRateChart";
 import { priceAt, sumHourlyCost } from "./peakOffPeakPricing";
-import { CURRENCY_SYMBOL, formatMoney, formatPrice, priceTokens } from "./tokenCost";
+import { currencyOf, currencySymbol, formatMoney, formatPrice, priceTokens, pricingFor } from "./tokenCost";
 import styles from "./HomeMetrics.module.scss";
 
 export type HomeMetricsData = {
@@ -66,6 +67,11 @@ export function HomeMetrics({ data, pricingSeries = null, refreshVersion = 0 }: 
   refreshVersion?: number;
 }) {
   const { pricing } = useAppStore();
+  // 币种跟随界面语言：简体中文用人民币，英文用美元。
+  const { locale } = useI18n();
+  const currency = currencyOf(locale);
+  const priceBook = pricingFor(pricing, currency);
+  const unit = currencySymbol(currency);
   const inputTokens = Math.max(0, data.promptTokens - data.cacheReadTokens - data.cacheWriteTokens);
   const outputTokens = Math.max(0, data.tokenUsage - data.promptTokens);
   const defaultCacheHitRate = calculateRate(data.cacheReadTokens, data.cacheReadTokens + inputTokens);
@@ -77,10 +83,10 @@ export function HomeMetrics({ data, pricingSeries = null, refreshVersion = 0 }: 
 
   // 分时计价：逐小时用「该小时所属时段」的单价计算。
   const hourlyCosts = pricing.mode === "peak_off_peak" && pricingSeries?.length
-    ? sumHourlyCost(pricingSeries, pricing)
+    ? sumHourlyCost(pricingSeries, priceBook)
     : null;
   // 分桶数据尚未就绪时，先按当前时段的价格给出一个近似值（提示框会注明）。
-  const fallbackPrice = pricing.mode === "peak_off_peak" ? priceAt(pricing, Date.now()) : pricing.fixed;
+  const fallbackPrice = pricing.mode === "peak_off_peak" ? priceAt(priceBook, Date.now()) : priceBook.fixed;
   const costs = hourlyCosts ?? {
     input: priceTokens(inputTokens, fallbackPrice.input_per_million),
     output: priceTokens(outputTokens, fallbackPrice.output_per_million),
@@ -133,30 +139,30 @@ export function HomeMetrics({ data, pricingSeries = null, refreshVersion = 0 }: 
     "",
     t("普通输入：{tokens} × {unit}{price}/1M = {cost}", {
       tokens: formatMetricValue(inputTokens),
-      unit: CURRENCY_SYMBOL,
+      unit,
       price: formatPrice(averagePrice(costs.input, inputTokens)),
-      cost: formatMoney(costs.input),
+      cost: formatMoney(costs.input, currency),
     }),
     t("模型输出：{tokens} × {unit}{price}/1M = {cost}", {
       tokens: formatMetricValue(outputTokens),
-      unit: CURRENCY_SYMBOL,
+      unit,
       price: formatPrice(averagePrice(costs.output, outputTokens)),
-      cost: formatMoney(costs.output),
+      cost: formatMoney(costs.output, currency),
     }),
     t("缓存读取：{tokens} × {unit}{price}/1M = {cost}", {
       tokens: formatMetricValue(data.cacheReadTokens),
-      unit: CURRENCY_SYMBOL,
+      unit,
       price: formatPrice(averagePrice(costs.cacheRead, data.cacheReadTokens)),
-      cost: formatMoney(costs.cacheRead),
+      cost: formatMoney(costs.cacheRead, currency),
     }),
     t("缓存写入：{tokens} × {unit}{price}/1M = {cost}", {
       tokens: formatMetricValue(data.cacheWriteTokens),
-      unit: CURRENCY_SYMBOL,
+      unit,
       price: formatPrice(averagePrice(costs.cacheWrite, data.cacheWriteTokens)),
-      cost: formatMoney(costs.cacheWrite),
+      cost: formatMoney(costs.cacheWrite, currency),
     }),
     "",
-    t("合计：{cost}", { cost: formatMoney(totalCost) }),
+    t("合计：{cost}", { cost: formatMoney(totalCost, currency) }),
   ].join("\n");
 
   return <div className={styles.scroller}>
@@ -185,8 +191,8 @@ export function HomeMetrics({ data, pricingSeries = null, refreshVersion = 0 }: 
       <article className={styles.metric}>
         <div className={styles.label}>{t("价值估算")}<InfoTooltip content={costTooltip} /></div>
         <div className={styles.body}>
-          <div className={styles.value} title={formatMoney(totalCost)}>{formatMoney(totalCost)}</div>
-          <div className={styles.secondary}>{t("缓存读写 {cost}", { cost: formatMoney(cacheCost) })}</div>
+          <div className={styles.value} title={formatMoney(totalCost, currency)}>{formatMoney(totalCost, currency)}</div>
+          <div className={styles.secondary}>{t("缓存读写 {cost}", { cost: formatMoney(cacheCost, currency) })}</div>
         </div>
       </article>
     </section>

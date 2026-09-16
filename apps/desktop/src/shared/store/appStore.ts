@@ -1,15 +1,16 @@
 import { useSyncExternalStore } from "react";
-import { api, type CursorHarnessStatus, type LlmCall, type Model, type ModelInput, type Overview, type PluginDescriptor, type PluginRuntimeStatus, type PortSettings, type TokenPricingSettings } from "../api";
+import { api, type CurrencyPricing, type CursorHarnessStatus, type LlmCall, type Model, type ModelInput, type Overview, type PluginDescriptor, type PluginRuntimeStatus, type PortSettings, type TokenPricingSettings } from "../api";
 import { applyTheme, isThemeId, type ThemeId } from "../theme/theme";
 
 /**
- * 首页「价值估算」的默认价格：DeepSeek-V4.1-Flash 官方单价（元 / 百万 token）。
+ * 首页「价值估算」的默认价格：DeepSeek-V4.1-Flash 官方单价（每百万 token）。
  *
+ * 界面语言决定使用哪一套：简体中文用人民币，英文用美元，
+ * 两套都是官方公布的原始价格，而不是按汇率折算出来的。
  * 默认走「高峰 / 低谷」模式，低谷价为高峰价的一半；
  * DeepSeek 不单独收取缓存写入费用，因此该项为 0。
  */
-export const DEFAULT_TOKEN_PRICING: TokenPricingSettings = {
-  mode: "peak_off_peak",
+const CNY_PRICING: CurrencyPricing = {
   fixed: {
     input_per_million: 2.0,
     output_per_million: 8.0,
@@ -28,6 +29,33 @@ export const DEFAULT_TOKEN_PRICING: TokenPricingSettings = {
     cache_read_per_million: 0.02,
     cache_write_per_million: 0.0,
   },
+};
+
+const USD_PRICING: CurrencyPricing = {
+  fixed: {
+    input_per_million: 0.3,
+    output_per_million: 1.2,
+    cache_read_per_million: 0.006,
+    cache_write_per_million: 0.0,
+  },
+  peak: {
+    input_per_million: 0.3,
+    output_per_million: 1.2,
+    cache_read_per_million: 0.006,
+    cache_write_per_million: 0.0,
+  },
+  off_peak: {
+    input_per_million: 0.15,
+    output_per_million: 0.6,
+    cache_read_per_million: 0.003,
+    cache_write_per_million: 0.0,
+  },
+};
+
+export const DEFAULT_TOKEN_PRICING: TokenPricingSettings = {
+  mode: "peak_off_peak",
+  cny: CNY_PRICING,
+  usd: USD_PRICING,
 };
 
 export type AppSnapshot = {

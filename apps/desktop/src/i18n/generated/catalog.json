@@ -21,7 +21,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 105,
+          "line": 111,
           "column": 5
         }
       ]
@@ -76,7 +76,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 63,
+          "line": 62,
           "column": 72
         }
       ]
@@ -103,7 +103,7 @@
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 172,
+          "line": 189,
           "column": 75
         },
         {
@@ -183,7 +183,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 117,
+          "line": 123,
           "column": 5
         }
       ]
@@ -197,7 +197,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 114,
+          "line": 120,
           "column": 5
         }
       ]
@@ -265,7 +265,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 186,
+          "line": 192,
           "column": 40
         }
       ]
@@ -279,7 +279,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 96,
+          "line": 108,
           "column": 38
         }
       ]
@@ -447,6 +447,18 @@
         }
       ]
     },
+    "1074d77b276b169f": {
+      "source": "价格币种跟随界面语言：简体中文用人民币，英文用美元，两套价格各自独立维护。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/settings/PricingSettingsCard.tsx",
+          "line": 196,
+          "column": 41
+        }
+      ]
+    },
     "12430375c0db4727": {
       "source": "按配置的 Token 价格估算。",
       "kind": "text",
@@ -454,7 +466,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 129,
+          "line": 135,
           "column": 8
         }
       ]
@@ -466,7 +478,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 179,
+          "line": 185,
           "column": 40
         }
       ]
@@ -519,7 +531,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 165,
+          "line": 171,
           "column": 40
         }
       ]
@@ -589,7 +601,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 104,
+          "line": 110,
           "column": 5
         }
       ]
@@ -654,12 +666,12 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 194,
+          "line": 212,
           "column": 46
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 210,
+          "line": 228,
           "column": 44
         }
       ]
@@ -758,7 +770,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 112,
+          "line": 118,
           "column": 5
         }
       ]
@@ -792,7 +804,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 95,
+          "line": 101,
           "column": 5
         }
       ]
@@ -1017,7 +1029,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 102,
+          "line": 108,
           "column": 5
         }
       ]
@@ -1093,7 +1105,7 @@
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 166,
+          "line": 183,
           "column": 64
         },
         {
@@ -1154,7 +1166,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 94,
+          "line": 100,
           "column": 5
         }
       ]
@@ -1354,22 +1366,22 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 181,
+          "line": 199,
           "column": 31
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 185,
+          "line": 203,
           "column": 28
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 203,
+          "line": 221,
           "column": 24
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 215,
+          "line": 233,
           "column": 24
         }
       ]
@@ -1424,7 +1436,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 97,
+          "line": 109,
           "column": 39
         }
       ]
@@ -1456,7 +1468,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 172,
+          "line": 178,
           "column": 46
         }
       ]
@@ -1494,7 +1506,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 94,
+          "line": 106,
           "column": 33
         }
       ]
@@ -1799,7 +1811,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 107,
+          "line": 113,
           "column": 5
         }
       ]
@@ -1811,7 +1823,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 112,
+          "line": 124,
           "column": 10
         }
       ]
@@ -1909,7 +1921,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 29,
+          "line": 30,
           "column": 27
         },
         {
@@ -2218,7 +2230,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 145,
+          "line": 162,
           "column": 17
         }
       ]
@@ -2417,7 +2429,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 159,
+          "line": 165,
           "column": 5
         }
       ]
@@ -2472,7 +2484,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 106,
+          "line": 112,
           "column": 5
         }
       ]
@@ -2498,7 +2510,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 116,
+          "line": 122,
           "column": 5
         }
       ]
@@ -2575,7 +2587,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 533,
+          "line": 547,
           "column": 43
         }
       ]
@@ -2661,7 +2673,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 182,
+          "line": 188,
           "column": 46
         }
       ]
@@ -2813,7 +2825,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 189,
+          "line": 195,
           "column": 46
         }
       ]
@@ -2837,12 +2849,12 @@
       "refs": [
         {
           "file": "shared/store/appStore.ts",
-          "line": 239,
+          "line": 267,
           "column": 23
         },
         {
           "file": "shared/store/appStore.ts",
-          "line": 246,
+          "line": 274,
           "column": 25
         }
       ]
@@ -2902,7 +2914,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 528,
+          "line": 542,
           "column": 43
         }
       ]
@@ -2914,7 +2926,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 163,
+          "line": 169,
           "column": 50
         }
       ]
@@ -2926,17 +2938,17 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 71,
+          "line": 77,
           "column": 31
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 190,
+          "line": 208,
           "column": 54
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 206,
+          "line": 224,
           "column": 52
         }
       ]
@@ -3078,7 +3090,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 472,
+          "line": 486,
           "column": 21
         }
       ]
@@ -3102,7 +3114,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 127,
+          "line": 133,
           "column": 7
         }
       ]
@@ -3202,7 +3214,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 111,
+          "line": 123,
           "column": 10
         }
       ]
@@ -3265,7 +3277,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 54,
+          "line": 55,
           "column": 17
         }
       ]
@@ -3390,7 +3402,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 60,
+          "line": 59,
           "column": 60
         }
       ]
@@ -3848,7 +3860,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 124,
+          "line": 130,
           "column": 11
         }
       ]
@@ -3915,7 +3927,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 126,
+          "line": 132,
           "column": 7
         }
       ]
@@ -3947,7 +3959,7 @@
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 168,
+          "line": 185,
           "column": 31
         },
         {
@@ -4098,12 +4110,12 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 160,
+          "line": 177,
           "column": 30
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 216,
+          "line": 234,
           "column": 47
         }
       ]
@@ -4180,17 +4192,17 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 70,
+          "line": 76,
           "column": 33
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 196,
+          "line": 214,
           "column": 54
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 218,
+          "line": 236,
           "column": 52
         }
       ]
@@ -4224,17 +4236,17 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 72,
+          "line": 78,
           "column": 38
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 192,
+          "line": 210,
           "column": 54
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 208,
+          "line": 226,
           "column": 52
         }
       ]
@@ -4405,7 +4417,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 61,
+          "line": 60,
           "column": 62
         }
       ]
@@ -4477,7 +4489,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 113,
+          "line": 119,
           "column": 5
         }
       ]
@@ -4542,7 +4554,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 115,
+          "line": 121,
           "column": 5
         }
       ]
@@ -4629,7 +4641,7 @@
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 165,
+          "line": 182,
           "column": 72
         }
       ]
@@ -4670,7 +4682,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 146,
+          "line": 152,
           "column": 5
         }
       ]
@@ -4783,7 +4795,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 62,
+          "line": 61,
           "column": 70
         }
       ]
@@ -4812,7 +4824,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 140,
+          "line": 146,
           "column": 5
         }
       ]
@@ -4855,12 +4867,12 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 159,
+          "line": 176,
           "column": 38
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 204,
+          "line": 222,
           "column": 47
         }
       ]
@@ -4973,7 +4985,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 132,
+          "line": 138,
           "column": 5
         }
       ]
@@ -5007,7 +5019,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 125,
+          "line": 131,
           "column": 11
         }
       ]
@@ -5036,7 +5048,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 134,
+          "line": 140,
           "column": 5
         }
       ]
@@ -5303,7 +5315,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 178,
+          "line": 195,
           "column": 17
         }
       ]
@@ -5435,7 +5447,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 113,
+          "line": 125,
           "column": 10
         }
       ]
@@ -5483,7 +5495,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 110,
+          "line": 116,
           "column": 5
         }
       ]
@@ -5711,7 +5723,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 169,
+          "line": 175,
           "column": 40
         }
       ]
@@ -5790,7 +5802,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 95,
+          "line": 107,
           "column": 34
         }
       ]
@@ -5934,7 +5946,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 52,
+          "line": 51,
           "column": 21
         }
       ]
@@ -6025,7 +6037,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 114,
+          "line": 126,
           "column": 10
         }
       ]
@@ -6280,7 +6292,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 152,
+          "line": 158,
           "column": 5
         }
       ]
@@ -6324,7 +6336,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 96,
+          "line": 102,
           "column": 5
         }
       ]
@@ -6360,7 +6372,7 @@
       "refs": [
         {
           "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 119,
+          "line": 125,
           "column": 5
         }
       ]
@@ -6396,7 +6408,7 @@
       "refs": [
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 176,
+          "line": 193,
           "column": 24
         }
       ]
@@ -6449,7 +6461,7 @@
         },
         {
           "file": "features/settings/PricingSettingsCard.tsx",
-          "line": 168,
+          "line": 185,
           "column": 19
         },
         {

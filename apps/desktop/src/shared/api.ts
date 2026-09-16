@@ -160,7 +160,7 @@ export interface CommitSettingsView extends CommitSettings {
   default_prompt: string;
 }
 
-/** 一组 Token 单价（单位：元 / 百万 token）。 */
+/** 一组 Token 单价（每百万 token）。 */
 export interface TokenPrice {
   /** 输入价格（缓存未命中）。 */
   input_per_million: number;
@@ -170,17 +170,31 @@ export interface TokenPrice {
   cache_write_per_million: number;
 }
 
-/** 首页「价值估算」的计价模式。 */
-export type PricingMode = "fixed" | "peak_off_peak";
-
-export interface TokenPricingSettings {
-  mode: PricingMode;
+/** 单一币种下的整套价格。 */
+export interface CurrencyPricing {
   /** 「固定单价」模式使用的价格。 */
   fixed: TokenPrice;
   /** 高峰时段价格。 */
   peak: TokenPrice;
   /** 低谷时段价格。 */
   off_peak: TokenPrice;
+}
+
+/** 首页「价值估算」的计价模式。 */
+export type PricingMode = "fixed" | "peak_off_peak";
+
+/**
+ * 首页「价值估算」的价格设置。
+ *
+ * 界面语言决定使用哪一套价格：简体中文用人民币，英文用美元。
+ * 两种币种各自维护完整的价格表，切换语言不会互相影响。
+ */
+export interface TokenPricingSettings {
+  mode: PricingMode;
+  /** 人民币价格。 */
+  cny: CurrencyPricing;
+  /** 美元价格。 */
+  usd: CurrencyPricing;
 }
 
 export type PluginRuntimeState = "uninitialized" | "initializing" | "ready" | "failed" | "unsupported";

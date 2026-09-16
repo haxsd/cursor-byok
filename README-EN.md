@@ -40,14 +40,18 @@ The "user guide" entry in the sidebar is a feature entry point, not an ad, so it
 
 ### 2. Time-of-day pricing for the value estimate
 
-DeepSeek-V4.1-Flash rates (CNY per million tokens):
+DeepSeek-V4.1-Flash rates, **one price list per currency** (both are the official published prices, not converted at an exchange rate):
 
-| Item | Off-peak | Peak |
-| --- | --- | --- |
-| Input (cache miss) | ¥1.00 | ¥2.00 |
-| Input (cache hit) | ¥0.02 | ¥0.04 |
-| Output | ¥4.00 | ¥8.00 |
-| Cache write | ¥0 (not billed separately by DeepSeek) | ¥0 |
+| Item | CNY off-peak | CNY peak | USD off-peak | USD peak |
+| --- | --- | --- | --- | --- |
+| Input (cache miss) | ¥1.00 | ¥2.00 | $0.15 | $0.30 |
+| Input (cache hit) | ¥0.02 | ¥0.04 | $0.003 | $0.006 |
+| Output | ¥4.00 | ¥8.00 | $0.60 | $1.20 |
+| Cache write | ¥0 | ¥0 | $0 | $0 |
+
+(Per million tokens. DeepSeek does not bill cache writes separately.)
+
+**The currency follows the interface language**: the Simplified Chinese UI prices in CNY, the English UI prices in USD. Both price lists are stored independently, so switching languages never overwrites the other one.
 
 Peak hours are **01:00–04:00 and 06:00–10:00 UTC, Monday to Friday**. All other times (including weekends) are off-peak at half the peak rate.
 
@@ -60,14 +64,14 @@ Relevant files:
 | File | Responsibility |
 | --- | --- |
 | `apps/desktop/src/features/home/metrics/peakOffPeakPricing.ts` | Period rules, hourly pricing, chunked fetching for long ranges |
-| `apps/desktop/src/features/home/metrics/tokenCost.ts` | Token-to-cost conversion and formatting (currency symbol lives here) |
+| `apps/desktop/src/features/home/metrics/tokenCost.ts` | Currency rules, token-to-cost conversion and formatting |
 | `apps/desktop/src/features/home/metrics/HomeMetrics.tsx` | The "value estimate" card and its tooltip |
 | `apps/desktop/src/features/settings/PricingSettingsCard.tsx` | The "Token pricing" settings card with both modes |
 | `server/src/store/settings.rs` | Persisted pricing shape and defaults |
 
 The settings card offers two modes: **peak / off-peak pricing** (default, two sets of rates) and **fixed pricing** (a single set, for models billed uniformly).
 
-Prices display with the CNY symbol `¥`. To switch currencies, change `CURRENCY_SYMBOL` in `tokenCost.ts` and enter rates in that currency.
+The card edits the price list of the currency that matches the current interface language; switch the language to edit the other one. The language-to-currency mapping lives in `currencyOf` and `CURRENCY_SYMBOLS` in `tokenCost.ts`.
 
 ### 3. Languages
 
@@ -96,8 +100,10 @@ Verification performed on this fork:
 
 - `npm run check` passes (typecheck + production build);
 - `cargo fmt --check`, `cargo clippy -D warnings` and `cargo check --workspace --all-targets` pass;
+- `cargo test -p cursor-server` passes all 242 tests across 16 suites;
 - the hourly pricing was cross-checked against an independent implementation with all four cost components matching exactly;
-- the sum of the usage buckets equals the aggregate figures returned by the service, so nothing is dropped.
+- the sum of the usage buckets equals the aggregate figures returned by the service, so nothing is dropped;
+- the language-to-currency mapping was exercised against the real module with 14 assertions (zh/en × currency × price list × money formatting), all passing.
 
 ## Syncing with upstream
 
