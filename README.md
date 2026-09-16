@@ -123,8 +123,18 @@ make build-desktop
 
 - `npm run check`：TypeScript 类型检查与生产构建全部通过；
 - `cargo fmt --check`、`cargo clippy -D warnings`、`cargo check --workspace --all-targets` 通过；
+- `cargo test -p cursor-server`：16 个测试套件、241 项测试全部通过；
 - 逐小时计价与独立复算脚本对账，四项费用完全一致；
 - 分桶用量之和与服务端汇总数据相等，不存在漏算。
+
+> [!NOTE]
+> **Windows 上请把仓库的行尾策略设为按原样检出**，否则 `prefix_stability` 会因为提示词模板被检出成 CRLF 而失败（`include_str!` 会把 CRLF 一起编进模板）：
+>
+> ```bash
+> git config core.autocrlf false
+> git config core.eol lf
+> git checkout -- .
+> ```
 
 ## 与原版保持同步
 
