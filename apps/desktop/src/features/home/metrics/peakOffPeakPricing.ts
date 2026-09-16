@@ -13,9 +13,9 @@
  */
 import {
   api,
+  type CurrencyPricing,
   type OverviewTokenUsageBucket,
   type TokenPrice,
-  type TokenPricingSettings,
 } from "../../../shared/api";
 import { priceTokens } from "./tokenCost";
 
@@ -57,7 +57,7 @@ export function pricingPeriodAt(epochMs: number): PricingPeriod {
 }
 
 /** 取某个时间点适用的单价。 */
-export function priceAt(pricing: TokenPricingSettings, epochMs: number): TokenPrice {
+export function priceAt(pricing: CurrencyPricing, epochMs: number): TokenPrice {
   return pricing[pricingPeriodAt(epochMs)];
 }
 
@@ -65,10 +65,11 @@ export function priceAt(pricing: TokenPricingSettings, epochMs: number): TokenPr
  * 按小时分桶逐段计价，返回各项费用。
  *
  * 每个分桶用它起始时刻所属时段的单价计算，累加后即为该时间范围内的真实金额。
+ * 传入的是**某个币种**的价格表，因此金额的币种由调用方决定。
  */
 export function sumHourlyCost(
   series: OverviewTokenUsageBucket[],
-  pricing: TokenPricingSettings,
+  pricing: CurrencyPricing,
 ): CostBreakdown {
   const total: CostBreakdown = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
   for (const bucket of series) {

@@ -25,7 +25,7 @@ pub struct PortSettings {
     pub service_port: u16,
 }
 
-/// 一组 Token 单价（单位：元 / 百万 token）。
+/// 一组 Token 单价（每百万 token）。
 ///
 /// `input_per_million` 指**缓存未命中**的输入，`cache_read_per_million` 指
 /// **缓存命中**的输入；这是 DeepSeek 与 Claude 共用的计费口径。
@@ -40,7 +40,7 @@ pub struct TokenPrice {
 
 impl TokenPrice {
     /// DeepSeek-V4.1-Flash 高峰时段官方单价（元 / 百万 token）。
-    pub const fn deepseek_flash_peak() -> Self {
+    pub const fn peak_cny() -> Self {
         Self {
             input_per_million: 2.0,
             output_per_million: 8.0,
@@ -49,8 +49,8 @@ impl TokenPrice {
         }
     }
 
-    /// DeepSeek-V4.1-Flash 低谷时段官方单价，为高峰价的一半。
-    pub const fn deepseek_flash_off_peak() -> Self {
+    /// DeepSeek-V4.1-Flash 低谷时段官方单价（元），为高峰价的一半。
+    pub const fn off_peak_cny() -> Self {
         Self {
             input_per_million: 1.0,
             output_per_million: 4.0,
@@ -58,11 +58,31 @@ impl TokenPrice {
             cache_write_per_million: 0.0,
         }
     }
+
+    /// DeepSeek-V4.1-Flash 高峰时段官方单价（美元 / 百万 token）。
+    pub const fn peak_usd() -> Self {
+        Self {
+            input_per_million: 0.3,
+            output_per_million: 1.2,
+            cache_read_per_million: 0.006,
+            cache_write_per_million: 0.0,
+        }
+    }
+
+    /// DeepSeek-V4.1-Flash 低谷时段官方单价（美元），为高峰价的一半。
+    pub const fn off_peak_usd() -> Self {
+        Self {
+            input_per_million: 0.15,
+            output_per_million: 0.6,
+            cache_read_per_million: 0.003,
+            cache_write_per_million: 0.0,
+        }
+    }
 }
 
 impl Default for TokenPrice {
     fn default() -> Self {
-        Self::deepseek_flash_peak()
+        Self::peak_cny()
     }
 }
 
@@ -77,14 +97,11 @@ pub enum PricingMode {
     PeakOffPeak,
 }
 
-/// 首页「价值估算」的价格设置。
-///
-/// 三种模式各自维护一组单价，切换模式不会丢失另一模式的配置。
+/// 单一币种下的整套价格。
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(default)]
-pub struct TokenPricingSettings {
-    pub mode: PricingMode,
-    /// 固定单价模式使用的价格。
+pub struct CurrencyPricing {
+    /// 「固定单价」模式使用的价格。
     pub fixed: TokenPrice,
     /// 高峰时段价格。
     pub peak: TokenPrice,
@@ -92,13 +109,52 @@ pub struct TokenPricingSettings {
     pub off_peak: TokenPrice,
 }
 
+impl CurrencyPricing {
+    /// 人民币价格，简体中文界面使用。
+    pub const fn cny() -> Self {
+        Self {
+            fixed: TokenPrice::peak_cny(),
+            peak: TokenPrice::peak_cny(),
+            off_peak: TokenPrice::off_peak_cny(),
+        }
+    }
+
+    /// 美元价格，英文界面使用。
+    pub const fn usd() -> Self {
+        Self {
+            fixed: TokenPrice::peak_usd(),
+            peak: TokenPrice::peak_usd(),
+            off_peak: TokenPrice::off_peak_usd(),
+        }
+    }
+}
+
+impl Default for CurrencyPricing {
+    fn default() -> Self {
+        Self::cny()
+    }
+}
+
+/// 首页「价值估算」的价格设置。
+///
+/// 界面语言决定使用哪一套价格：简体中文用人民币，英文用美元。
+/// 两种币种各自维护完整的价格表，切换语言不会互相影响。
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(default)]
+pub struct TokenPricingSettings {
+    pub mode: PricingMode,
+    /// 人民币价格。
+    pub cny: CurrencyPricing,
+    /// 美元价格。
+    pub usd: CurrencyPricing,
+}
+
 impl Default for TokenPricingSettings {
     fn default() -> Self {
         Self {
             mode: PricingMode::PeakOffPeak,
-            fixed: TokenPrice::deepseek_flash_peak(),
-            peak: TokenPrice::deepseek_flash_peak(),
-            off_peak: TokenPrice::deepseek_flash_off_peak(),
+            cny: CurrencyPricing::cny(),
+            usd: CurrencyPricing::usd(),
         }
     }
 }
@@ -529,9 +585,10 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::{
-        read_proxy_settings, CommitPromptLocale, CommitSettings, PricingMode, ProxyMode,
-        ProxySettingsInput, ProxySettingsSecret, Store, TokenPrice, TokenPricingSettings,
-        DEFAULT_COMMIT_PROMPT_EN_US, DEFAULT_COMMIT_PROMPT_ZH_CN, PROXY_SETTINGS_KEY,
+        read_proxy_settings, CommitPromptLocale, CommitSettings, CurrencyPricing, PricingMode,
+        ProxyMode, ProxySettingsInput, ProxySettingsSecret, Store, TokenPrice,
+        TokenPricingSettings, DEFAULT_COMMIT_PROMPT_EN_US, DEFAULT_COMMIT_PROMPT_ZH_CN,
+        PROXY_SETTINGS_KEY,
     };
 
     /// The `outbound_proxy` row exactly as builds before the `system` -> `default`
@@ -657,11 +714,14 @@ mod tests {
 
         let custom = TokenPricingSettings {
             mode: PricingMode::Fixed,
-            fixed: TokenPrice {
-                input_per_million: 3.0,
-                output_per_million: 15.0,
-                cache_read_per_million: 0.3,
-                cache_write_per_million: 3.75,
+            cny: CurrencyPricing {
+                fixed: TokenPrice {
+                    input_per_million: 3.0,
+                    output_per_million: 15.0,
+                    cache_read_per_million: 0.3,
+                    cache_write_per_million: 3.75,
+                },
+                ..CurrencyPricing::cny()
             },
             ..TokenPricingSettings::default()
         };
@@ -679,5 +739,33 @@ mod tests {
             serde_json::from_str(r#"{"input_per_million":5.0,"output_per_million":25.0,"cache_read_per_million":0.5,"cache_write_per_million":6.25}"#)
                 .unwrap();
         assert_eq!(settings, TokenPricingSettings::default());
+    }
+
+    /// 默认价格应当是 DeepSeek-V4.1-Flash 的官方价，且人民币与美元各自独立。
+    #[test]
+    fn default_pricing_holds_the_official_rates_for_both_currencies() {
+        let settings = TokenPricingSettings::default();
+        assert_eq!(settings.mode, PricingMode::PeakOffPeak);
+
+        let cny = settings.cny;
+        assert_eq!(cny.peak.input_per_million, 2.0);
+        assert_eq!(cny.peak.output_per_million, 8.0);
+        assert_eq!(cny.peak.cache_read_per_million, 0.04);
+        assert_eq!(cny.off_peak.input_per_million, 1.0);
+        assert_eq!(cny.off_peak.output_per_million, 4.0);
+        assert_eq!(cny.off_peak.cache_read_per_million, 0.02);
+
+        let usd = settings.usd;
+        assert_eq!(usd.peak.input_per_million, 0.3);
+        assert_eq!(usd.peak.output_per_million, 1.2);
+        assert_eq!(usd.peak.cache_read_per_million, 0.006);
+        assert_eq!(usd.off_peak.input_per_million, 0.15);
+        assert_eq!(usd.off_peak.output_per_million, 0.6);
+        assert_eq!(usd.off_peak.cache_read_per_million, 0.003);
+
+        // DeepSeek 不单独收取缓存写入费用。
+        for price in [cny.peak, cny.off_peak, usd.peak, usd.off_peak] {
+            assert_eq!(price.cache_write_per_million, 0.0);
+        }
     }
 }
