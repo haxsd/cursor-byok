@@ -109,7 +109,6 @@ npm --prefix apps/desktop run i18n:scan
 ## 构建与验证
 
 依赖：Node.js 22、Rust stable、Tauri 的系统依赖（Windows 下为 WebView2 与 MSVC 工具链）。
-
 ```bash
 # 前端：类型检查 + 生产构建
 npm --prefix apps/desktop run check
@@ -140,6 +139,35 @@ make build-desktop
 > git config core.eol lf
 > git checkout -- .
 > ```
+
+## 发布安装包
+
+仓库已配置好 GitHub Actions，**打标签即自动构建并发布 Windows 安装包**：
+
+```bash
+# 1. 三处版本号改成同一个值
+#    apps/desktop/package.json
+#    apps/desktop/src-tauri/Cargo.toml
+#    apps/desktop/src-tauri/tauri.conf.json
+
+# 2. 提交推送后打标签（标签名必须是 v<版本号>）
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+构建完成后会出现在 Releases 页面，包含：
+
+| 产物 | 说明 |
+| --- | --- |
+| `Cursor BYOK_<版本>_x64-setup.exe` | NSIS 安装包，双击安装 |
+| `cursor-byok-<版本>-windows-amd64.zip` | 免安装便携版，解压即用（内含单个 `cursor-byok-desktop.exe`） |
+| `latest.json` / `portable-latest.json` | 应用内「检查更新」用的清单 |
+
+想先验证构建能否通过而不发布，可在 Actions 页面手动触发 `Release desktop app`，它只产出 Actions 产物。
+
+发布流程只构建 Windows。需要 macOS / Linux 产物时，在 `.github/workflows/release.yml` 的 `publish` 任务里补回对应的 `matrix` 条目与平台专属步骤即可（可参考上游的 `release.yml`）。
+
+签名说明：更新包用本仓库自己的密钥签名，私钥保存在仓库的 Actions 密钥中，公钥写在 `tauri.conf.json` 的 `plugins.updater.pubkey`。**私钥与密码务必另行备份**，丢失后无法再为更新包签名（`.tauri/` 目录下有说明）。
 
 ## 与原版保持同步
 
