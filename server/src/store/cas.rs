@@ -59,9 +59,10 @@ impl Store {
         data: &[u8],
         edges: &[BlobEdge],
     ) -> Result<()> {
-        sqlx::query("INSERT OR IGNORE INTO blobs(blob_id, data, created_at_ms) VALUES (?, ?, ?)")
+        sqlx::query("INSERT INTO blobs(blob_id, data, created_at_ms, last_used_at_ms) VALUES (?, ?, ?, ?) ON CONFLICT(blob_id) DO UPDATE SET last_used_at_ms = excluded.last_used_at_ms")
             .bind(blob_id.as_bytes().as_slice())
             .bind(data)
+            .bind(now_ms())
             .bind(now_ms())
             .execute(&mut **tx)
             .await?;
@@ -79,6 +80,15 @@ impl Store {
     }
 
     pub async fn get_blob(&self, blob_id: &BlobId) -> Result<Option<Vec<u8>>> {
+        let _write = self.writes.lock().await;
+        sqlx::query(
+            "UPDATE blobs SET last_used_at_ms = ? WHERE blob_id = ? AND last_used_at_ms < ?",
+        )
+        .bind(now_ms())
+        .bind(blob_id.as_bytes().as_slice())
+        .bind(now_ms() - 60 * 60 * 1000)
+        .execute(&self.pool)
+        .await?;
         Ok(sqlx::query("SELECT data FROM blobs WHERE blob_id = ?")
             .bind(blob_id.as_bytes().as_slice())
             .fetch_optional(&self.pool)

@@ -105,6 +105,9 @@ impl CursorHarness {
     }
 
     pub async fn cleanup_stale_settings(&self) -> Result<()> {
+        if std::env::var_os("CURSOR_BYOK_DATA_DIR").is_some() {
+            return Ok(());
+        }
         settings::clear_stale_managed_settings()
     }
 
@@ -144,6 +147,7 @@ impl CursorHarness {
     }
 
     pub async fn initialize_ca(&self) -> Result<CursorHarnessStatus> {
+        reject_isolated_integration()?;
         let _initialization = self.inner.ca_initialization.lock().await;
         let manager = self.inner.ca.clone();
         tokio::task::spawn_blocking(move || manager.initialize_local())
@@ -170,6 +174,7 @@ impl CursorHarness {
     }
 
     async fn enable(&self) -> Result<()> {
+        reject_isolated_integration()?;
         if !matches!(self.inner.ca.state()?, CaState::Ready) {
             return Err(Error::Config(
                 "initialize and trust the CA before enabling Cursor".into(),
@@ -219,10 +224,21 @@ impl CursorHarness {
     }
 
     pub async fn disable(&self) -> Result<()> {
-        settings::clear_proxy_settings()?;
+        if std::env::var_os("CURSOR_BYOK_DATA_DIR").is_none() {
+            settings::clear_proxy_settings()?;
+        }
         self.inner.proxy.lock().await.stop().await;
         Ok(())
     }
+}
+
+fn reject_isolated_integration() -> Result<()> {
+    if std::env::var_os("CURSOR_BYOK_DATA_DIR").is_some() {
+        return Err(Error::Config(
+            "Cursor integration is disabled with an isolated data directory".into(),
+        ));
+    }
+    Ok(())
 }
 
 async fn apply_cursor_configuration(proxy_url: &str) -> Result<()> {

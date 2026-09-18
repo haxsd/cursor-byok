@@ -44,6 +44,10 @@ struct ActiveRun {
 }
 
 impl ConversationRegistry {
+    pub(crate) async fn has_active_runs(&self) -> bool {
+        !self.inner.current.lock().await.is_empty()
+    }
+
     pub fn new(
         store: Store,
         provider: Arc<dyn Provider>,

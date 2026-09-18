@@ -265,6 +265,12 @@ impl CheckpointBuilder {
         handle: &TransportHandle,
         checkpoint: &pb::ConversationStateStructure,
     ) -> Result<()> {
+        if let Some(conversation) = handle.conversation_id() {
+            let roots = checkpoint_blob_roots(checkpoint)?;
+            self.store
+                .retain_conversation_blobs(conversation, &roots)
+                .await?;
+        }
         tracing::debug!(
             request_id = self.sync.request_id(),
             stable_roots = checkpoint.root_prompt_messages_json.len(),
@@ -292,6 +298,43 @@ impl CheckpointBuilder {
         }
         result
     }
+}
+
+fn checkpoint_blob_roots(
+    state: &pb::ConversationStateStructure,
+) -> Result<Vec<crate::store::BlobId>> {
+    let mut states = vec![state];
+    let mut ids = HashSet::new();
+    while let Some(state) = states.pop() {
+        let mut raw = Vec::new();
+        raw.extend(state.root_prompt_messages_json.iter());
+        raw.extend(state.turns.iter());
+        raw.extend(state.todos.iter());
+        raw.extend(state.summary.iter());
+        raw.extend(state.plan.iter());
+        raw.extend(state.summary_archive.iter());
+        raw.extend(state.summary_archives.iter());
+        raw.extend(state.file_states.values());
+        raw.extend(state.subagent_state_refs.values());
+        for file in state.file_states_v2.values() {
+            raw.extend(file.content.iter());
+            raw.extend(file.initial_content.iter());
+        }
+        if let Some(details) = &state.token_details {
+            raw.extend(details.prompt_context_usage_snapshot_blob_id.iter());
+        }
+        for value in raw {
+            if !value.is_empty() {
+                ids.insert(crate::store::BlobId::from_bytes(value)?);
+            }
+        }
+        for subagent in state.subagent_states.values() {
+            if let Some(child) = &subagent.conversation_state {
+                states.push(child);
+            }
+        }
+    }
+    Ok(ids.into_iter().collect())
 }
 
 fn context_limit(selected: Option<u64>, previous: Option<u64>) -> Option<u64> {
