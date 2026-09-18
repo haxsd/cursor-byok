@@ -135,6 +135,22 @@ impl TransportRegistry {
         &self.inner.store
     }
 
+    pub(crate) async fn maintain_storage_if_idle(&self) -> Result<()> {
+        // Check admission before collecting, then release the registry locks before DB work.
+        let no_transports = {
+            let local = self.inner.local.lock().await;
+            let upstream = self.inner.upstream.lock().await;
+            local.is_empty() && upstream.is_empty()
+        };
+        if no_transports && !self.inner.conversations.has_active_runs().await {
+            self.inner
+                .store
+                .prune_inactive_storage(crate::store::now_ms())
+                .await?;
+        }
+        Ok(())
+    }
+
     pub fn trace(
         &self,
         request_id: &str,

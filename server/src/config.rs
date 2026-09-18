@@ -14,6 +14,11 @@ const DEFAULT_PROVIDER_REQUEST_TIMEOUT: Duration = Duration::from_secs(60 * 60);
 const DEFAULT_PROVIDER_STREAM_IDLE_TIMEOUT: Duration = Duration::from_secs(30 * 60);
 
 pub fn managed_data_dir() -> Result<PathBuf> {
+    if let Some(directory) = env::var_os("CURSOR_BYOK_DATA_DIR") {
+        let data_dir = isolated_data_dir(PathBuf::from(directory))?;
+        fs::create_dir_all(&data_dir)?;
+        return Ok(data_dir);
+    }
     let home_dir = dirs::home_dir()
         .ok_or_else(|| Error::Config("cannot resolve user home directory".into()))?;
     let data_dir = home_dir.join(DATA_DIR_NAME);
@@ -21,6 +26,15 @@ pub fn managed_data_dir() -> Result<PathBuf> {
     #[cfg(unix)]
     fs::set_permissions(&data_dir, fs::Permissions::from_mode(0o700))?;
     Ok(data_dir)
+}
+
+fn isolated_data_dir(directory: PathBuf) -> Result<PathBuf> {
+    if !directory.is_absolute() {
+        return Err(Error::Config(
+            "CURSOR_BYOK_DATA_DIR must be an absolute path".into(),
+        ));
+    }
+    Ok(directory)
 }
 
 pub fn v0049_config_path() -> Result<PathBuf> {
@@ -155,6 +169,16 @@ fn database_url_for_dir(data_dir: &std::path::Path) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn isolated_directory_rejects_relative_paths() {
+        assert!(isolated_data_dir(PathBuf::from("test-data")).is_err());
+        let temp = tempfile::tempdir().unwrap();
+        assert_eq!(
+            isolated_data_dir(temp.path().to_owned()).unwrap(),
+            temp.path()
+        );
+    }
 
     #[test]
     fn provider_timeout_defaults_match_runtime_boundaries() {

@@ -142,7 +142,20 @@ impl App {
             .into_future();
         tokio::pin!(server);
 
+        let maintenance = async {
+            let mut interval = tokio::time::interval(Duration::from_secs(60 * 60));
+            interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+            loop {
+                interval.tick().await;
+                if let Err(error) = registry.maintain_storage_if_idle().await {
+                    tracing::warn!(%error, "storage retention failed; retained data for retry");
+                }
+            }
+        };
+        tokio::pin!(maintenance);
+
         tokio::select! {
+            () = &mut maintenance => {},
             result = &mut server => {
                 if let Err(error) = harness.disable().await {
                     tracing::warn!(%error, "failed to disable Cursor harness after server stop");
