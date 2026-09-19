@@ -129,7 +129,8 @@ async fn handle_request(
 
     let content_encoding = parts
         .headers
-        .get(header::CONTENT_ENCODING)
+        .get("connect-content-encoding")
+        .or_else(|| parts.headers.get(header::CONTENT_ENCODING))
         .and_then(|value| value.to_str().ok());
     let body = match to_bytes(body, MAX_BODY_SIZE + 5).await {
         Ok(body) => body,
