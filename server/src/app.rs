@@ -149,10 +149,10 @@ impl App {
 
         let gateway_shutdown = shutdown.clone();
         let gateway_task = tokio::spawn(async move {
-            let cancellation = gateway_shutdown.clone();
             if let Err(error) = devin_gateway.serve(gateway_shutdown).await {
-                tracing::error!(%error, "Devin gateway stopped unexpectedly");
-                cancellation.cancel();
+                // Devin is an optional integration; a binding or port failure
+                // must not stop the Cursor listener that owns this process.
+                tracing::error!(%error, "Devin gateway stopped; Cursor listener remains active");
             }
         });
 
