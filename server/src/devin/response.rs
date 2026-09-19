@@ -38,6 +38,15 @@ impl ResponseState {
             replay_state: None,
         }
     }
+
+    pub fn set_fallback_input_tokens(&mut self, input_tokens: u64) {
+        if input_tokens > 0 && self.usage.is_none() {
+            self.usage = Some(Usage {
+                input_tokens: Some(input_tokens),
+                ..Usage::default()
+            });
+        }
+    }
 }
 
 pub fn stream_event(state: &mut ResponseState, event: ModelEvent) -> Result<Vec<Vec<u8>>> {

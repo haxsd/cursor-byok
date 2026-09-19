@@ -167,10 +167,12 @@ async fn handle_request(
         Ok(invocation) => invocation,
         Err(error) => return protocol_error(StatusCode::BAD_REQUEST, error.to_string()),
     };
+    let fallback_input_tokens = request.context_tokens;
     let model_uid = binding.model_uid.clone();
     let cancellation = CancellationToken::new();
     let mut provider_stream = state.provider.stream(invocation, cancellation);
     let mut response_state = ResponseState::new("devin-response", provider_type);
+    response_state.set_fallback_input_tokens(fallback_input_tokens);
     let stream = async_stream::stream! {
         while let Some(event) = provider_stream.next().await {
             match event {
