@@ -16,8 +16,6 @@ pub struct DevinSettings {
     pub enabled: bool,
     #[serde(default)]
     pub auth_token: String,
-    #[serde(default)]
-    pub auth_token: String,
     #[serde(default = "default_api_port")]
     pub api_port: u16,
     #[serde(default = "default_inference_port")]
@@ -32,7 +30,6 @@ impl Default for DevinSettings {
     fn default() -> Self {
         Self {
             enabled: false,
-            auth_token: String::new(),
             auth_token: String::new(),
             api_port: DEFAULT_DEVIN_API_PORT,
             inference_port: DEFAULT_DEVIN_INFERENCE_PORT,

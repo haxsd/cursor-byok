@@ -1,0 +1,14 @@
+@use "../../styles/typography" as type;
+
+.page { display: grid; gap: 16px; }
+.loading, .empty, .note { padding: 16px; color: var(--vscode-descriptionForeground); font-size: type.$font-size-xs; }
+.settingRow, .bindingFooter { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px; }
+.settingRow > div { display: grid; gap: 5px; }
+.settingRow small, .note { color: var(--vscode-descriptionForeground); font-size: type.$font-size-xs; }
+.fields, .bindingFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+.bindings { display: grid; gap: 12px; }
+.binding { border-top: 1px solid var(--vscode-panel-border); }
+.bindingFooter { padding-top: 10px; }
+.remove { padding: 4px; color: var(--vscode-textLink-foreground); background: transparent; border: 0; cursor: pointer; }
+.remove:hover { color: var(--vscode-textLink-activeForeground); }
+@media (max-width: 700px) { .fields, .bindingFields { grid-template-columns: 1fr; } }

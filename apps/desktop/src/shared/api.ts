@@ -112,6 +112,23 @@ export interface PortSettings {
   service_port: number;
 }
 
+export interface DevinModelBinding {
+  model_uid: string;
+  model_hash: string;
+  display_name: string;
+  context_window_tokens: number | null;
+  enabled: boolean;
+}
+
+export interface DevinSettings {
+  enabled: boolean;
+  auth_token: string;
+  api_port: number;
+  inference_port: number;
+  local_api_port: number;
+  bindings: DevinModelBinding[];
+}
+
 export interface StatisticsStorage {
   bytes: number;
   call_count: number;
@@ -523,6 +540,8 @@ export const api = {
     return request<Overview>(`/overview${query ? `?${query}` : ""}`);
   },
   cursorHarness: () => request<CursorHarnessStatus>("/harness/cursor/status"),
+  devinSettings: () => request<DevinSettings>("/devin/settings"),
+  setDevinSettings: (settings: DevinSettings) => request<DevinSettings>("/devin/settings", { method: "PUT", body: JSON.stringify(settings) }),
   initializeCursorCa: () => request<CursorHarnessStatus>("/harness/cursor/ca/initialize", { method: "POST" }),
   plugins: () => request<PluginDescriptor[]>("/plugins"),
   pluginOAuthBegin: (pluginId: string, resourceType: string, methodId: string) => request<PluginOAuthBegin>(`/plugins/${encodeURIComponent(pluginId)}/resources/${encodeURIComponent(resourceType)}/add/${encodeURIComponent(methodId)}/begin`, { method: "POST" }),
