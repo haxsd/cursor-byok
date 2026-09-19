@@ -4,7 +4,7 @@
 //! disabled by default and only reads the persisted Devin binding table when
 //! it is explicitly enabled.
 
-use std::{collections::HashSet, net::SocketAddr, sync::Arc};
+use std::{collections::HashSet, future::IntoFuture, net::SocketAddr, sync::Arc};
 
 use axum::{
     body::{to_bytes, Body},
@@ -19,7 +19,11 @@ use futures_util::StreamExt;
 use tokio::net::TcpListener;
 use tokio_util::sync::CancellationToken;
 
-use crate::{model::ModelEvent, provider::Provider, store::Store, Error, Result};
+use crate::{
+    provider::{ModelEvent, Provider},
+    store::Store,
+    Error, Result,
+};
 
 use super::{
     assignment::{assignment_token_response, find_model_reference, AssignmentSessions},
@@ -77,9 +81,9 @@ impl DevinGateway {
             "Devin gateway listening on loopback"
         );
 
-        let api = axum::serve(api_listener, router.clone());
-        let inference = axum::serve(inference_listener, router.clone());
-        let local = axum::serve(local_listener, router);
+        let api = axum::serve(api_listener, router.clone()).into_future();
+        let inference = axum::serve(inference_listener, router.clone()).into_future();
+        let local = axum::serve(local_listener, router).into_future();
         tokio::pin!(api, inference, local);
         tokio::select! {
             result = &mut api => result.map_err(Error::Io),
@@ -326,7 +330,8 @@ fn protocol_error(status: StatusCode, message: impl Into<String>) -> Response<Bo
 
 fn protocol_success_response(request_body: &[u8], payload: &[u8]) -> Response<Body> {
     let (body, content_type) = if wire::is_connect_envelope(request_body) {
-        let mut body = wire::frame(payload, false).unwrap_or_else(|error| stream_error(error));
+        let mut body =
+            wire::frame(payload, false).unwrap_or_else(|error| stream_error(error).to_vec());
         body.extend_from_slice(&wire::end_frame(None));
         (body, "application/connect+proto")
     } else {

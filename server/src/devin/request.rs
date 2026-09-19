@@ -1,5 +1,6 @@
 use base64::{engine::general_purpose::STANDARD, Engine};
-use serde_json::{json, Value};
+use serde_json::json;
+use uuid::Uuid;
 
 use crate::{
     devin::{wire::FieldValue, DevinModelBinding},
@@ -125,7 +126,7 @@ pub fn to_invocation(
     }
 
     let call_id = if request.execution_id.is_empty() {
-        format!("devin-call:{}", request.cascade_id)
+        format!("devin-call:{}", Uuid::new_v4())
     } else {
         format!("devin:{}", request.execution_id)
     };
@@ -482,5 +483,13 @@ mod tests {
         assert!(!serde_json::to_string(&invocation)
             .unwrap()
             .contains("secret-must-stay"));
+
+        let anonymous_request = parse_chat_request(
+            &serialize_fields(&[Field::bytes(21, b"MODEL_CLAUDE_4_SONNET_BYOK")]).unwrap(),
+        )
+        .unwrap();
+        let first = to_invocation(anonymous_request.clone(), &binding, &model).unwrap();
+        let second = to_invocation(anonymous_request, &binding, &model).unwrap();
+        assert_ne!(first.call_id, second.call_id);
     }
 }

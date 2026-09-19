@@ -80,10 +80,10 @@ pub fn stream_event(state: &mut ResponseState, event: ModelEvent) -> Result<Vec<
             Ok(Vec::new())
         }
         ModelEvent::TextDelta(text) if !text.is_empty() => {
-            frame_payload(text_delta(&state.message_id, &text))
+            frame_payload(text_delta(&state.message_id, &text)?)
         }
         ModelEvent::ThinkingDelta(text) if !text.is_empty() => {
-            frame_payload(thinking_delta(&state.message_id, &text))
+            frame_payload(thinking_delta(&state.message_id, &text)?)
         }
         ModelEvent::ToolCallStart {
             index,
@@ -316,7 +316,7 @@ mod tests {
     };
 
     #[test]
-    fn text_events_emit_a_Devin_text_delta_frame() {
+    fn text_events_emit_a_devin_text_delta_frame() {
         let mut state = ResponseState::new("response-1", ProviderType::OpenAiChat);
         let frames = stream_event(&mut state, ModelEvent::TextDelta("hello".into())).unwrap();
         assert_eq!(frames.len(), 1);
