@@ -14,6 +14,10 @@ pub const DEFAULT_DEVIN_LOCAL_API_PORT: u16 = 43_112;
 pub struct DevinSettings {
     #[serde(default)]
     pub enabled: bool,
+    #[serde(default)]
+    pub auth_token: String,
+    #[serde(default)]
+    pub auth_token: String,
     #[serde(default = "default_api_port")]
     pub api_port: u16,
     #[serde(default = "default_inference_port")]
@@ -28,6 +32,8 @@ impl Default for DevinSettings {
     fn default() -> Self {
         Self {
             enabled: false,
+            auth_token: String::new(),
+            auth_token: String::new(),
             api_port: DEFAULT_DEVIN_API_PORT,
             inference_port: DEFAULT_DEVIN_INFERENCE_PORT,
             local_api_port: DEFAULT_DEVIN_LOCAL_API_PORT,
@@ -125,6 +131,7 @@ fn default_local_api_port() -> u16 {
     DEFAULT_DEVIN_LOCAL_API_PORT
 }
 
+pub mod gateway;
 pub mod request;
 pub mod response;
 pub mod wire;

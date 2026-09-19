@@ -12,6 +12,7 @@ use crate::{
         prompting::{PromptAssets, PromptCompiler},
         transport::TransportRegistry,
     },
+    devin::gateway::DevinGateway,
     local_app::CursorHarness,
     plugin::{PluginRegistry, PluginRuntime},
     provider::ProviderRouter,
@@ -26,6 +27,7 @@ pub struct App {
     registry: TransportRegistry,
     harness: CursorHarness,
     store: Store,
+    devin_gateway: DevinGateway,
 }
 
 impl App {
@@ -52,6 +54,7 @@ impl App {
             config.provider_request_timeout,
             config.provider_stream_idle_timeout,
         ));
+        let devin_gateway = DevinGateway::new(store.clone(), provider.clone());
         let registry = TransportRegistry::with_plugins(
             store.clone(),
             provider.clone(),
@@ -83,6 +86,7 @@ impl App {
             registry,
             harness,
             store,
+            devin_gateway,
             config,
         })
     }
@@ -134,6 +138,7 @@ impl App {
         tracing::info!(%address, "cursor server listening");
         let registry = self.registry;
         let harness = self.harness;
+        let devin_gateway = self.devin_gateway;
         let graceful = shutdown.clone();
         let server = axum::serve(listener, self.router)
             .with_graceful_shutdown(async move {
@@ -141,6 +146,15 @@ impl App {
             })
             .into_future();
         tokio::pin!(server);
+
+        let gateway_shutdown = shutdown.clone();
+        let gateway_task = tokio::spawn(async move {
+            let cancellation = gateway_shutdown.clone();
+            if let Err(error) = devin_gateway.serve(gateway_shutdown).await {
+                tracing::error!(%error, "Devin gateway stopped unexpectedly");
+                cancellation.cancel();
+            }
+        });
 
         let maintenance = async {
             let mut interval = tokio::time::interval(Duration::from_secs(60 * 60));
@@ -154,7 +168,7 @@ impl App {
         };
         tokio::pin!(maintenance);
 
-        tokio::select! {
+        let result = tokio::select! {
             () = &mut maintenance => {},
             result = &mut server => {
                 if let Err(error) = harness.disable().await {
@@ -172,8 +186,10 @@ impl App {
                     Err(_) => tracing::warn!("graceful shutdown timed out; forcing server close"),
                 }
             }
-        }
-        Ok(())
+        };
+        gateway_task.abort();
+        let _ = gateway_task.await;
+        Ok(result)
     }
 }
 
