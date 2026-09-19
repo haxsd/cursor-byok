@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, type DevinModelBinding, type DevinSettings, type Model } from "../../shared/api";
+import { api, type DevinHostPatchReceipt, type DevinHostPatchStatus, type DevinModelBinding, type DevinSettings, type Model } from "../../shared/api";
 import { Button } from "../../shared/ui/Button";
 import { FormField, SecretTextInput, TextInput } from "../../shared/ui/FormControls";
 import { Select } from "../../shared/ui/Select";
@@ -24,6 +24,10 @@ export function DevinSettingsPage() {
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hostPath, setHostPath] = useState("");
+  const [hostStatus, setHostStatus] = useState<DevinHostPatchStatus | null>(null);
+  const [hostReceipt, setHostReceipt] = useState<DevinHostPatchReceipt | null>(null);
+  const [hostBusy, setHostBusy] = useState(false);
 
   useEffect(() => {
     void Promise.all([api.devinSettings(), api.models()]).then(([nextSettings, nextModels]) => {
@@ -52,6 +56,43 @@ export function DevinSettingsPage() {
     }]);
   };
   const removeBinding = (index: number) => update("bindings", settings.bindings.filter((_, itemIndex) => itemIndex !== index));
+  const inspectHost = async () => {
+    try {
+      setHostBusy(true);
+      setHostStatus(await api.devinHostStatus(hostPath));
+    } catch (cause) {
+      message(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setHostBusy(false);
+    }
+  };
+  const applyHostPatch = async () => {
+    try {
+      setHostBusy(true);
+      const receipt = await api.applyDevinHostPatch(hostPath);
+      setHostReceipt(receipt);
+      setHostStatus(await api.devinHostStatus(hostPath));
+      message("Devin 宿主补丁已应用；重启 Devin 后生效", { duration: 5_000 });
+    } catch (cause) {
+      message(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setHostBusy(false);
+    }
+  };
+  const restoreHostPatch = async () => {
+    if (!hostReceipt) return;
+    try {
+      setHostBusy(true);
+      await api.restoreDevinHostPatch(hostReceipt);
+      setHostReceipt(null);
+      setHostStatus(await api.devinHostStatus(hostPath));
+      message("Devin 宿主文件已恢复");
+    } catch (cause) {
+      message(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setHostBusy(false);
+    }
+  };
   const save = async () => {
     try {
       setSaving(true);
@@ -103,6 +144,20 @@ export function DevinSettingsPage() {
     </TitledCard>
     <TitledCard title={t("安全边界")}>
       <p className={styles.note}>{t("网关固定监听 127.0.0.1，并限制单次请求体为 24 MiB。Devin 负责执行工具，Cursor BYOK 只负责模型调用和事件转发。")}</p>
+    </TitledCard>
+    <TitledCard title="Devin 宿主接入（可选）">
+      <p className={styles.note}>只对你明确填写的 extension.js 操作。应用补丁前会校验四个版本锚点并创建 SHA-256 备份；未知版本、部分补丁或备份不一致时会拒绝写入。</p>
+      <div className={styles.fields}>
+        <FormField label="Devin / Windsurf extension.js 路径" hint="例如：C:\\Program Files\\Devin\\resources\\app\\extensions\\windsurf\\dist\\extension.js">
+          <TextInput value={hostPath} onChange={(event) => setHostPath(event.target.value)} placeholder="请输入绝对路径" />
+        </FormField>
+      </div>
+      <div className={styles.hostActions}>
+        <Button size="small" disabled={!hostPath.trim() || hostBusy} onClick={() => void inspectHost()}>{hostBusy ? "检查中…" : "检查宿主"}</Button>
+        <Button size="small" variant="primary" disabled={!hostStatus?.clean || !settings.enabled || hostBusy} onClick={() => void applyHostPatch()}>应用补丁</Button>
+        <Button size="small" disabled={!hostReceipt || hostBusy} onClick={() => void restoreHostPatch()}>恢复原文件</Button>
+      </div>
+      {hostStatus && <small className={styles.hostStatus}>{hostStatus.patched ? `已接入：API ${hostStatus.ports?.api_port} · 推理 ${hostStatus.ports?.inference_port} · Local API ${hostStatus.ports?.local_api_port}` : hostStatus.clean ? "兼容版本，尚未应用补丁" : hostStatus.message}</small>}
     </TitledCard>
   </div>;
   return <PageContent title="Devin" sections={[{ key: "devin", estimatedHeight: 900, content }]} />;
