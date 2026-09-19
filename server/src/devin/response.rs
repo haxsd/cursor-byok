@@ -47,6 +47,28 @@ impl ResponseState {
             });
         }
     }
+
+    fn merge_usage(&mut self, usage: Usage) {
+        let accounted_input = usage
+            .input_tokens
+            .unwrap_or_default()
+            .saturating_add(usage.cache_read_tokens.unwrap_or_default())
+            .saturating_add(usage.cache_write_tokens.unwrap_or_default());
+        let Some(fallback) = self.usage else {
+            self.usage = Some(usage);
+            return;
+        };
+        if accounted_input > 0 {
+            self.usage = Some(usage);
+            return;
+        }
+        self.usage = Some(Usage {
+            input_tokens: fallback.input_tokens,
+            cache_read_tokens: fallback.cache_read_tokens.or(usage.cache_read_tokens),
+            cache_write_tokens: fallback.cache_write_tokens.or(usage.cache_write_tokens),
+            ..usage
+        });
+    }
 }
 
 pub fn stream_event(state: &mut ResponseState, event: ModelEvent) -> Result<Vec<Vec<u8>>> {
@@ -90,7 +112,7 @@ pub fn stream_event(state: &mut ResponseState, event: ModelEvent) -> Result<Vec<
             Ok(Vec::new())
         }
         ModelEvent::Usage(usage) => {
-            state.usage = Some(usage);
+            state.merge_usage(usage);
             Ok(Vec::new())
         }
         ModelEvent::Done(reason) => {
@@ -362,5 +384,30 @@ mod tests {
         );
         assert!(first_field(&stop_fields, 7).is_some());
         assert_eq!(frames[2][0], 2);
+    }
+
+    #[test]
+    fn fallback_input_usage_survives_provider_usage_without_input_tokens() {
+        let mut state = ResponseState::new("response-3", ProviderType::OpenAiChat);
+        state.set_fallback_input_tokens(120);
+        stream_event(
+            &mut state,
+            ModelEvent::Usage(Usage {
+                output_tokens: Some(7),
+                ..Usage::default()
+            }),
+        )
+        .unwrap();
+        let frames = finish(state, "model-1").unwrap();
+        let stop = parse_fields(&unwrap_request(&frames[0], None).unwrap()).unwrap();
+        let usage = match &first_field(&stop, 7).unwrap().value {
+            FieldValue::Bytes(value) => parse_fields(value).unwrap(),
+            _ => panic!("usage field must be nested"),
+        };
+        assert_eq!(
+            first_field(&usage, 2).unwrap().value,
+            FieldValue::Varint(120)
+        );
+        assert_eq!(first_field(&usage, 3).unwrap().value, FieldValue::Varint(7));
     }
 }
