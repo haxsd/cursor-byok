@@ -8,7 +8,7 @@ use tokio::sync::mpsc;
 
 use crate::store::{BufferedCursorTraceChunk, Store};
 
-use super::event::{TraceEvent, TRACE_ACTIVE, TRACE_DISABLED};
+use super::event::{TraceEvent, TRACE_ACTIVE, TRACE_DISABLED, TRACE_SUMMARY};
 
 const MAX_BUFFERED_CHUNKS: usize = 32;
 const MAX_BUFFERED_BYTES: usize = 256 * 1024;
@@ -17,6 +17,7 @@ const FLUSH_INTERVAL: Duration = Duration::from_millis(50);
 #[derive(Clone, Copy)]
 enum TraceState {
     Active,
+    Summary,
     Disabled,
 }
 
@@ -86,7 +87,7 @@ async fn process(
                 .await
             {
                 Ok(true) => TraceState::Active,
-                Ok(false) => TraceState::Disabled,
+                Ok(false) => TraceState::Summary,
                 Err(error) => {
                     tracing::warn!(%request_id, %error, "failed to start Cursor trace");
                     TraceState::Disabled
@@ -95,6 +96,7 @@ async fn process(
             activation.store(
                 match state {
                     TraceState::Active => TRACE_ACTIVE,
+                    TraceState::Summary => TRACE_SUMMARY,
                     TraceState::Disabled => TRACE_DISABLED,
                 },
                 Ordering::Release,
@@ -110,6 +112,7 @@ async fn process(
             activation.store(
                 match state {
                     TraceState::Active => TRACE_ACTIVE,
+                    TraceState::Summary => TRACE_SUMMARY,
                     TraceState::Disabled => TRACE_DISABLED,
                 },
                 Ordering::Release,
@@ -119,10 +122,8 @@ async fn process(
         _ => {}
     }
 
-    if !matches!(
-        ensure_state(store, states, &request_id).await,
-        TraceState::Active
-    ) {
+    let state = ensure_state(store, states, &request_id).await;
+    if matches!(state, TraceState::Disabled) {
         if finishes_trace {
             states.remove(&request_id);
             buffers.remove(&request_id);
@@ -137,55 +138,70 @@ async fn process(
             data,
             metadata,
             ..
-        } => {
-            append_request(
-                store,
-                request_orders,
-                &request_id,
-                artifact_type,
-                data,
-                metadata,
-            )
-            .await
-        }
+        } => match state {
+            TraceState::Active => {
+                append_request(
+                    store,
+                    request_orders,
+                    &request_id,
+                    artifact_type,
+                    data,
+                    metadata,
+                )
+                .await
+            }
+            TraceState::Summary => Ok(()),
+            TraceState::Disabled => unreachable!(),
+        },
         TraceEvent::Artifact {
             artifact_type,
             source,
             data,
             metadata,
             ..
-        } => {
-            store
-                .append_cursor_trace_artifact(
-                    &request_id,
-                    &artifact_type,
-                    &source,
-                    &data,
-                    &metadata,
-                )
-                .await
-        }
+        } => match state {
+            TraceState::Active => {
+                store
+                    .append_cursor_trace_artifact(
+                        &request_id,
+                        &artifact_type,
+                        &source,
+                        &data,
+                        &metadata,
+                    )
+                    .await
+            }
+            TraceState::Summary => Ok(()),
+            TraceState::Disabled => unreachable!(),
+        },
         TraceEvent::LinkedBlob {
             artifact_type,
             source,
             blob_id,
             metadata,
             ..
-        } => {
-            store
-                .link_cursor_trace_artifact(
-                    &request_id,
-                    &artifact_type,
-                    &source,
-                    &blob_id,
-                    &metadata,
-                )
-                .await
-        }
+        } => match state {
+            TraceState::Active => {
+                store
+                    .link_cursor_trace_artifact(
+                        &request_id,
+                        &artifact_type,
+                        &source,
+                        &blob_id,
+                        &metadata,
+                    )
+                    .await
+            }
+            TraceState::Summary => Ok(()),
+            TraceState::Disabled => unreachable!(),
+        },
         TraceEvent::ResponseStarted { status, .. } => {
             store.start_cursor_trace_response(&request_id, status).await
         }
         TraceEvent::ResponseChunk { source, data, .. } => {
+            if matches!(state, TraceState::Summary) {
+                return;
+            }
             let buffer = buffers.entry(request_id.clone()).or_default();
             buffer.bytes += data.len();
             buffer
@@ -197,8 +213,10 @@ async fn process(
             return;
         }
         TraceEvent::Finish { error, .. } => {
-            flush_request_order(store, request_orders, &request_id).await;
-            flush_one(store, buffers, &request_id).await;
+            if matches!(state, TraceState::Active) {
+                flush_request_order(store, request_orders, &request_id).await;
+                flush_one(store, buffers, &request_id).await;
+            }
             store
                 .finish_cursor_trace(&request_id, error.as_deref())
                 .await
@@ -316,7 +334,14 @@ async fn ensure_state(
         return state;
     }
     let state = match store.cursor_trace_exists(request_id).await {
-        Ok(true) => TraceState::Active,
+        Ok(true) => match store.detailed_logging().await {
+            Ok(true) => TraceState::Active,
+            Ok(false) => TraceState::Summary,
+            Err(error) => {
+                tracing::warn!(%request_id, %error, "failed to read Cursor trace detail setting");
+                TraceState::Disabled
+            }
+        },
         Ok(false) => TraceState::Disabled,
         Err(error) => {
             tracing::warn!(%request_id, %error, "failed to resume Cursor trace");

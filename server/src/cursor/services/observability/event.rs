@@ -7,6 +7,7 @@ use crate::store::BlobId;
 pub(super) const TRACE_UNKNOWN: u8 = 0;
 pub(super) const TRACE_ACTIVE: u8 = 1;
 pub(super) const TRACE_DISABLED: u8 = 2;
+pub(super) const TRACE_SUMMARY: u8 = 3;
 
 pub(super) enum TraceEvent {
     Begin {

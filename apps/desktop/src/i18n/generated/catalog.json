@@ -67,6 +67,18 @@
         }
       ]
     },
+    "037e074e14749618": {
+      "source": "Cursor 会话同步",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 36,
+          "column": 40
+        }
+      ]
+    },
     "046a01112a0c9169": {
       "source": "{group}的缓存写入价格",
       "kind": "template",
@@ -243,6 +255,18 @@
           "file": "features/models/CursorModelTestResult.tsx",
           "line": 24,
           "column": 112
+        }
+      ]
+    },
+    "097fe01191d130f5": {
+      "source": "模型服务返回了限流响应",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 17,
+          "column": 44
         }
       ]
     },
@@ -483,6 +507,18 @@
         }
       ]
     },
+    "1250f9bbd65810fe": {
+      "source": "模型响应格式异常",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 27,
+          "column": 23
+        }
+      ]
+    },
     "12ae77e6202d063e": {
       "source": "自定义 Headers",
       "kind": "text",
@@ -500,6 +536,18 @@
         }
       ]
     },
+    "12da4865805c2364": {
+      "source": "请求 ID",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 67,
+          "column": 36
+        }
+      ]
+    },
     "133340e53175128a": {
       "source": "一键测试",
       "kind": "text",
@@ -509,6 +557,30 @@
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 322,
           "column": 213
+        }
+      ]
+    },
+    "136e04f752847496": {
+      "source": "上游模型服务返回了服务器错误",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 21,
+          "column": 44
+        }
+      ]
+    },
+    "13a46616e16fe5e6": {
+      "source": "未知错误",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 29,
+          "column": 23
         }
       ]
     },
@@ -545,6 +617,18 @@
           "file": "features/models/CursorModelEditor.tsx",
           "line": 159,
           "column": 322
+        }
+      ]
+    },
+    "14b35a114a421aa9": {
+      "source": "查看下方请求编号，重试后仍失败再继续排查",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 29,
+          "column": 81
         }
       ]
     },
@@ -833,6 +917,18 @@
         }
       ]
     },
+    "1dd07e8005163532": {
+      "source": "最近 3 天没有记录到错误。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 96,
+          "column": 41
+        }
+      ]
+    },
     "1f9b46e61efcccb5": {
       "source": "筛选项：{label}，{summary}",
       "kind": "template",
@@ -867,6 +963,18 @@
           "file": "features/models/CursorModelEditor.tsx",
           "line": 168,
           "column": 50
+        }
+      ]
+    },
+    "20293f5958efe1be": {
+      "source": "检查模型兼容性和代理是否修改了响应内容",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 27,
+          "column": 81
         }
       ]
     },
@@ -993,6 +1101,18 @@
           "file": "features/models/CursorModelEditor.tsx",
           "line": 159,
           "column": 42
+        }
+      ]
+    },
+    "292f2674c98b10be": {
+      "source": "模型服务异常",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 21,
+          "column": 23
         }
       ]
     },
@@ -1140,7 +1260,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 118,
+          "line": 119,
           "column": 20
         }
       ]
@@ -1257,8 +1377,20 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 117,
+          "line": 118,
           "column": 14
+        }
+      ]
+    },
+    "2f8a25b3235a66ac": {
+      "source": "底层错误摘要",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 63,
+          "column": 38
         }
       ]
     },
@@ -1660,6 +1792,18 @@
         }
       ]
     },
+    "3fbb93469a748f16": {
+      "source": "调用 ID",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 68,
+          "column": 33
+        }
+      ]
+    },
     "3fd118e2ffe0b2b6": {
       "source": "取消全部测试",
       "kind": "text",
@@ -2023,6 +2167,18 @@
         }
       ]
     },
+    "4b5a3e50b16878b3": {
+      "source": "模型服务拒绝了 API Key 或账号鉴权",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 13,
+          "column": 42
+        }
+      ]
+    },
     "4d0680f9efaef147": {
       "source": "未读",
       "kind": "text",
@@ -2030,7 +2186,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 86,
+          "line": 87,
           "column": 67
         }
       ]
@@ -2146,8 +2302,32 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 106,
+          "line": 107,
           "column": 51
+        }
+      ]
+    },
+    "53653357bf751041": {
+      "source": "重启 Cursor 客户端后重试；当前会话数据仍保留在本机",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 19,
+          "column": 99
+        }
+      ]
+    },
+    "53d7a26d0e8eff75": {
+      "source": "本地数据库被占用、锁定或迁移失败",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 25,
+          "column": 46
         }
       ]
     },
@@ -2269,6 +2449,18 @@
         }
       ]
     },
+    "57db8cc9f5e2d74e": {
+      "source": "检查梯子或代理是否抖动；DeepSeek 可直连时尽量不要让它走代理",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 23,
+          "column": 93
+        }
+      ]
+    },
     "5886afc1c71df1fe": {
       "source": "显示在 Cursor 模型说明中。",
       "kind": "text",
@@ -2300,6 +2492,18 @@
           "file": "features/settings/TabSettingsCard.tsx",
           "line": 84,
           "column": 20
+        }
+      ]
+    },
+    "593e75726f2e18c0": {
+      "source": "本地服务保存 Cursor 会话检查点时没有收到客户端确认",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 19,
+          "column": 51
         }
       ]
     },
@@ -2475,6 +2679,18 @@
         }
       ]
     },
+    "612dd45339caa1d9": {
+      "source": "这里只保留最近 3 天的错误摘要，不保存完整提示词、响应正文或密钥。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 94,
+          "column": 37
+        }
+      ]
+    },
     "61a4c7bac12dc125": {
       "source": "异常调用：{count}",
       "kind": "template",
@@ -2587,7 +2803,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 547,
+          "line": 561,
           "column": 43
         }
       ]
@@ -2726,7 +2942,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 52,
+          "line": 53,
           "column": 47
         }
       ]
@@ -2762,6 +2978,18 @@
           "file": "features/models/CursorModelCards.tsx",
           "line": 284,
           "column": 104
+        }
+      ]
+    },
+    "6adfe64369f8d06f": {
+      "source": "服务在规定时间内没有返回完整结果",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 15,
+          "column": 42
         }
       ]
     },
@@ -2849,12 +3077,12 @@
       "refs": [
         {
           "file": "shared/store/appStore.ts",
-          "line": 267,
+          "line": 269,
           "column": 23
         },
         {
           "file": "shared/store/appStore.ts",
-          "line": 274,
+          "line": 276,
           "column": 25
         }
       ]
@@ -2880,6 +3108,18 @@
           "file": "features/models/CursorModelTestResult.tsx",
           "line": 50,
           "column": 80
+        }
+      ]
+    },
+    "788254dae3c6a640": {
+      "source": "稍后重试；如果持续发生，检查服务商状态",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 21,
+          "column": 77
         }
       ]
     },
@@ -2914,7 +3154,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 542,
+          "line": 556,
           "column": 43
         }
       ]
@@ -3003,7 +3243,7 @@
       "refs": [
         {
           "file": "App.tsx",
-          "line": 62,
+          "line": 64,
           "column": 21
         }
       ]
@@ -3017,6 +3257,18 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 139,
           "column": 83
+        }
+      ]
+    },
+    "7e4bd0ce9d30bb86": {
+      "source": "本地数据服务异常",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 25,
+          "column": 23
         }
       ]
     },
@@ -3090,7 +3342,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 486,
+          "line": 500,
           "column": 21
         }
       ]
@@ -3116,6 +3368,30 @@
           "file": "features/home/metrics/HomeMetrics.tsx",
           "line": 133,
           "column": 7
+        }
+      ]
+    },
+    "82ccdd8e74ccf26d": {
+      "source": "检查 API Key、模型服务地址和账号权限",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 13,
+          "column": 82
+        }
+      ]
+    },
+    "83a75fc8b96eeddd": {
+      "source": "Cursor 对话",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 35,
+          "column": 43
         }
       ]
     },
@@ -3340,6 +3616,18 @@
         }
       ]
     },
+    "8b7f52f0dbb6ed9f": {
+      "source": "请求超时",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 15,
+          "column": 23
+        }
+      ]
+    },
     "8cbcf741e727dbf7": {
       "source": "模型配置",
       "kind": "text",
@@ -3347,7 +3635,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 48,
+          "line": 49,
           "column": 29
         }
       ]
@@ -3519,8 +3807,20 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 106,
+          "line": 107,
           "column": 62
+        }
+      ]
+    },
+    "93769d54f398f34e": {
+      "source": "判断原因",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 55,
+          "column": 38
         }
       ]
     },
@@ -3663,7 +3963,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 123,
+          "line": 124,
           "column": 11
         }
       ]
@@ -4055,7 +4355,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 119,
+          "line": 120,
           "column": 21
         }
       ]
@@ -4185,6 +4485,18 @@
         }
       ]
     },
+    "a81a758122e55bc0": {
+      "source": "本机到模型服务的连接被中断、代理波动或 TLS/DNS 失败",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 23,
+          "column": 44
+        }
+      ]
+    },
     "a8e812a13db72b2b": {
       "source": "全时段",
       "kind": "text",
@@ -4280,6 +4592,18 @@
         }
       ]
     },
+    "abee4974732afaf5": {
+      "source": "建议",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 59,
+          "column": 38
+        }
+      ]
+    },
     "ac58d0f9a3f8d389": {
       "source": "请输入模型备注",
       "kind": "text",
@@ -4350,13 +4674,25 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 129,
+          "line": 130,
           "column": 64
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 129,
+          "line": 130,
           "column": 125
+        }
+      ]
+    },
+    "afcc8cf9486a74bc": {
+      "source": "服务记录到了错误，但暂时无法确定具体类型",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 29,
+          "column": 42
         }
       ]
     },
@@ -4731,6 +5067,18 @@
         }
       ]
     },
+    "bc9b653fb09406ea": {
+      "source": "模型调用",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 34,
+          "column": 41
+        }
+      ]
+    },
     "bda74b5674b6a57d": {
       "source": "初始化插件",
       "kind": "text",
@@ -4800,6 +5148,18 @@
         }
       ]
     },
+    "bfeeb6b68bf79c6c": {
+      "source": "降低请求频率，或检查模型服务额度",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 17,
+          "column": 74
+        }
+      ]
+    },
     "c0b3fbff51ccc40b": {
       "source": "完成",
       "kind": "text",
@@ -4840,6 +5200,18 @@
           "file": "shared/ui/Pagination.tsx",
           "line": 22,
           "column": 159
+        }
+      ]
+    },
+    "c2ba2a9370e79195": {
+      "source": "请求频率受限",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 17,
+          "column": 23
         }
       ]
     },
@@ -5353,7 +5725,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 72,
+          "line": 73,
           "column": 54
         }
       ]
@@ -5500,6 +5872,18 @@
         }
       ]
     },
+    "def598ae59fc15d8": {
+      "source": "模型服务返回的数据无法按预期解析",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 27,
+          "column": 46
+        }
+      ]
+    },
     "df1baa9f706d970b": {
       "source": "将新增",
       "kind": "text",
@@ -5529,7 +5913,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 50,
+          "line": 51,
           "column": 29
         }
       ]
@@ -5824,6 +6208,18 @@
         }
       ]
     },
+    "e8122def332cc7a1": {
+      "source": "检查网络稳定性，或稍后重试",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 15,
+          "column": 77
+        }
+      ]
+    },
     "e825a2a42c22380e": {
       "source": "模型类型",
       "kind": "text",
@@ -5862,6 +6258,18 @@
           "file": "features/models/LegacyModelImport.tsx",
           "line": 71,
           "column": 66
+        }
+      ]
+    },
+    "e8ce9263039d3b32": {
+      "source": "网络连接异常",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 23,
+          "column": 23
         }
       ]
     },
@@ -6018,6 +6426,47 @@
         }
       ]
     },
+    "eff520e0bf7bc2f1": {
+      "source": "错误诊断",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 99,
+          "column": 36
+        },
+        {
+          "file": "shell/AppLayout.tsx",
+          "line": 48,
+          "column": 50
+        }
+      ]
+    },
+    "f1ebf99067dd997c": {
+      "source": "鉴权失败",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 13,
+          "column": 23
+        }
+      ]
+    },
+    "f3b155294f73ae2a": {
+      "source": "关闭重复运行的 Cursor BYOK 后重试，并保留错误记录",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 25,
+          "column": 81
+        }
+      ]
+    },
     "f4694c46b1e19602": {
       "source": "最终请求类型",
       "kind": "text",
@@ -6129,7 +6578,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 51,
+          "line": 52,
           "column": 46
         }
       ]
@@ -6425,6 +6874,18 @@
         }
       ]
     },
+    "febfde7da4cadb07": {
+      "source": "Cursor 会话同步异常",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/diagnostics/DiagnosticsPage.tsx",
+          "line": 19,
+          "column": 23
+        }
+      ]
+    },
     "fec45092945f8790": {
       "source": "使用教程",
       "kind": "text",
@@ -6432,7 +6893,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 53,
+          "line": 54,
           "column": 48
         }
       ]

@@ -61,6 +61,7 @@ impl Store {
             "DELETE FROM llm_call_requests WHERE call_id IN (SELECT call_id FROM llm_calls WHERE created_at_ms < ? AND status != 'running')",
             "DELETE FROM llm_call_response_chunks WHERE call_id IN (SELECT call_id FROM llm_calls WHERE created_at_ms < ? AND status != 'running')",
             "DELETE FROM cursor_run_trace_artifacts WHERE request_id IN (SELECT request_id FROM cursor_run_traces WHERE received_at_ms < ? AND status != 'running')",
+            "DELETE FROM error_diagnostics WHERE created_at_ms < ?",
         ] {
             sqlx::query(statement).bind(cutoff).execute(&mut *tx).await?;
         }
@@ -151,6 +152,39 @@ mod tests {
                 .unwrap();
             assert_eq!(ids, vec!["recent"]);
         }
+    }
+
+    #[tokio::test]
+    async fn diagnostics_expire_after_three_days_without_touching_recent_entries() {
+        let (_dir, store) = fixture().await;
+        let now = crate::store::now_ms();
+        for (request_id, created_at_ms) in [
+            ("old-diagnostic", now - RETENTION_MS - 1),
+            ("recent-diagnostic", now - RETENTION_MS + 1),
+        ] {
+            sqlx::query(
+                "INSERT INTO error_diagnostics(
+                    created_at_ms, source, request_id, category,
+                    title_key, reason_key, suggestion_key, message
+                 ) VALUES (?, 'cursor_request', ?, 'network',
+                    'diagnostic.title.network', 'diagnostic.reason.network',
+                    'diagnostic.suggestion.network', 'connection reset')",
+            )
+            .bind(created_at_ms)
+            .bind(request_id)
+            .execute(store.pool())
+            .await
+            .unwrap();
+        }
+
+        store.prune_inactive_storage(now).await.unwrap();
+
+        let ids: Vec<String> =
+            sqlx::query_scalar("SELECT request_id FROM error_diagnostics ORDER BY request_id")
+                .fetch_all(store.pool())
+                .await
+                .unwrap();
+        assert_eq!(ids, vec!["recent-diagnostic"]);
     }
 
     #[tokio::test]

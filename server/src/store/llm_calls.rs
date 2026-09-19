@@ -2,6 +2,7 @@
 use sqlx::Row;
 
 use crate::{
+    diagnostics::{sanitize_error_message, DiagnosticInput},
     model::{LlmCallRequest, LlmCallResponseChunk, LlmCallSummary, NewLlmCall, Usage},
     Result,
 };
@@ -258,17 +259,38 @@ impl Store {
         error_kind: Option<&str>,
         error_message: Option<&str>,
     ) -> Result<()> {
-        let _write = self.writes.lock().await;
-        sqlx::query("UPDATE llm_calls SET status = ?, finish_reason = ?, finished_at_ms = ?, duration_ms = ?, error_kind = ?, error_message = ? WHERE call_id = ? AND status = 'running'")
-            .bind(status)
-            .bind(finish_reason)
-            .bind(now_ms())
-            .bind(elapsed_ms)
-            .bind(error_kind)
-            .bind(error_message)
+        let sanitized_error = error_message.map(sanitize_error_message);
+        {
+            let _write = self.writes.lock().await;
+            sqlx::query("UPDATE llm_calls SET status = ?, finish_reason = ?, finished_at_ms = ?, duration_ms = ?, error_kind = ?, error_message = ? WHERE call_id = ? AND status = 'running'")
+                .bind(status)
+                .bind(finish_reason)
+                .bind(now_ms())
+                .bind(elapsed_ms)
+                .bind(error_kind)
+                .bind(&sanitized_error)
+                .bind(call_id)
+                .execute(&self.pool)
+                .await?;
+        }
+        if error_kind.is_some() || sanitized_error.is_some() || status == "error" {
+            let http_status = sqlx::query_scalar::<_, Option<i64>>(
+                "SELECT http_status FROM llm_calls WHERE call_id = ?",
+            )
             .bind(call_id)
-            .execute(&self.pool)
+            .fetch_optional(&self.pool)
+            .await?
+            .flatten()
+            .and_then(|status| u16::try_from(status).ok());
+            self.record_diagnostic(DiagnosticInput {
+                source: "provider_llm".into(),
+                request_id: None,
+                call_id: Some(call_id.into()),
+                http_status,
+                message: sanitized_error,
+            })
             .await?;
+        }
         Ok(())
     }
 
@@ -457,6 +479,59 @@ mod tests {
             .unwrap();
         assert_eq!(overview.metrics.llm_calls, 1);
         assert_eq!(overview.metrics.successful_calls, 1);
+    }
+
+    #[tokio::test]
+    async fn failed_provider_calls_create_a_sanitized_diagnostic() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = Store::connect(&format!(
+            "sqlite://{}",
+            directory.path().join("test.db").display()
+        ))
+        .await
+        .unwrap();
+        store
+            .start_llm_call(&NewLlmCall {
+                call_id: "failed-call".into(),
+                run_id: "run".into(),
+                conversation_id: "conversation".into(),
+                provider_call_index: 0,
+                model_hash: "model".into(),
+                provider_type: ProviderType::OpenAiChat,
+                provider_url: "https://api.deepseek.com".into(),
+                request_type: ProviderType::OpenAiChat,
+                request_url: "https://api.deepseek.com/v1/chat/completions".into(),
+                model_id: "deepseek-chat".into(),
+                display_name: "DeepSeek".into(),
+                reasoning_effort: None,
+                fast: false,
+                message_count: 1,
+                tool_count: 0,
+                detailed: false,
+            })
+            .await
+            .unwrap();
+        store
+            .record_llm_response_headers("failed-call", 50, 502)
+            .await
+            .unwrap();
+        store
+            .finish_llm_call(
+                "failed-call",
+                "error",
+                None,
+                50,
+                Some("transport"),
+                Some("connection reset by peer; Bearer secret-token"),
+            )
+            .await
+            .unwrap();
+
+        let diagnostics = store.diagnostics(10).await.unwrap();
+        assert_eq!(diagnostics.len(), 1);
+        assert_eq!(diagnostics[0].category, "network");
+        assert!(!diagnostics[0].message.contains("secret-token"));
+        assert_eq!(diagnostics[0].call_id.as_deref(), Some("failed-call"));
     }
 
     #[tokio::test]
