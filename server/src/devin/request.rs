@@ -73,6 +73,11 @@ pub fn parse_chat_request(payload: &[u8]) -> Result<DevinChatRequest> {
     let tools = super::wire::all_fields(&fields, 10)
         .map(|field| parse_tool(bytes_value(field)?))
         .collect::<Result<Vec<_>>>()?;
+    if super::wire::first_field(&fields, 12).is_some() {
+        return Err(Error::Protocol(
+            "Devin tool choice is not supported by the shared model request yet".into(),
+        ));
+    }
     let requested_model = string_field(&fields, 21)?;
     let cascade_id = string_field(&fields, 16)?;
     let prompt_id = string_field(&fields, 17)?;
@@ -177,10 +182,10 @@ fn parse_message(
     match source {
         SOURCE_SYSTEM | SOURCE_USER => {
             let mut parts = Vec::new();
+            parts.extend(images);
             if !text.is_empty() {
                 parts.push(ContentPart::Text { text });
             }
-            parts.extend(images);
             Ok(Some(ProjectedMessage {
                 message_id,
                 role: if source == SOURCE_SYSTEM {
@@ -228,7 +233,7 @@ fn parse_message(
             role: Role::Tool,
             content: ProjectedContent::ToolResult(ToolResultContent {
                 call_id: string_field(&fields, 7)?,
-                name: string_field(&fields, 8)?.if_empty_then("_"),
+                name: "_".into(),
                 content: text,
                 is_error: varint_field(&fields, 9)?.unwrap_or_default() != 0,
                 image: None,

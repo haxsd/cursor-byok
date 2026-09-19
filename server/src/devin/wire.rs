@@ -133,6 +133,9 @@ pub struct ConnectError {
 }
 
 pub fn unwrap_request(body: &[u8], content_encoding: Option<&str>) -> Result<Vec<u8>> {
+    if body.len() > MAX_BODY_SIZE + 5 {
+        return Err(Error::Protocol("Devin request body exceeds 24 MiB".into()));
+    }
     let mut buffer = body.to_vec();
     if content_encoding
         .unwrap_or_default()
@@ -148,7 +151,7 @@ pub fn unwrap_request(body: &[u8], content_encoding: Option<&str>) -> Result<Vec
     if buffer.len() >= 5 {
         let flags = buffer[0];
         let declared = u32::from_be_bytes([buffer[1], buffer[2], buffer[3], buffer[4]]) as usize;
-        if declared == buffer.len() - 5 && flags <= 2 {
+        if declared == buffer.len() - 5 && flags <= 1 {
             let payload = &buffer[5..];
             let payload = if flags == 1 {
                 gunzip(payload)?
@@ -159,6 +162,11 @@ pub fn unwrap_request(body: &[u8], content_encoding: Option<&str>) -> Result<Vec
                 return Err(Error::Protocol("Devin request body exceeds 24 MiB".into()));
             }
             return Ok(payload);
+        }
+        if declared == buffer.len() - 5 && flags == 2 {
+            return Err(Error::Protocol(
+                "Devin end frame is not valid as a request".into(),
+            ));
         }
     }
     if buffer.len() > MAX_BODY_SIZE {
@@ -251,8 +259,13 @@ fn gunzip(payload: &[u8]) -> Result<Vec<u8>> {
     let mut decoder = GzDecoder::new(payload);
     let mut output = Vec::new();
     decoder
+        .by_ref()
+        .take((MAX_BODY_SIZE + 1) as u64)
         .read_to_end(&mut output)
         .map_err(|error| Error::Protocol(format!("invalid Devin gzip payload: {error}")))?;
+    if output.len() > MAX_BODY_SIZE {
+        return Err(Error::Protocol("Devin gzip payload exceeds 24 MiB".into()));
+    }
     Ok(output)
 }
 
@@ -302,13 +315,18 @@ mod tests {
         }));
 
         assert_eq!(frame[0], 2);
-        let payload = super::unwrap_request(&frame, None).unwrap();
+        let payload = &frame[5..];
         assert_eq!(
             serde_json::from_slice::<serde_json::Value>(&payload).unwrap(),
             serde_json::json!({
                 "error": {"code": "invalid_argument", "message": "bad Devin payload"}
             })
         );
+    }
+
+    #[test]
+    fn connect_end_frame_is_rejected_as_a_request() {
+        assert!(super::unwrap_request(&super::end_frame(None), None).is_err());
     }
 
     #[test]

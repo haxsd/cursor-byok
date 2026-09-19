@@ -121,10 +121,18 @@ async fn handle_request(
         Err(error) => return protocol_error(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
     };
     if !settings.enabled {
-        return plain_error(StatusCode::SERVICE_UNAVAILABLE, "Devin gateway is disabled");
+        return connect_error_response(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "failed_precondition",
+            "Devin gateway is disabled",
+        );
     }
     if !authorized(&parts.headers, &settings.auth_token) {
-        return plain_error(StatusCode::UNAUTHORIZED, "invalid Devin gateway token");
+        return connect_error_response(
+            StatusCode::UNAUTHORIZED,
+            "unauthenticated",
+            "invalid Devin gateway token",
+        );
     }
 
     let content_encoding = parts
@@ -164,11 +172,11 @@ async fn handle_request(
         Err(error) => return protocol_error(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
     };
     let provider_type = model.provider_type();
+    let fallback_input_tokens = request.context_tokens;
     let invocation = match to_invocation(request, &binding, &model) {
         Ok(invocation) => invocation,
         Err(error) => return protocol_error(StatusCode::BAD_REQUEST, error.to_string()),
     };
-    let fallback_input_tokens = request.context_tokens;
     let model_uid = binding.model_uid.clone();
     let cancellation = CancellationToken::new();
     let mut provider_stream = state.provider.stream(invocation, cancellation);
@@ -237,11 +245,30 @@ fn plain_error(status: StatusCode, message: &str) -> Response<Body> {
 }
 
 fn protocol_error(status: StatusCode, message: impl Into<String>) -> Response<Body> {
-    let body = serde_json::json!({ "code": "invalid_argument", "message": message.into() });
+    let code = match status {
+        StatusCode::UNAUTHORIZED => "unauthenticated",
+        StatusCode::PAYLOAD_TOO_LARGE => "resource_exhausted",
+        StatusCode::SERVICE_UNAVAILABLE => "failed_precondition",
+        StatusCode::INTERNAL_SERVER_ERROR => "internal",
+        _ => "invalid_argument",
+    };
+    connect_error_response(status, code, message)
+}
+
+fn connect_error_response(
+    _status: StatusCode,
+    code: &str,
+    message: impl Into<String>,
+) -> Response<Body> {
+    let frame = wire::end_frame(Some(ConnectError {
+        code: code.into(),
+        message: message.into(),
+    }));
     Response::builder()
-        .status(status)
-        .header(header::CONTENT_TYPE, "application/json")
-        .body(Body::from(body.to_string()))
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, "application/connect+proto")
+        .header(header::CACHE_CONTROL, "no-store")
+        .body(Body::from(frame))
         .expect("Devin protocol error response")
 }
 
