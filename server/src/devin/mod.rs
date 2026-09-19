@@ -125,4 +125,6 @@ fn default_local_api_port() -> u16 {
     DEFAULT_DEVIN_LOCAL_API_PORT
 }
 
+pub mod request;
+pub mod response;
 pub mod wire;
