@@ -13,6 +13,7 @@ use tokio_util::sync::CancellationToken;
 use url::Url;
 
 use crate::{
+    devin::DevinSettings,
     local_app::CursorHarness,
     model::{
         ContentPart, CursorRunTraceArtifact, CursorRunTraceSummary, LlmCallRequest,
@@ -618,6 +619,14 @@ impl ControlService {
 
     pub async fn ports(&self) -> Result<PortSettings> {
         self.store.port_settings().await
+    }
+
+    pub async fn devin_settings(&self) -> Result<DevinSettings> {
+        self.store.devin_settings().await
+    }
+
+    pub async fn set_devin_settings(&self, settings: DevinSettings) -> Result<DevinSettings> {
+        self.store.set_devin_settings(settings).await
     }
 
     pub async fn set_ports(&self, settings: PortSettings) -> Result<PortSettings> {

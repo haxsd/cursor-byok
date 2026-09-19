@@ -12,6 +12,7 @@ const DESKTOP_SETTINGS_KEY: &str = "desktop_lifecycle";
 const COMMIT_SETTINGS_KEY: &str = "commit_settings";
 const CURSOR_TAKEOVER_ENABLED_KEY: &str = "cursor_takeover_enabled";
 const PRICING_SETTINGS_KEY: &str = "token_pricing";
+const DEVIN_SETTINGS_KEY: &str = "devin_router";
 
 /// Embedded default system prompts for commit message generation.
 pub const DEFAULT_COMMIT_PROMPT_ZH_CN: &str = include_str!("../../prompt/cursor/commit/zh-CN.md");
@@ -326,6 +327,36 @@ fn read_proxy_settings(value: &str) -> ProxySettingsSecret {
 }
 
 impl Store {
+    pub async fn devin_settings(&self) -> Result<crate::devin::DevinSettings> {
+        let value = sqlx::query_scalar::<_, String>(
+            "SELECT value_json FROM service_settings WHERE setting_key = ?",
+        )
+        .bind(DEVIN_SETTINGS_KEY)
+        .fetch_optional(&self.pool)
+        .await?;
+        let settings = value
+            .map(|value| serde_json::from_str(&value).map_err(Into::into))
+            .unwrap_or_else(|| Ok(crate::devin::DevinSettings::default()))?;
+        settings.validate()?;
+        Ok(settings)
+    }
+
+    pub async fn set_devin_settings(
+        &self,
+        settings: crate::devin::DevinSettings,
+    ) -> Result<crate::devin::DevinSettings> {
+        settings.validate()?;
+        let value_json = serde_json::to_string(&settings)?;
+        let _write = self.writes.lock().await;
+        sqlx::query("INSERT INTO service_settings(setting_key, value_json, updated_at_ms) VALUES (?, ?, ?) ON CONFLICT(setting_key) DO UPDATE SET value_json = excluded.value_json, updated_at_ms = excluded.updated_at_ms")
+            .bind(DEVIN_SETTINGS_KEY)
+            .bind(value_json)
+            .bind(now_ms())
+            .execute(&self.pool)
+            .await?;
+        Ok(settings)
+    }
+
     pub(crate) async fn cursor_takeover_enabled(&self) -> Result<bool> {
         let value = sqlx::query_scalar::<_, String>(
             "SELECT value_json FROM service_settings WHERE setting_key = ?",
@@ -590,6 +621,7 @@ mod tests {
         TokenPricingSettings, DEFAULT_COMMIT_PROMPT_EN_US, DEFAULT_COMMIT_PROMPT_ZH_CN,
         PROXY_SETTINGS_KEY,
     };
+    use crate::devin::{DevinModelBinding, DevinSettings};
 
     /// The `outbound_proxy` row exactly as builds before the `system` -> `default`
     /// rename wrote it.
@@ -729,6 +761,57 @@ mod tests {
         assert_eq!(saved, custom);
 
         assert_eq!(store.pricing_settings().await.unwrap(), custom);
+    }
+
+    #[test]
+    fn devin_defaults_are_disabled_and_use_isolated_ports() {
+        let settings = DevinSettings::default();
+
+        assert!(!settings.enabled);
+        assert_eq!(settings.api_port, 43_110);
+        assert_eq!(settings.inference_port, 43_111);
+        assert_eq!(settings.local_api_port, 43_112);
+        assert!(settings.bindings.is_empty());
+    }
+
+    #[test]
+    fn devin_settings_reject_duplicate_model_uids() {
+        let settings = DevinSettings {
+            bindings: vec![
+                DevinModelBinding::new("model-a", "hash-a"),
+                DevinModelBinding::new("model-a", "hash-b"),
+            ],
+            ..DevinSettings::default()
+        };
+
+        let error = settings.validate().unwrap_err().to_string();
+        assert!(error.contains("duplicate Devin model UID"));
+    }
+
+    #[tokio::test]
+    async fn devin_settings_persist_without_credentials() {
+        let directory = tempfile::tempdir().unwrap();
+        let url = format!("sqlite://{}", directory.path().join("test.db").display());
+        let store = Store::connect(&url).await.unwrap();
+        let settings = DevinSettings {
+            enabled: true,
+            bindings: vec![DevinModelBinding::new("deven-model", "0123abcd")],
+            ..DevinSettings::default()
+        };
+
+        assert_eq!(
+            store.set_devin_settings(settings.clone()).await.unwrap(),
+            settings
+        );
+        assert_eq!(store.devin_settings().await.unwrap(), settings);
+
+        let raw = sqlx::query_scalar::<_, String>(
+            "SELECT value_json FROM service_settings WHERE setting_key = 'devin_router'",
+        )
+        .fetch_one(store.pool())
+        .await
+        .unwrap();
+        assert!(!raw.contains("api_key"));
     }
 
     /// 旧版本只存了四个单价字段，读取时必须能平滑降级到新的默认值，

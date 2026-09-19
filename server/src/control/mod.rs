@@ -1,5 +1,6 @@
 //! Exposes the local control API.
 mod calls;
+mod devin;
 mod harness;
 mod models;
 mod overview;
@@ -209,6 +210,10 @@ pub fn api_router(service: ControlService) -> Router {
         .route(
             "/__byok-api__/api/settings/pricing",
             get(settings::get_pricing_settings).put(settings::update_pricing_settings),
+        )
+        .route(
+            "/__byok-api__/api/devin/settings",
+            get(devin::get).put(devin::update),
         )
         .route(
             "/__byok-api__/api/harness/cursor/status",
