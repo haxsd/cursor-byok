@@ -12,6 +12,7 @@ use crate::{
 
 const SOURCE_USER: u64 = 1;
 const SOURCE_ASSISTANT: u64 = 2;
+const SOURCE_ASSISTANT_ALT: u64 = 3;
 const SOURCE_TOOL: u64 = 4;
 const SOURCE_SYSTEM: u64 = 5;
 
@@ -58,6 +59,15 @@ pub fn parse_chat_request(payload: &[u8]) -> Result<DevinChatRequest> {
             }
             None => {}
         }
+    }
+    if history.is_empty() {
+        history.push(ProjectedMessage {
+            message_id: "devin:continue".into(),
+            role: Role::User,
+            content: ProjectedContent::Parts(vec![ContentPart::Text {
+                text: "Continue.".into(),
+            }]),
+        });
     }
 
     let tools = super::wire::all_fields(&fields, 10)
@@ -181,7 +191,7 @@ fn parse_message(
                 content: ProjectedContent::Parts(parts),
             }))
         }
-        SOURCE_ASSISTANT => {
+        SOURCE_ASSISTANT | SOURCE_ASSISTANT_ALT => {
             let calls = super::wire::all_fields(&fields, 6)
                 .enumerate()
                 .map(|(index, field)| parse_tool_call(bytes_value(field)?, index))
