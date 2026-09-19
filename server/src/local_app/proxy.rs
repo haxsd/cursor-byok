@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::Arc};
 
 use hudsucker::{
     certificate_authority::RcgenAuthority,
-    hyper::{Request, Uri},
+    hyper::{header, http::StatusCode, Method, Request, Response, Uri},
     rustls::crypto::aws_lc_rs,
     Body, HttpContext, HttpHandler, Proxy, RequestOrResponse,
 };
@@ -113,8 +113,44 @@ impl HttpHandler for CursorRelay {
         mut request: Request<Body>,
     ) -> RequestOrResponse {
         let original = request.uri().clone();
-        let locally_routed = should_route_locally(original.path(), *self.tab_mode.read());
-        if is_cursor_host(original.host().unwrap_or_default()) && locally_routed {
+        // Hudsucker invokes this hook for CONNECT before deciding whether to
+        // MITM. Rewriting an authority-form CONNECT URI would hide the
+        // original Cursor host and disable TLS interception.
+        if request.method() == Method::CONNECT {
+            return request.into();
+        }
+
+        let is_cursor = is_cursor_host(original.host().unwrap_or_default());
+        if is_cursor {
+            if let Some(status) = local_stub_status(original.path()) {
+                let mut response = Response::new(Body::empty());
+                *response.status_mut() = status;
+                response.headers_mut().insert(
+                    header::CONTENT_LENGTH,
+                    header::HeaderValue::from_static("0"),
+                );
+                if original.path().starts_with("/aiserver.v1.")
+                    || original.path().starts_with("/agent.v1.")
+                {
+                    response.headers_mut().insert(
+                        header::CONTENT_TYPE,
+                        header::HeaderValue::from_static("application/grpc"),
+                    );
+                }
+                tracing::info!(
+                    path = %original.path(),
+                    status = status.as_u16(),
+                    "local stub: external-only path answered locally, upstream blocked"
+                );
+                return RequestOrResponse::Response(response);
+            }
+        }
+
+        if should_route_through_backend(
+            original.host().unwrap_or_default(),
+            original.path(),
+            *self.tab_mode.read(),
+        ) {
             if let Ok(value) = original.to_string().parse() {
                 request.headers_mut().insert(UPSTREAM_URL_HEADER, value);
             }
@@ -147,6 +183,26 @@ impl HttpHandler for CursorRelay {
     ) -> bool {
         hello.server_name().is_some_and(is_cursor_host)
     }
+}
+
+/// Cursor probes these cloud-only endpoints even when the account does not
+/// have the corresponding feature. Returning the status Cursor already
+/// tolerates keeps those probes off the network path.
+fn local_stub_status(path: &str) -> Option<StatusCode> {
+    let status = match path {
+        "/agent/v1/run" => StatusCode::NOT_FOUND,
+        "/aiserver.v1.BackgroundComposerService/MintAgentStoreToken"
+        | "/aiserver.v1.BackgroundComposerService/ListPrivateWorkers"
+        | "/aiserver.v1.BackgroundComposerService/ListEnvironments"
+        | "/aiserver.v1.BackgroundComposerService/ListBackgroundComposers" => {
+            StatusCode::BAD_REQUEST
+        }
+        "/aiserver.v1.FileSyncService/FSSyncFile" | "/ws-reachability-probe" => {
+            StatusCode::NOT_FOUND
+        }
+        _ => return None,
+    };
+    Some(status)
 }
 
 pub fn is_cursor_host(host: &str) -> bool {
@@ -195,6 +251,10 @@ fn should_route_locally(path: &str, tab_mode: TabMode) -> bool {
     is_local_path(path) || (is_tab_path(path) && tab_mode != TabMode::Direct)
 }
 
+fn should_route_through_backend(host: &str, path: &str, tab_mode: TabMode) -> bool {
+    is_cursor_host(host) && (should_route_locally(path, tab_mode) || !is_tab_path(path))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -218,5 +278,46 @@ mod tests {
         ] {
             assert!(is_local_path(path), "{path} must not reach Cursor upstream");
         }
+    }
+
+    #[test]
+    fn cloud_only_probes_are_stubbed_without_network_access() {
+        assert_eq!(
+            local_stub_status("/agent/v1/run"),
+            Some(StatusCode::NOT_FOUND)
+        );
+        assert_eq!(
+            local_stub_status("/aiserver.v1.BackgroundComposerService/MintAgentStoreToken"),
+            Some(StatusCode::BAD_REQUEST)
+        );
+        assert_eq!(
+            local_stub_status("/aiserver.v1.FileSyncService/FSSyncFile"),
+            Some(StatusCode::NOT_FOUND)
+        );
+        assert_eq!(local_stub_status("/agent.v1.AgentService/RunSSE"), None);
+    }
+
+    #[test]
+    fn unknown_cursor_paths_use_the_local_backend_but_direct_tab_does_not() {
+        assert!(should_route_through_backend(
+            "api2.cursor.sh",
+            "/aiserver.v1.NewService/NewMethod",
+            TabMode::Direct,
+        ));
+        assert!(!should_route_through_backend(
+            "api2.cursor.sh",
+            "/aiserver.v1.AiService/StreamCpp",
+            TabMode::Direct,
+        ));
+        assert!(should_route_through_backend(
+            "api2.cursor.sh",
+            "/aiserver.v1.AiService/StreamCpp",
+            TabMode::Public,
+        ));
+        assert!(!should_route_through_backend(
+            "example.com",
+            "/aiserver.v1.NewService/NewMethod",
+            TabMode::Direct,
+        ));
     }
 }

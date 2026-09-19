@@ -6,7 +6,6 @@ use serde_json::Value;
 use crate::{Error, Result};
 
 const NO_PROXY_KEY: &str = "http.noProxy";
-const MANAGED_PROXY_SUPPORT: &str = "override";
 const KEYS: [&str; 5] = [
     "http.proxy",
     "http.proxyKerberosServicePrincipal",
@@ -65,9 +64,7 @@ pub fn write_proxy_settings(proxy_url: &str) -> Result<()> {
     settings.remove(NO_PROXY_KEY);
     settings.insert(KEYS[0].into(), Value::String(proxy_url.into()));
     settings.insert(KEYS[1].into(), Value::String(proxy_url.into()));
-    // Keep Cursor on the local MITM proxy only; do not merge it with a
-    // fluctuating system/PAC proxy while a model stream is active.
-    settings.insert(KEYS[2].into(), Value::String(MANAGED_PROXY_SUPPORT.into()));
+    settings.insert(KEYS[2].into(), Value::String("on".into()));
     settings.insert(KEYS[3].into(), Value::Bool(true));
     settings.insert(KEYS[4].into(), Value::Bool(true));
     write(&settings)
@@ -90,7 +87,7 @@ pub fn settings_match(proxy_url: &str) -> Result<bool> {
     Ok(
         settings.get(KEYS[0]) == Some(&Value::String(proxy_url.into()))
             && settings.get(KEYS[1]) == Some(&Value::String(proxy_url.into()))
-            && settings.get(KEYS[2]) == Some(&Value::String(MANAGED_PROXY_SUPPORT.into()))
+            && settings.get(KEYS[2]) == Some(&Value::String("on".into()))
             && settings.get(KEYS[3]) == Some(&Value::Bool(true))
             && settings.get(KEYS[4]) == Some(&Value::Bool(true)),
     )
@@ -98,8 +95,7 @@ pub fn settings_match(proxy_url: &str) -> Result<bool> {
 
 pub fn clear_stale_managed_settings() -> Result<()> {
     let settings = read()?;
-    let managed_signature = settings.get(KEYS[2])
-        == Some(&Value::String(MANAGED_PROXY_SUPPORT.into()))
+    let managed_signature = settings.get(KEYS[2]) == Some(&Value::String("on".into()))
         && settings.get(KEYS[3]) == Some(&Value::Bool(true))
         && settings.get(KEYS[4]) == Some(&Value::Bool(true));
     let loopback = settings

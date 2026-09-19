@@ -5,23 +5,17 @@ use axum::{
 };
 use bytes::Bytes;
 use std::convert::Infallible;
-use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_stream::StreamExt;
 
 use crate::{
     cursor::{
-        protocol::{
-            connect::{self, END_STREAM_FLAG},
-            events,
-        },
+        protocol::connect::{self, END_STREAM_FLAG},
         services::observability::CursorTraceRecorder,
         transport::{TransportHandle, TransportRegistry},
     },
     Result,
 };
-
-const AUTONOMOUS_HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 
 pub async fn stream(registry: &TransportRegistry, request_id: &str) -> Result<Response<Body>> {
     let handle = registry.get_or_create(request_id).await?;
@@ -37,16 +31,9 @@ pub async fn stream(registry: &TransportRegistry, request_id: &str) -> Result<Re
         header::CONTENT_TYPE,
         HeaderValue::from_static("text/event-stream"),
     );
-    response.headers_mut().insert(
-        header::CACHE_CONTROL,
-        HeaderValue::from_static("no-cache, no-transform"),
-    );
     response
         .headers_mut()
-        .insert(header::CONNECTION, HeaderValue::from_static("keep-alive"));
-    response
-        .headers_mut()
-        .insert("x-accel-buffering", HeaderValue::from_static("no"));
+        .insert(header::CACHE_CONTROL, HeaderValue::from_static("no-cache"));
     response
         .headers_mut()
         .insert("connect-protocol-version", HeaderValue::from_static("1"));
@@ -61,40 +48,21 @@ fn local_body_stream(
     async_stream::stream! {
         let mut guard = LocalRunGuard::new(handle);
         let mut trace = TraceStreamSink::new(trace, "byok_server");
-        let mut heartbeat = tokio::time::interval(AUTONOMOUS_HEARTBEAT_INTERVAL);
-        heartbeat.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
-        heartbeat.tick().await;
-
-        loop {
-            tokio::select! {
-                chunk = receiver.recv() => {
-                    let Some(chunk) = chunk else {
-                        guard.complete();
-                        trace.finish(None);
-                        return;
-                    };
-                    let terminal = is_end_stream_frame(&chunk);
-                    trace.chunk(&chunk);
-                    if terminal {
-                        guard.complete();
-                        trace.finish(end_stream_error(&chunk));
-                    }
-                    yield Ok::<Bytes, Infallible>(chunk);
-                    if terminal {
-                        return;
-                    }
-                }
-                _ = heartbeat.tick() => {
-                    let frame = heartbeat_frame().expect("heartbeat encoding cannot fail");
-                    yield Ok::<Bytes, Infallible>(frame);
-                }
+        while let Some(chunk) = receiver.recv().await {
+            let terminal = is_end_stream_frame(&chunk);
+            trace.chunk(&chunk);
+            if terminal {
+                guard.complete();
+                trace.finish(end_stream_error(&chunk));
+            }
+            yield Ok::<Bytes, Infallible>(chunk);
+            if terminal {
+                return;
             }
         }
+        guard.complete();
+        trace.finish(None);
     }
-}
-
-fn heartbeat_frame() -> Result<Bytes> {
-    connect::encode_message(&events::heartbeat())
 }
 
 fn is_end_stream_frame(frame: &Bytes) -> bool {
@@ -260,20 +228,5 @@ impl Drop for UpstreamRunGuard {
     fn drop(&mut self) {
         self.registry
             .finish_upstream(self.request_id.clone(), self.generation);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn autonomous_heartbeat_is_a_valid_connect_frame() {
-        let frame = heartbeat_frame().expect("heartbeat frame");
-        let frames = connect::decode_frames(&frame).expect("valid Connect envelope");
-
-        assert_eq!(frames.len(), 1);
-        assert_eq!(frames[0].0, 0);
-        assert!(!frames[0].1.is_empty());
     }
 }
