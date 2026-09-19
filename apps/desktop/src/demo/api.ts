@@ -1,6 +1,9 @@
 import type {
   CallDetail,
   CursorHarnessStatus,
+  DevinHostPatchReceipt,
+  DevinHostPatchStatus,
+  DevinSettings,
   LlmCall,
   Model,
   Overview,
@@ -84,6 +87,24 @@ let harnessStatus: CursorHarnessStatus = {
   ca_install_command: null,
 };
 
+let devinSettings: DevinSettings = {
+  enabled: false,
+  auth_token: "",
+  api_port: 43_110,
+  inference_port: 43_111,
+  local_api_port: 43_112,
+  bindings: [{
+    model_uid: "demo-model",
+    model_hash: models[0].model_hash,
+    display_name: models[0].display_name,
+    context_window_tokens: models[0].context_window_tokens,
+    enabled: true,
+  }],
+};
+
+let devinHostStatus: DevinHostPatchStatus | null = null;
+let devinHostReceipt: DevinHostPatchReceipt | null = null;
+
 let detailed = true;
 let portSettings = { proxy_port: 0, service_port: 0 };
 let proxySettings: ProxySettings = {
@@ -136,6 +157,40 @@ export function installDemoApi() {
         proxy_url: enabled ? "http://127.0.0.1:54321" : null,
       };
       return json(harnessStatus);
+    }
+    if (path === "/devin/settings" && method === "GET") return json(devinSettings);
+    if (path === "/devin/settings") {
+      devinSettings = body as DevinSettings;
+      return json(devinSettings);
+    }
+    if (path === "/harness/devin/host/status" && method === "GET") {
+      const hostPath = url.searchParams.get("path") || "";
+      if (!hostPath) return json({ message: "请输入宿主文件路径" }, 400);
+      devinHostStatus ??= {
+        path: hostPath,
+        compatible: true,
+        clean: !devinHostReceipt,
+        patched: Boolean(devinHostReceipt),
+        parts: { api: Boolean(devinHostReceipt), restart: Boolean(devinHostReceipt), inference: Boolean(devinHostReceipt), local_api: Boolean(devinHostReceipt) },
+        ports: devinHostReceipt?.ports ?? null,
+        backup_path: `${hostPath}.devin-router.backup`,
+        backup_available: Boolean(devinHostReceipt),
+        current_sha256: devinHostReceipt?.patched_sha256 ?? "demo-clean",
+        backup_sha256: devinHostReceipt?.original_sha256 ?? null,
+        message: "",
+      };
+      return json({ ...devinHostStatus, path: hostPath, clean: !devinHostReceipt, patched: Boolean(devinHostReceipt), ports: devinHostReceipt?.ports ?? null });
+    }
+    if (path === "/harness/devin/host/apply" && method === "POST") {
+      const hostPath = (body as { path?: string } | null)?.path || "";
+      devinHostReceipt = { path: hostPath, backup_path: `${hostPath}.devin-router.backup`, original_sha256: "demo-original", patched_sha256: "demo-patched", ports: { api_port: devinSettings.api_port, inference_port: devinSettings.inference_port, local_api_port: devinSettings.local_api_port } };
+      devinHostStatus = null;
+      return json(devinHostReceipt);
+    }
+    if (path === "/harness/devin/host/restore" && method === "POST") {
+      devinHostReceipt = null;
+      devinHostStatus = null;
+      return json({ restored: true });
     }
     if (path === "/settings/observability" && method === "GET") return json({ detailed });
     if (path === "/settings/observability") {

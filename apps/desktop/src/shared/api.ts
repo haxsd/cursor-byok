@@ -129,6 +129,34 @@ export interface DevinSettings {
   bindings: DevinModelBinding[];
 }
 
+export interface DevinHostPorts {
+  api_port: number;
+  inference_port: number;
+  local_api_port: number;
+}
+
+export interface DevinHostPatchStatus {
+  path: string;
+  compatible: boolean;
+  clean: boolean;
+  patched: boolean;
+  parts: { api: boolean; restart: boolean; inference: boolean; local_api: boolean };
+  ports: DevinHostPorts | null;
+  backup_path: string;
+  backup_available: boolean;
+  current_sha256: string;
+  backup_sha256: string | null;
+  message: string;
+}
+
+export interface DevinHostPatchReceipt {
+  path: string;
+  backup_path: string;
+  original_sha256: string;
+  patched_sha256: string;
+  ports: DevinHostPorts;
+}
+
 export interface StatisticsStorage {
   bytes: number;
   call_count: number;
@@ -542,6 +570,9 @@ export const api = {
   cursorHarness: () => request<CursorHarnessStatus>("/harness/cursor/status"),
   devinSettings: () => request<DevinSettings>("/devin/settings"),
   setDevinSettings: (settings: DevinSettings) => request<DevinSettings>("/devin/settings", { method: "PUT", body: JSON.stringify(settings) }),
+  devinHostStatus: (path: string) => request<DevinHostPatchStatus>(`/harness/devin/host/status?path=${encodeURIComponent(path)}`),
+  applyDevinHostPatch: (path: string) => request<DevinHostPatchReceipt>("/harness/devin/host/apply", { method: "POST", body: JSON.stringify({ path }) }),
+  restoreDevinHostPatch: (receipt: DevinHostPatchReceipt) => request<{ restored: boolean }>("/harness/devin/host/restore", { method: "POST", body: JSON.stringify({ receipt }) }),
   initializeCursorCa: () => request<CursorHarnessStatus>("/harness/cursor/ca/initialize", { method: "POST" }),
   plugins: () => request<PluginDescriptor[]>("/plugins"),
   pluginOAuthBegin: (pluginId: string, resourceType: string, methodId: string) => request<PluginOAuthBegin>(`/plugins/${encodeURIComponent(pluginId)}/resources/${encodeURIComponent(resourceType)}/add/${encodeURIComponent(methodId)}/begin`, { method: "POST" }),

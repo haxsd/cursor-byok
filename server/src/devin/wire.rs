@@ -175,6 +175,15 @@ pub fn unwrap_request(body: &[u8], content_encoding: Option<&str>) -> Result<Vec
     Ok(buffer)
 }
 
+pub fn is_connect_envelope(body: &[u8]) -> bool {
+    if body.len() < 5 {
+        return false;
+    }
+    let flags = body[0];
+    let declared = u32::from_be_bytes([body[1], body[2], body[3], body[4]]) as usize;
+    declared == body.len() - 5 && flags <= 1
+}
+
 pub fn frame(payload: &[u8], compress: bool) -> Result<Vec<u8>> {
     if payload.len() > MAX_BODY_SIZE {
         return Err(Error::Protocol("Devin response body exceeds 24 MiB".into()));
@@ -305,6 +314,14 @@ mod tests {
                 super::unwrap_request(&frame, if compress { Some("gzip") } else { None }).unwrap();
             assert_eq!(unwrapped, payload);
         }
+    }
+
+    #[test]
+    fn recognizes_only_request_connect_frames() {
+        let frame = super::frame(b"request", false).unwrap();
+        assert!(super::is_connect_envelope(&frame));
+        assert!(!super::is_connect_envelope(&super::end_frame(None)));
+        assert!(!super::is_connect_envelope(b"raw protobuf"));
     }
 
     #[test]

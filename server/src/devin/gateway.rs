@@ -4,7 +4,7 @@
 //! disabled by default and only reads the persisted Devin binding table when
 //! it is explicitly enabled.
 
-use std::{net::SocketAddr, sync::Arc};
+use std::{collections::HashSet, net::SocketAddr, sync::Arc};
 
 use axum::{
     body::{to_bytes, Body},
@@ -22,6 +22,8 @@ use tokio_util::sync::CancellationToken;
 use crate::{model::ModelEvent, provider::Provider, store::Store, Error, Result};
 
 use super::{
+    assignment::{assignment_token_response, find_model_reference, AssignmentSessions},
+    catalog,
     request::{parse_chat_request, to_invocation},
     response::{finish, stream_event, ResponseState},
     wire::{self, ConnectError, MAX_BODY_SIZE},
@@ -39,6 +41,7 @@ pub struct DevinGateway {
 struct GatewayState {
     store: Store,
     provider: Arc<dyn Provider>,
+    assignments: Arc<AssignmentSessions>,
 }
 
 impl DevinGateway {
@@ -57,6 +60,7 @@ impl DevinGateway {
         let state = GatewayState {
             store: self.store,
             provider: self.provider,
+            assignments: Arc::new(AssignmentSessions::new()),
         };
         let router = Router::new()
             .route("/health", get(health))
@@ -112,7 +116,10 @@ async fn handle_request(
         );
     }
     let method = parts.uri.path().rsplit('/').next().unwrap_or_default();
-    if method != "GetChatMessage" {
+    if !matches!(
+        method,
+        "GetChatMessage" | "GetCliModelConfigs" | "AssignModel"
+    ) {
         return plain_error(StatusCode::NOT_FOUND, "unsupported Devin RPC method");
     }
 
@@ -148,10 +155,72 @@ async fn handle_request(
         Ok(payload) => payload,
         Err(error) => return protocol_error(StatusCode::BAD_REQUEST, error.to_string()),
     };
+
+    let candidates = settings
+        .bindings
+        .iter()
+        .filter(|binding| binding.enabled)
+        .map(|binding| binding.model_uid.clone())
+        .collect::<HashSet<_>>();
+    if method == "GetCliModelConfigs" {
+        let gateway_url = format!("http://127.0.0.1:{}", settings.local_api_port);
+        let catalog = match catalog::model_configs_payload(&settings, &gateway_url)
+            .and_then(|catalog| catalog::rewrite_model_configs(&catalog, &settings, &gateway_url))
+        {
+            Ok(catalog) => catalog,
+            Err(error) => {
+                return protocol_error(StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
+            }
+        };
+        return protocol_success_response(&body, &catalog);
+    }
+
+    let reference =
+        match find_model_reference(&payload, &parts.headers, &candidates, &state.assignments) {
+            Ok(reference) => reference,
+            Err(error) => return protocol_error(StatusCode::BAD_REQUEST, error.to_string()),
+        };
+    if reference.ambiguous {
+        return protocol_error(
+            StatusCode::BAD_REQUEST,
+            format!(
+                "Devin request contains multiple mapped model UIDs: {}",
+                reference.candidates.join(", ")
+            ),
+        );
+    }
+    if method == "AssignModel" {
+        let Some(uid) = (!reference.uid.is_empty()).then_some(reference.uid) else {
+            return protocol_error(
+                StatusCode::BAD_REQUEST,
+                "Devin AssignModel has no mapped model UID",
+            );
+        };
+        if !candidates.contains(&uid) {
+            return protocol_error(
+                StatusCode::BAD_REQUEST,
+                format!("Devin model is not assigned: {uid}"),
+            );
+        }
+        let assignment = state.assignments.issue(&uid);
+        let harness_uid = format!("cursor-byok:{uid}");
+        let response = match assignment_token_response(&assignment, &harness_uid) {
+            Ok(response) => response,
+            Err(error) => {
+                return protocol_error(StatusCode::INTERNAL_SERVER_ERROR, error.to_string())
+            }
+        };
+        return protocol_success_response(&body, &response);
+    }
+
     let request = match parse_chat_request(&payload) {
         Ok(request) => request,
         Err(error) => return protocol_error(StatusCode::BAD_REQUEST, error.to_string()),
     };
+    let mut request = request;
+    if request.requested_model.is_empty() {
+        request.requested_model = reference.uid;
+    }
     let binding = match settings.binding(&request.requested_model).cloned() {
         Some(binding) => binding,
         None => {
@@ -253,6 +322,22 @@ fn protocol_error(status: StatusCode, message: impl Into<String>) -> Response<Bo
         _ => "invalid_argument",
     };
     connect_error_response(status, code, message)
+}
+
+fn protocol_success_response(request_body: &[u8], payload: &[u8]) -> Response<Body> {
+    let (body, content_type) = if wire::is_connect_envelope(request_body) {
+        let mut body = wire::frame(payload, false).unwrap_or_else(|error| stream_error(error));
+        body.extend_from_slice(&wire::end_frame(None));
+        (body, "application/connect+proto")
+    } else {
+        (payload.to_vec(), "application/proto")
+    };
+    Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, content_type)
+        .header(header::CACHE_CONTROL, "no-store")
+        .body(Body::from(body))
+        .expect("Devin protocol success response")
 }
 
 fn connect_error_response(
