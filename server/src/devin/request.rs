@@ -259,8 +259,8 @@ fn parse_tool(bytes: &[u8]) -> Result<ToolDefinition> {
 
 fn parse_image(bytes: &[u8]) -> Result<ContentPart> {
     let fields = super::wire::parse_fields(bytes)?;
-    let mime_type = string_field(&fields, 1)?.if_empty_then("application/octet-stream");
-    let encoded = string_field(&fields, 2)?;
+    let encoded = string_field(&fields, 1)?;
+    let mime_type = string_field(&fields, 2)?.if_empty_then("image/png");
     let data = STANDARD
         .decode(encoded)
         .map_err(|error| Error::Protocol(format!("invalid Devin image data: {error}")))?;
