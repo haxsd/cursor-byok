@@ -2,6 +2,7 @@
 use sqlx::{Row, Sqlite, Transaction};
 
 use crate::{
+    diagnostics::{sanitize_error_message, DiagnosticInput},
     model::{CursorRunTraceArtifact, CursorRunTraceSummary},
     Result,
 };
@@ -31,11 +32,9 @@ impl Store {
         route: &str,
         model_id: Option<&str>,
     ) -> Result<bool> {
+        let detailed = self.detailed_logging().await?;
         if self.cursor_trace_exists(request_id).await? {
-            return Ok(true);
-        }
-        if !self.detailed_logging().await? {
-            return Ok(false);
+            return Ok(detailed);
         }
         let _write = self.writes.lock().await;
         sqlx::query(
@@ -50,7 +49,7 @@ impl Store {
         .bind(now_ms())
         .execute(&self.pool)
         .await?;
-        Ok(true)
+        Ok(detailed)
     }
 
     pub async fn cursor_trace_exists(&self, request_id: &str) -> Result<bool> {
@@ -253,22 +252,45 @@ impl Store {
     }
 
     pub async fn finish_cursor_trace(&self, request_id: &str, error: Option<&str>) -> Result<()> {
-        let _write = self.writes.lock().await;
-        sqlx::query(
-            "UPDATE cursor_run_traces
-             SET status = ?, finished_at_ms = ?, error_message = ?
-             WHERE request_id = ?",
-        )
-        .bind(if error.is_some() {
-            "error"
-        } else {
-            "completed"
-        })
-        .bind(now_ms())
-        .bind(error)
-        .bind(request_id)
-        .execute(&self.pool)
-        .await?;
+        let sanitized_error = error.map(sanitize_error_message);
+        let http_status = {
+            let _write = self.writes.lock().await;
+            let http_status = sqlx::query_scalar::<_, Option<i64>>(
+                "SELECT http_status FROM cursor_run_traces WHERE request_id = ?",
+            )
+            .bind(request_id)
+            .fetch_optional(&self.pool)
+            .await?
+            .flatten();
+            sqlx::query(
+                "UPDATE cursor_run_traces
+                 SET status = ?, finished_at_ms = ?, error_message = ?
+                 WHERE request_id = ?",
+            )
+            .bind(
+                if sanitized_error.is_some() || http_status.is_some_and(|status| status >= 400) {
+                    "error"
+                } else {
+                    "completed"
+                },
+            )
+            .bind(now_ms())
+            .bind(&sanitized_error)
+            .bind(request_id)
+            .execute(&self.pool)
+            .await?;
+            http_status
+        };
+        if sanitized_error.is_some() || http_status.is_some_and(|status| status >= 400) {
+            self.record_diagnostic(DiagnosticInput {
+                source: "cursor_request".into(),
+                request_id: Some(request_id.into()),
+                call_id: None,
+                http_status: http_status.and_then(|status| u16::try_from(status).ok()),
+                message: sanitized_error,
+            })
+            .await?;
+        }
         Ok(())
     }
 

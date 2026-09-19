@@ -23,8 +23,8 @@ use crate::{
     plugin::{PluginDescriptor, PluginRegistry, PluginRuntime, PluginRuntimeStatus},
     provider::{is_valid_response_event, ModelEvent, Provider},
     store::{
-        CommitSettings, DesktopSettings, PortSettings, ProxySettings, ProxySettingsInput,
-        StatisticsStorage, Store, TabSettings, TokenPricingSettings,
+        CommitSettings, DesktopSettings, DiagnosticRecord, PortSettings, ProxySettings,
+        ProxySettingsInput, StatisticsStorage, Store, TabSettings, TokenPricingSettings,
     },
     Error, Result,
 };
@@ -550,6 +550,10 @@ impl ControlService {
         calls.sort_by_key(|call| std::cmp::Reverse(call.call.created_at_ms));
         calls.truncate(limit.clamp(1, 500) as usize);
         Ok(calls)
+    }
+
+    pub async fn diagnostics(&self, limit: i64) -> Result<Vec<DiagnosticRecord>> {
+        self.store.diagnostics(limit).await
     }
 
     pub async fn call(&self, call_id: &str) -> Result<CallDetail> {

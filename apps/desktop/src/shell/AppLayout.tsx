@@ -23,7 +23,7 @@ type MenuItem =
   | { kind: "external"; id: string; label: string; icon: IconifyIcon | string }
   | { kind: "group"; label: string };
 
-const keptAlivePages = ["/", "/calls", "/settings", "/harness/cursor", "/plugins"];
+const keptAlivePages = ["/", "/calls", "/diagnostics", "/settings", "/harness/cursor", "/plugins"];
 const tutorialReadStorageKey = "cursor-byok:tutorial-read";
 const tutorialUrl = "https://docs.leokun.cn";
 
@@ -45,6 +45,7 @@ export function AppLayout() {
   const menuItems: MenuItem[] = [
     { kind: "page", path: "/", label: t("数据概览"), icon: flatColorAreaChartIcon },
     { kind: "page", path: "/calls", label: t("调用详细"), icon: flatColorSalesPerformanceIcon },
+    { kind: "page", path: "/diagnostics", label: t("错误诊断"), icon: flatColorAboutIcon },
     { kind: "group", label: t("模型配置") },
     { kind: "page", path: "/harness/cursor", label: "Cursor", icon: cursorIconUrl },
     { kind: "group", label: t("设置") },

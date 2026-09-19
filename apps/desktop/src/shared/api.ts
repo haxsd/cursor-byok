@@ -470,6 +470,20 @@ export interface CallDetail {
   } | null;
 }
 
+export interface DiagnosticRecord {
+  diagnostic_id: number;
+  created_at_ms: number;
+  source: string;
+  request_id: string | null;
+  call_id: string | null;
+  http_status: number | null;
+  category: string;
+  title_key: string;
+  reason_key: string;
+  suggestion_key: string;
+  message: string;
+}
+
 const packagedDesktop = "__TAURI_INTERNALS__" in window
   || window.location.protocol === "tauri:"
   || window.location.hostname === "tauri.localhost";
@@ -551,6 +565,7 @@ export const api = {
   setCursorEnabled: (enabled: boolean) => request<CursorHarnessStatus>("/harness/cursor/enabled", { method: "PUT", body: JSON.stringify({ enabled }) }),
   calls: () => request<LlmCall[]>("/llm-calls?limit=200"),
   call: (id: string) => request<CallDetail>(`/llm-calls/${encodeURIComponent(id)}`),
+  diagnostics: () => request<DiagnosticRecord[]>("/diagnostics?limit=200"),
   openCallDetails: async (id: string) => {
     const url = new URL(window.location.href);
     url.hash = `/calls/${encodeURIComponent(id)}`;

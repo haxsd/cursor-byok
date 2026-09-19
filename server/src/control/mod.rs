@@ -1,5 +1,6 @@
 //! Exposes the local control API.
 mod calls;
+mod diagnostics;
 mod harness;
 mod models;
 mod overview;
@@ -131,6 +132,7 @@ pub fn api_router(service: ControlService) -> Router {
         )
         .route("/__byok-api__/api/llm-calls", get(calls::list))
         .route("/__byok-api__/api/llm-calls/{call_id}", get(calls::detail))
+        .route("/__byok-api__/api/diagnostics", get(diagnostics::list))
         .route("/__byok-api__/api/plugins", get(plugins::list))
         .route(
             "/__byok-api__/api/plugins/runtime",

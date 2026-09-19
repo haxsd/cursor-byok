@@ -108,7 +108,7 @@ async fn trace_producers_do_not_wait_for_sqlite_and_artifacts_stay_ordered() {
 }
 
 #[tokio::test]
-async fn events_for_disabled_detailed_logging_are_discarded_off_path() {
+async fn disabled_detailed_logging_discards_large_trace_artifacts() {
     let (_directory, store) = fixtures::temp_store().await;
     let traces = CursorTraceService::new(store.clone());
     let recorder = traces.recorder("trace-disabled");
@@ -120,10 +120,72 @@ async fn events_for_disabled_detailed_logging_are_discarded_off_path() {
         serde_json::json!({"append_seqno": 0}),
     );
 
-    tokio::time::sleep(Duration::from_millis(50)).await;
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if store
+                .cursor_trace("trace-disabled")
+                .await
+                .unwrap()
+                .is_some()
+            {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
     assert!(store
-        .cursor_trace("trace-disabled")
+        .cursor_trace_artifacts("trace-disabled")
         .await
         .unwrap()
-        .is_none());
+        .is_empty());
+}
+
+#[tokio::test]
+async fn disabled_detailed_logging_keeps_error_summary_without_artifacts() {
+    let (_directory, store) = fixtures::temp_store().await;
+    let traces = CursorTraceService::new(store.clone());
+    let recorder = traces.recorder("trace-summary");
+
+    recorder.begin(None, "local_byok", Some("deepseek"));
+    tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if store.cursor_trace("trace-summary").await.unwrap().is_some() {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+
+    recorder.response_started(502);
+    recorder.finish(Some("connection reset by peer"));
+
+    let trace = tokio::time::timeout(Duration::from_secs(2), async {
+        loop {
+            if let Some(trace) = store.cursor_trace("trace-summary").await.unwrap() {
+                if trace.status == "error" {
+                    break trace;
+                }
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+
+    assert_eq!(
+        trace.error_message.as_deref(),
+        Some("connection reset by peer")
+    );
+    assert!(store
+        .cursor_trace_artifacts("trace-summary")
+        .await
+        .unwrap()
+        .is_empty());
+    let diagnostics = store.diagnostics(10).await.unwrap();
+    assert_eq!(diagnostics.len(), 1);
+    assert_eq!(diagnostics[0].category, "network");
 }

@@ -8,6 +8,7 @@ import { AppLayout } from "./shell/AppLayout";
 import { CallsPage } from "./features/calls/CallsPage";
 import { CallDetailsPage } from "./features/calls/CallDetailsPage";
 import { CursorSettingsPage } from "./features/models/CursorSettingsPage";
+import { DiagnosticsPage } from "./features/diagnostics/DiagnosticsPage";
 import { HomePage } from "./features/home/HomePage";
 import { PluginManagementPage } from "./features/plugins/PluginManagementPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
@@ -26,6 +27,7 @@ export function App() {
             <Route element={<AppLayout />}>
               <Route index element={<HomePage />} />
               <Route path="calls" element={<CallsPage />} />
+              <Route path="diagnostics" element={<DiagnosticsPage />} />
               <Route path="harness/cursor" element={<CursorSettingsPage />} />
               <Route path="plugins" element={<PluginManagementPage />} />
               <Route path="settings" element={<SettingsPage />} />

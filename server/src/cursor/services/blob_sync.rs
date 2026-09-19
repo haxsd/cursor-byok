@@ -20,7 +20,11 @@ use crate::{
 
 type BlobSetSender = oneshot::Sender<Result<()>>;
 
-const SET_TIMEOUT: Duration = Duration::from_secs(30 * 60);
+// Cursor normally acknowledges a Blob SET within a few hundred milliseconds. If
+// the client has lost the optional KV acknowledgement path, waiting 30 minutes
+// would wedge the whole conversation even though the authoritative copy is
+// already in our local store.
+const SET_TIMEOUT: Duration = Duration::from_secs(20);
 const GET_TIMEOUT: Duration = Duration::from_secs(10 * 60);
 
 #[derive(Clone)]
@@ -74,7 +78,33 @@ impl BlobSynchronizer {
 
     pub async fn persist(&self, data: &[u8], edges: &[BlobEdge]) -> Result<BlobId> {
         let id = self.inner.store.put_blob(data, edges).await?;
-        let result = self.ensure_set(&id, data).await;
+        let mut deferred = false;
+        let result = match self.ensure_set(&id, data).await {
+            Ok(()) => Ok(()),
+            Err(error) if is_deferred_set_timeout(&error) => {
+                deferred = true;
+                let message = error.to_string();
+                tracing::warn!(
+                    request_id = self.request_id(),
+                    blob_id = id.to_base64(),
+                    %message,
+                    "Cursor did not acknowledge Blob SET; continuing with the local copy"
+                );
+                let _ = self
+                    .inner
+                    .store
+                    .record_diagnostic(crate::diagnostics::DiagnosticInput {
+                        source: "cursor_sync".into(),
+                        request_id: Some(self.request_id().to_owned()),
+                        call_id: None,
+                        http_status: None,
+                        message: Some(message),
+                    })
+                    .await;
+                Ok(())
+            }
+            Err(error) => Err(error),
+        };
         if let Some(trace) = self.inner.handle.trace() {
             trace.linked_blob(
                 "blob_set",
@@ -82,7 +112,13 @@ impl BlobSynchronizer {
                 &id,
                 serde_json::json!({
                     "byte_count": data.len(),
-                    "status": if result.is_ok() { "acknowledged" } else { "error" },
+                    "status": if deferred {
+                        "deferred"
+                    } else if result.is_ok() {
+                        "acknowledged"
+                    } else {
+                        "error"
+                    },
                     "error": result.as_ref().err().map(ToString::to_string),
                     "edges": edges.iter().map(|edge| serde_json::json!({
                         "child_blob_id": edge.child.to_base64(),
@@ -312,17 +348,32 @@ impl BlobSynchronizer {
     }
 }
 
+fn is_deferred_set_timeout(error: &Error) -> bool {
+    matches!(error, Error::Protocol(message) if message.starts_with("KV SET timed out:"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn set_timeout_allows_slow_cursor_acknowledgements() {
-        assert_eq!(SET_TIMEOUT, Duration::from_secs(30 * 60));
+        assert_eq!(SET_TIMEOUT, Duration::from_secs(20));
     }
 
     #[test]
     fn get_timeout_allows_slow_cursor_responses() {
         assert_eq!(GET_TIMEOUT, Duration::from_secs(10 * 60));
+    }
+
+    #[test]
+    fn only_blob_set_timeouts_are_safe_to_defer() {
+        assert!(is_deferred_set_timeout(&Error::Protocol(
+            "KV SET timed out: blob".into(),
+        )));
+        assert!(!is_deferred_set_timeout(&Error::Protocol(
+            "KV SET response channel closed".into(),
+        )));
+        assert!(!is_deferred_set_timeout(&Error::Cancelled));
     }
 }

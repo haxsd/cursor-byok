@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { api, type CurrencyPricing, type CursorHarnessStatus, type LlmCall, type Model, type ModelInput, type Overview, type PluginDescriptor, type PluginRuntimeStatus, type PortSettings, type TokenPricingSettings } from "../api";
+import { api, type CurrencyPricing, type CursorHarnessStatus, type DiagnosticRecord, type LlmCall, type Model, type ModelInput, type Overview, type PluginDescriptor, type PluginRuntimeStatus, type PortSettings, type TokenPricingSettings } from "../api";
 import { applyTheme, isThemeId, type ThemeId } from "../theme/theme";
 
 /**
@@ -61,6 +61,7 @@ export const DEFAULT_TOKEN_PRICING: TokenPricingSettings = {
 export type AppSnapshot = {
   models: Model[];
   calls: LlmCall[];
+  diagnostics: DiagnosticRecord[];
   overview: Overview;
   detailed: boolean;
   ports: PortSettings;
@@ -82,6 +83,7 @@ const savedTheme = (): ThemeId => {
 let snapshot: AppSnapshot = {
   models: [],
   calls: [],
+  diagnostics: [],
   overview: {
     metrics: {
       llm_calls: 0,
@@ -294,6 +296,14 @@ export const appStore = {
   async refreshCalls() {
     try {
       update({ calls: await api.calls() });
+    } catch (cause) {
+      update({ error: cause instanceof Error ? cause.message : String(cause) });
+    }
+  },
+
+  async refreshDiagnostics() {
+    try {
+      update({ diagnostics: await api.diagnostics() });
     } catch (cause) {
       update({ error: cause instanceof Error ? cause.message : String(cause) });
     }

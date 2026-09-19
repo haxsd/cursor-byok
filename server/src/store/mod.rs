@@ -3,6 +3,7 @@ mod cas;
 mod checkpoints;
 mod conversations;
 mod cursor_traces;
+mod diagnostics;
 mod input_anchors;
 mod legacy_config;
 mod llm_calls;
@@ -20,6 +21,7 @@ mod writer;
 
 pub use cas::*;
 pub(crate) use cursor_traces::BufferedCursorTraceChunk;
+pub use diagnostics::DiagnosticRecord;
 pub(crate) use llm_calls::{BufferedLlmChunk, ContextUsageAnchor};
 pub use runs::*;
 pub use settings::*;
