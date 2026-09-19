@@ -67,6 +67,18 @@
         }
       ]
     },
+    "03ac57b50f0a8ace": {
+      "source": "关闭时不会打开任何 Devin 端口，也不会影响 Cursor。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 72,
+          "column": 57
+        }
+      ]
+    },
     "046a01112a0c9169": {
       "source": "{group}的缓存写入价格",
       "kind": "template",
@@ -284,6 +296,30 @@
         }
       ]
     },
+    "0a9f9aa653c56c31": {
+      "source": "Devin 设置已保存，重启软件后监听端口生效",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 60,
+          "column": 15
+        }
+      ]
+    },
+    "0b6c217675f12388": {
+      "source": "可选；Devin 请求可通过 x-devin-router-token 或 Bearer 令牌认证。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 76,
+          "column": 44
+        }
+      ]
+    },
     "0bbb2c0ce279d6d5": {
       "source": "尚未同步模型",
       "kind": "text",
@@ -371,6 +407,18 @@
           "file": "features/calls/CallTable.tsx",
           "line": 132,
           "column": 15
+        }
+      ]
+    },
+    "0d741e79b92ee3b0": {
+      "source": "模型映射",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 84,
+          "column": 24
         }
       ]
     },
@@ -512,6 +560,18 @@
         }
       ]
     },
+    "13527e1b3be295c6": {
+      "source": "安全边界",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 104,
+          "column": 24
+        }
+      ]
+    },
     "13a9ac7a68c5fd96": {
       "source": "CA 仅保存在本机，用于安全解析 Cursor 的 HTTPS 请求。",
       "kind": "text",
@@ -630,6 +690,18 @@
         }
       ]
     },
+    "186af386ba53b0b0": {
+      "source": "Devin 接入",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 70,
+          "column": 24
+        }
+      ]
+    },
     "19658d9fa9aa8de4": {
       "source": "安装中…",
       "kind": "text",
@@ -734,6 +806,18 @@
           "file": "shell/WindowControls.tsx",
           "line": 63,
           "column": 14
+        }
+      ]
+    },
+    "1b46ced60f533e7f": {
+      "source": "控制令牌",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 76,
+          "column": 27
         }
       ]
     },
@@ -932,6 +1016,18 @@
         }
       ]
     },
+    "232b1c101c02aa22": {
+      "source": "留空表示仅依赖本机回环访问",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 77,
+          "column": 132
+        }
+      ]
+    },
     "23ae7a90b1b9816d": {
       "source": "清理范围",
       "kind": "text",
@@ -981,6 +1077,18 @@
           "file": "features/models/LegacyModelImport.tsx",
           "line": 80,
           "column": 33
+        }
+      ]
+    },
+    "24f44fdb33c2820f": {
+      "source": "推理端口",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 80,
+          "column": 27
         }
       ]
     },
@@ -1140,7 +1248,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 118,
+          "line": 119,
           "column": 20
         }
       ]
@@ -1257,7 +1365,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 117,
+          "line": 118,
           "column": 14
         }
       ]
@@ -1327,6 +1435,18 @@
           "file": "features/plugins/PluginResourcePanels.tsx",
           "line": 355,
           "column": 56
+        }
+      ]
+    },
+    "304ddada65d234d3": {
+      "source": "还没有映射。添加一个 Cursor BYOK 模型后，Devin 才能使用它。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 86,
+          "column": 72
         }
       ]
     },
@@ -1898,6 +2018,11 @@
       "placeholders": [],
       "refs": [
         {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 69,
+          "column": 62
+        },
+        {
           "file": "features/settings/CommitSettingsCard.tsx",
           "line": 164,
           "column": 8
@@ -2030,7 +2155,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 86,
+          "line": 87,
           "column": 67
         }
       ]
@@ -2146,7 +2271,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 106,
+          "line": 107,
           "column": 51
         }
       ]
@@ -2211,6 +2336,23 @@
         }
       ]
     },
+    "553ecf7ce56976f9": {
+      "source": "Cursor BYOK 模型",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 90,
+          "column": 31
+        },
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 90,
+          "column": 121
+        }
+      ]
+    },
     "56432ba297009bdc": {
       "source": "请先初始化 CA",
       "kind": "text",
@@ -2254,6 +2396,18 @@
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 391,
           "column": 83
+        }
+      ]
+    },
+    "56f7e70bb6631861": {
+      "source": "上下文 token",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 95,
+          "column": 31
         }
       ]
     },
@@ -2475,6 +2629,18 @@
         }
       ]
     },
+    "6135d4159e892541": {
+      "source": "移除",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 99,
+          "column": 99
+        }
+      ]
+    },
     "61a4c7bac12dc125": {
       "source": "异常调用：{count}",
       "kind": "template",
@@ -2587,7 +2753,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 547,
+          "line": 566,
           "column": 43
         }
       ]
@@ -2726,7 +2892,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 52,
+          "line": 53,
           "column": 47
         }
       ]
@@ -2801,6 +2967,18 @@
           "file": "features/settings/ProxySettingsCard.tsx",
           "line": 69,
           "column": 46
+        }
+      ]
+    },
+    "6d34c954eee26f03": {
+      "source": "启用此模型映射",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 98,
+          "column": 54
         }
       ]
     },
@@ -2914,7 +3092,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 542,
+          "line": 561,
           "column": 43
         }
       ]
@@ -3003,7 +3181,7 @@
       "refs": [
         {
           "file": "App.tsx",
-          "line": 62,
+          "line": 64,
           "column": 21
         }
       ]
@@ -3090,7 +3268,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 486,
+          "line": 503,
           "column": 21
         }
       ]
@@ -3519,7 +3697,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 106,
+          "line": 107,
           "column": 62
         }
       ]
@@ -3632,6 +3810,18 @@
         }
       ]
     },
+    "99049e59a6e85025": {
+      "source": "添加映射",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 84,
+          "column": 112
+        }
+      ]
+    },
     "997ec8201c2adeda": {
       "source": "打开终端安装 CA",
       "kind": "text",
@@ -3663,8 +3853,20 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 123,
+          "line": 124,
           "column": 11
+        }
+      ]
+    },
+    "9b34f3b6a48bb1a6": {
+      "source": "本地 API 端口",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 81,
+          "column": 27
         }
       ]
     },
@@ -3938,6 +4140,11 @@
       "placeholders": [],
       "refs": [
         {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 70,
+          "column": 155
+        },
+        {
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 341,
           "column": 432
@@ -4055,7 +4262,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 119,
+          "line": 120,
           "column": 21
         }
       ]
@@ -4223,6 +4430,11 @@
           "column": 15
         },
         {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 94,
+          "column": 31
+        },
+        {
           "file": "features/models/CursorModelEditor.tsx",
           "line": 160,
           "column": 25
@@ -4350,12 +4562,12 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 129,
+          "line": 130,
           "column": 64
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 129,
+          "line": 130,
           "column": 125
         }
       ]
@@ -4860,6 +5072,30 @@
         }
       ]
     },
+    "c41ca50349b63cf7": {
+      "source": "网关固定监听 127.0.0.1，并限制单次请求体为 24 MiB。Devin 负责执行工具，Cursor BYOK 只负责模型调用和事件转发。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 105,
+          "column": 35
+        }
+      ]
+    },
+    "c42c07f7d2c78bf2": {
+      "source": "API 端口",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 79,
+          "column": 27
+        }
+      ]
+    },
     "c4a41ac5c1b31a10": {
       "source": "高峰 / 低谷分别计价",
       "kind": "text",
@@ -5135,6 +5371,18 @@
         }
       ]
     },
+    "d1fafc7341f1d0a5": {
+      "source": "Devin 模型 UID",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 89,
+          "column": 31
+        }
+      ]
+    },
     "d2d648bd1c94b7f9": {
       "source": "认证",
       "kind": "text",
@@ -5353,7 +5601,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 72,
+          "line": 73,
           "column": 54
         }
       ]
@@ -5529,7 +5777,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 50,
+          "line": 51,
           "column": 29
         }
       ]
@@ -5853,6 +6101,23 @@
         }
       ]
     },
+    "e84c5c6a2418a300": {
+      "source": "启用 Devin 网关",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 72,
+          "column": 23
+        },
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 73,
+          "column": 51
+        }
+      ]
+    },
     "e8b1268c1e3610f2": {
       "source": "已存在",
       "kind": "text",
@@ -6129,7 +6394,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 51,
+          "line": 52,
           "column": 46
         }
       ]
@@ -6432,7 +6697,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 53,
+          "line": 54,
           "column": 48
         }
       ]
@@ -6454,6 +6719,11 @@
       "kind": "text",
       "placeholders": [],
       "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 70,
+          "column": 143
+        },
         {
           "file": "features/settings/CommitSettingsCard.tsx",
           "line": 169,
