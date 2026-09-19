@@ -335,7 +335,10 @@ impl Store {
         .fetch_optional(&self.pool)
         .await?;
         let settings = value
-            .map(|value| serde_json::from_str(&value).map_err(Into::into))
+            .map(|value| {
+                serde_json::from_str::<crate::devin::DevinSettings>(&value)
+                    .map_err(crate::Error::Json)
+            })
             .unwrap_or_else(|| Ok(crate::devin::DevinSettings::default()))?;
         settings.validate()?;
         Ok(settings)

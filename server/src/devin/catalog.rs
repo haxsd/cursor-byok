@@ -5,7 +5,7 @@
 //! local catalog from cursor-byok bindings so no upstream account or license
 //! behavior is copied into this project.
 
-use crate::{devin::wire, Error, Result};
+use crate::{devin::wire, Result};
 
 use super::DevinSettings;
 
@@ -211,7 +211,7 @@ fn model_uid(fields: &[wire::Field]) -> Option<String> {
 
 fn rewrite_identity(value: &[u8], uid: &str) -> Result<Vec<u8>> {
     let fields = wire::parse_fields(value)?;
-    replace_or_append_bytes(fields, IDENTITY_UID_FIELD, uid)
+    wire::serialize_fields(&replace_or_append_bytes(fields, IDENTITY_UID_FIELD, uid)?)
 }
 
 fn rewrite_model_info(
@@ -230,21 +230,29 @@ fn rewrite_model_info(
     )?;
     let fields = replace_or_append_bytes(fields, MODEL_INFO_HARNESS_FIELD, harness_uid)?;
     if context > 0 {
-        replace_or_append_varint(fields, MODEL_INFO_CONTEXT_FIELD, context)
+        wire::serialize_fields(&replace_or_append_varint(
+            fields,
+            MODEL_INFO_CONTEXT_FIELD,
+            context,
+        )?)
     } else {
         wire::serialize_fields(&fields)
     }
 }
 
 fn rewrite_metadata(value: &[u8], display_name: &str) -> Result<Vec<u8>> {
-    replace_or_append_bytes(
+    wire::serialize_fields(&replace_or_append_bytes(
         wire::parse_fields(value)?,
         METADATA_NAME_FIELD,
         display_name,
-    )
+    )?)
 }
 
-fn replace_or_append_bytes(fields: Vec<wire::Field>, number: u32, value: &str) -> Result<Vec<u8>> {
+fn replace_or_append_bytes(
+    fields: Vec<wire::Field>,
+    number: u32,
+    value: &str,
+) -> Result<Vec<wire::Field>> {
     let mut found = false;
     let output = fields
         .into_iter()
@@ -261,10 +269,14 @@ fn replace_or_append_bytes(fields: Vec<wire::Field>, number: u32, value: &str) -
     if !found {
         output.push(wire::Field::bytes(number, value));
     }
-    wire::serialize_fields(&output)
+    Ok(output)
 }
 
-fn replace_or_append_varint(fields: Vec<wire::Field>, number: u32, value: u64) -> Result<Vec<u8>> {
+fn replace_or_append_varint(
+    fields: Vec<wire::Field>,
+    number: u32,
+    value: u64,
+) -> Result<Vec<wire::Field>> {
     let mut found = false;
     let output = fields
         .into_iter()
@@ -281,7 +293,7 @@ fn replace_or_append_varint(fields: Vec<wire::Field>, number: u32, value: u64) -
     if !found {
         output.push(wire::Field::varint(number, value));
     }
-    wire::serialize_fields(&output)
+    Ok(output)
 }
 
 fn string_field(fields: &[wire::Field], number: u32) -> Option<String> {
@@ -378,7 +390,9 @@ mod tests {
         let info = model_fields
             .iter()
             .find_map(|field| match (&field.number, &field.value) {
-                (MODEL_INFO_FIELD, wire::FieldValue::Bytes(value)) => {
+                (field_number, wire::FieldValue::Bytes(value))
+                    if *field_number == MODEL_INFO_FIELD =>
+                {
                     Some(wire::parse_fields(value).unwrap())
                 }
                 _ => None,

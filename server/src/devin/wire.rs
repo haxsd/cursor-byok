@@ -310,10 +310,21 @@ mod tests {
         let payload = b"hello Devin";
         for compress in [false, true] {
             let frame = super::frame(payload, compress).unwrap();
-            let unwrapped =
-                super::unwrap_request(&frame, if compress { Some("gzip") } else { None }).unwrap();
+            let unwrapped = super::unwrap_request(&frame, None).unwrap();
             assert_eq!(unwrapped, payload);
         }
+    }
+
+    #[test]
+    fn http_gzip_wrapping_is_decoded_before_connect_frame() {
+        let payload = b"hello Devin";
+        let frame = super::frame(payload, false).unwrap();
+        let http_body = super::gzip(&frame).unwrap();
+
+        assert_eq!(
+            super::unwrap_request(&http_body, Some("gzip")).unwrap(),
+            payload
+        );
     }
 
     #[test]
