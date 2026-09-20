@@ -1,7 +1,13 @@
 # Devin integration
 
-This branch adds an optional Devin-compatible gateway to Cursor BYOK. It is
-isolated from the existing Cursor listener and is disabled by default.
+This branch packages an independent product named `haxsd byok`. It adds an
+optional Devin-compatible gateway to the existing Cursor model harness. The
+Devin listener is isolated from the Cursor listener and is disabled by default.
+
+This branch is intentionally isolated from `main`, which remains the Cursor
+BYOK product line. Do not merge the branches or reuse the Cursor release/update
+channel. The product uses its own Tauri identifier (`dev.haxsd.byok`) and
+storage directory (`.haxsd-byok-devin-v3`).
 
 ## What is integrated
 
@@ -12,6 +18,8 @@ isolated from the existing Cursor listener and is disabled by default.
   not copy the reference router's commercial license or JWT behavior.
 - Devin model UID to Cursor BYOK model-hash bindings, persisted in the existing
   settings store. API keys remain in the existing model records.
+- Optional candidate routes per binding and a binding kind that marks a Devin
+  UID as a context-compression binding.
 - The existing provider router and Devin tool definitions are reused. Devin
   remains responsible for executing its tools; Cursor BYOK supplies model
   inference and forwards model events.
@@ -31,7 +39,7 @@ The settings page is available under the Devin section. Defaults are:
 | local API | `43112` |
 
 Enable the gateway, add at least one enabled model binding, and save. The
-process reads listener settings at startup, so restart Cursor BYOK after
+process reads listener settings at startup, so restart haxsd byok after
 changing enabled state or ports.
 
 The gateway binds only to `127.0.0.1`. An optional token can be supplied with
@@ -43,6 +51,51 @@ in the settings page. Only after the status reports a compatible clean version
 and the Devin gateway is enabled should “应用补丁” be used. The receipt-backed
 “恢复原文件” action refuses to restore if the host file or backup changed.
 
+## Model routes and compression bindings
+
+Each binding still owns one Devin model UID and one legacy primary model hash.
+Two optional fields extend it without breaking old settings rows:
+
+| Field | Meaning |
+| --- | --- |
+| `kind` | `standard` (default) or `context_compression` |
+| `routes` | Candidate routes; each has `route_id`, `model_hash`, `label`, `enabled` |
+| `active_route_id` | The candidate route that currently serves the UID |
+
+Resolution rules:
+
+- A binding with no routes keeps using its legacy `model_hash`, so settings
+  written by earlier builds load unchanged and are never rewritten.
+- A binding with routes uses the enabled route named by `active_route_id`. If
+  that route is missing, disabled, or has an empty hash, the legacy primary hash
+  is used instead.
+- `AssignModel` still issues its token for the Devin model UID, not for a route
+  ID, and the catalog still exposes exactly one Devin UID per binding.
+- `kind` is control-plane metadata only. A context-compression binding is an
+  ordinary Devin UID mapping at runtime; the flag keeps the UI and any later
+  wire work from overwriting it with a normal route.
+
+Validation rejects empty route IDs, duplicate route IDs, empty route hashes, and
+an `active_route_id` that does not exist or is disabled. Catalog generation and
+settings reload never rewrite bindings, so the active route, route order, route
+labels, and disabled candidates survive a save or a catalog refresh.
+
+The Devin settings page shows the legacy primary hash as a synthetic `primary`
+route until the binding is edited. Adding the first candidate materializes that
+route and keeps it active, so adding a route never silently switches the model
+that Devin is already using. Route selection is manual: switching the active
+route is an explicit user action.
+
+Deliberately out of scope in this phase:
+
+- no automatic retry with another candidate route after a provider failure, and
+- no official Devin account routing or upstream catalog fetching.
+
+A streamed provider failure may already have emitted tokens or tool calls, so
+automatic fallback needs a verified Devin request lifecycle and a separate
+idempotency policy. Official routing needs real black-box Devin captures before
+any wire field is invented.
+
 ## Intentional limits
 
 The current integration does not automatically discover, edit, or SSH into a
@@ -53,3 +106,7 @@ status-extension behavior. Unknown host versions fail closed.
 This is intentional: the Devin adapter is a separate opt-in path, and the
 Cursor listener/harness continues to run independently when Devin is disabled
 or when the Devin listener stops.
+
+Automatic updates are intentionally disabled in this product build. Do not
+point it at the Cursor BYOK release manifest; create a dedicated `haxsd byok`
+release channel before adding updates back.
