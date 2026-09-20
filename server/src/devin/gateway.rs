@@ -31,6 +31,7 @@ use super::{
     request::{parse_chat_request, to_invocation},
     response::{finish, stream_event, ResponseState},
     wire::{self, ConnectError, MAX_BODY_SIZE},
+    DevinModelBinding,
 };
 
 const TOKEN_HEADER: &str = "x-devin-router-token";
@@ -234,12 +235,13 @@ async fn handle_request(
             )
         }
     };
-    let model = match state.store.model(&binding.model_hash).await {
+    let model_hash = model_lookup_hash(&binding);
+    let model = match state.store.model(model_hash).await {
         Ok(Some(model)) => model,
         Ok(None) => {
             return protocol_error(
                 StatusCode::BAD_REQUEST,
-                format!("cursor-byok model hash not found: {}", binding.model_hash),
+                format!("cursor-byok model hash not found: {model_hash}"),
             )
         }
         Err(error) => return protocol_error(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()),
@@ -292,6 +294,13 @@ async fn handle_request(
         yield Ok::<Bytes, std::io::Error>(stream_error("provider stream ended without Done"));
     };
     streaming_response(stream)
+}
+
+/// The Cursor BYOK model record that serves a Devin binding: the enabled active
+/// route's hash when one is selected, otherwise the legacy primary hash. The
+/// Devin model UID stays the request identity.
+fn model_lookup_hash(binding: &DevinModelBinding) -> &str {
+    binding.effective_model_hash()
 }
 
 fn authorized(headers: &HeaderMap, configured: &str) -> bool {
@@ -384,6 +393,7 @@ fn stream_error(error: impl std::fmt::Display) -> Bytes {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::devin::{DevinModelBinding, DevinRoute};
 
     #[test]
     fn token_auth_accepts_header_or_bearer_token() {
@@ -402,5 +412,28 @@ mod tests {
         let frame = stream_error("provider failed");
         assert!(frame.len() < MAX_BODY_SIZE);
         assert_eq!(frame[0], 2);
+    }
+
+    #[test]
+    fn selected_route_hash_drives_the_cursor_byok_model_lookup() {
+        let routed = DevinModelBinding {
+            model_uid: "devin-sonnet".into(),
+            model_hash: "legacy-hash".into(),
+            enabled: true,
+            routes: vec![DevinRoute {
+                route_id: "active".into(),
+                model_hash: "active-hash".into(),
+                label: "Active".into(),
+                enabled: true,
+            }],
+            active_route_id: Some("active".into()),
+            ..DevinModelBinding::new("", "")
+        };
+        assert_eq!(model_lookup_hash(&routed), "active-hash");
+        assert_eq!(routed.model_uid, "devin-sonnet");
+
+        let legacy = DevinModelBinding::new("devin-legacy", "legacy-hash");
+        assert_eq!(model_lookup_hash(&legacy), "legacy-hash");
+        assert_eq!(legacy.model_uid, "devin-legacy");
     }
 }
