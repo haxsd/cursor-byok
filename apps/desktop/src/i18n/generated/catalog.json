@@ -193,7 +193,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 203,
+          "line": 207,
           "column": 37
         }
       ]
@@ -579,7 +579,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 222,
+          "line": 226,
           "column": 24
         }
       ]
@@ -1099,6 +1099,18 @@
           "file": "features/models/CursorModelEditor.tsx",
           "line": 159,
           "column": 42
+        }
+      ]
+    },
+    "2604b7dafd97652f": {
+      "source": "上下文压缩绑定必须是单线路；切换为该类型会清空候选路由。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 191,
+          "column": 50
         }
       ]
     },
@@ -1685,18 +1697,6 @@
         }
       ]
     },
-    "3ab90314a30f7be1": {
-      "source": "上下文压缩只是标记；绑定仍然对应一个 Devin 模型 UID。",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 190,
-          "column": 50
-        }
-      ]
-    },
     "3b67824289b5fa1e": {
       "source": "已隐藏 Dock 栏图标",
       "kind": "text",
@@ -2198,7 +2198,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 208,
+          "line": 212,
           "column": 281
         }
       ]
@@ -2383,7 +2383,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 189,
+          "line": 190,
           "column": 33
         }
       ]
@@ -2532,12 +2532,12 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 202,
+          "line": 206,
           "column": 37
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 202,
+          "line": 206,
           "column": 115
         }
       ]
@@ -2549,7 +2549,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 197,
+          "line": 201,
           "column": 117
         }
       ]
@@ -2628,12 +2628,12 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 209,
+          "line": 213,
           "column": 156
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 216,
+          "line": 220,
           "column": 101
         }
       ]
@@ -2865,7 +2865,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 208,
+          "line": 212,
           "column": 269
         }
       ]
@@ -2986,7 +2986,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 215,
+          "line": 219,
           "column": 56
         }
       ]
@@ -3786,7 +3786,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 196,
+          "line": 200,
           "column": 24
         }
       ]
@@ -3885,7 +3885,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 223,
+          "line": 227,
           "column": 35
         }
       ]
@@ -4074,6 +4074,18 @@
         }
       ]
     },
+    "a13b7d5e62d491f9": {
+      "source": "上下文压缩绑定只使用上面的模型，不参与候选路由。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 198,
+          "column": 67
+        }
+      ]
+    },
     "a19395b9e938233c": {
       "source": "绑定类型",
       "kind": "text",
@@ -4081,12 +4093,12 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 190,
+          "line": 191,
           "column": 33
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 191,
+          "line": 192,
           "column": 79
         }
       ]
@@ -4139,7 +4151,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 206,
+          "line": 210,
           "column": 58
         }
       ]
@@ -4427,7 +4439,7 @@
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 188,
+          "line": 189,
           "column": 33
         },
         {
@@ -5362,7 +5374,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 183,
+          "line": 184,
           "column": 33
         }
       ]
@@ -6262,12 +6274,12 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 184,
+          "line": 185,
           "column": 33
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 184,
+          "line": 185,
           "column": 122
         }
       ]
@@ -6378,7 +6390,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 199,
+          "line": 203,
           "column": 67
         }
       ]

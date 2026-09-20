@@ -155,6 +155,12 @@ impl DevinSettings {
                 return Err(Error::Config(format!("duplicate Devin model UID: {uid}")));
             }
 
+            if binding.kind == DevinBindingKind::ContextCompression && !binding.routes.is_empty() {
+                return Err(Error::Config(format!(
+                    "Devin context compression binding {uid} must not define candidate routes"
+                )));
+            }
+
             let mut route_ids = HashSet::with_capacity(binding.routes.len());
             for route in &binding.routes {
                 let route_id = route.route_id.as_str();
@@ -377,6 +383,23 @@ mod tests {
             .to_string();
 
         assert!(error.contains("Devin active route must be enabled"));
+    }
+
+    #[test]
+    fn context_compression_bindings_stay_single_line() {
+        let mut binding = DevinModelBinding::new("devin-compaction", "hash-a");
+        binding.kind = DevinBindingKind::ContextCompression;
+        assert!(settings_with_binding(binding.clone()).validate().is_ok());
+
+        binding.routes = vec![route("route-a", "hash-b", true)];
+        binding.active_route_id = Some("route-a".into());
+
+        let error = settings_with_binding(binding)
+            .validate()
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("must not define candidate routes"));
     }
 
     #[test]

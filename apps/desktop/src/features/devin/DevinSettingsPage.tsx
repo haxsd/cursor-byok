@@ -178,6 +178,7 @@ export function DevinSettingsPage() {
           const routes = routesForDisplay(binding);
           const activeRouteId = activeRouteIdForDisplay(binding);
           const hasRoutes = binding.routes.length > 0;
+          const isCompression = binding.kind === "context_compression";
           return <div className={styles.binding} key={`${binding.model_uid}-${index}`}>
             <div className={styles.bindingFields}>
               <FormField label={t("Devin 模型 UID")}><TextInput value={binding.model_uid} onChange={(event) => updateBinding(index, { model_uid: event.target.value })} /></FormField>
@@ -187,11 +188,14 @@ export function DevinSettingsPage() {
               }} /></FormField>
               <FormField label={t("显示名称")}><TextInput value={binding.display_name} onChange={(event) => updateBinding(index, { display_name: event.target.value })} /></FormField>
               <FormField label={t("上下文 token") }><TextInput type="number" min={1} value={binding.context_window_tokens ?? ""} onChange={(event) => updateBinding(index, { context_window_tokens: event.target.value ? Number(event.target.value) : null })} /></FormField>
-              <FormField label={t("绑定类型")} hint={t("上下文压缩只是标记；绑定仍然对应一个 Devin 模型 UID。")}>
-                <Select value={binding.kind} options={kindOptions} ariaLabel={t("绑定类型")} onChange={(kind) => updateBinding(index, { kind: kind as DevinBindingKind })} />
+              <FormField label={t("绑定类型")} hint={t("上下文压缩绑定必须是单线路；切换为该类型会清空候选路由。")}>
+                <Select value={binding.kind} options={kindOptions} ariaLabel={t("绑定类型")} onChange={(kind) => {
+                  const nextKind = kind as DevinBindingKind;
+                  updateBinding(index, nextKind === "context_compression" ? { kind: nextKind, routes: [], active_route_id: null } : { kind: nextKind });
+                }} />
               </FormField>
             </div>
-            <div className={styles.routes}>
+            {isCompression ? <small className={styles.routeHint}>{t("上下文压缩绑定只使用上面的模型，不参与候选路由。")}</small> : <div className={styles.routes}>
               <div className={styles.routesHeader}>
                 <span>{t("候选路由")}</span>
                 <Button size="small" disabled={!models.length} onClick={() => appendRoute(index, binding, routes)}>{t("添加候选路由")}</Button>
@@ -210,7 +214,7 @@ export function DevinSettingsPage() {
                   </div>
                 </div>
               </div>)}
-            </div>
+            </div>}
             <div className={styles.bindingFooter}>
               <Switch checked={binding.enabled} label={t("启用此模型映射")} onChange={(enabled) => updateBinding(index, { enabled })} />
               <button type="button" className={styles.remove} onClick={() => removeBinding(index)}>{t("移除")}</button>
