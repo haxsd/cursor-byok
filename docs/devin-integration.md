@@ -72,11 +72,13 @@ Resolution rules:
 - `AssignModel` still issues its token for the Devin model UID, not for a route
   ID, and the catalog still exposes exactly one Devin UID per binding.
 - `kind` is control-plane metadata only. A context-compression binding is an
-  ordinary Devin UID mapping at runtime; the flag keeps the UI and any later
-  wire work from overwriting it with a normal route.
+  ordinary Devin UID mapping at runtime, but it is single-line: it must not
+  define candidate routes, and switching a binding to compression clears them.
+  That keeps compression configuration independent from ordinary routes.
 
 Validation rejects empty route IDs, duplicate route IDs, empty route hashes, and
-an `active_route_id` that does not exist or is disabled. Catalog generation and
+an `active_route_id` that does not exist or is disabled. It also rejects
+candidate routes on a context-compression binding. Catalog generation and
 settings reload never rewrite bindings, so the active route, route order, route
 labels, and disabled candidates survive a save or a catalog refresh.
 
