@@ -40,6 +40,42 @@ impl Default for DevinSettings {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DevinBindingKind {
+    Standard,
+    ContextCompression,
+}
+
+impl Default for DevinBindingKind {
+    fn default() -> Self {
+        Self::Standard
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
+pub struct DevinRoute {
+    #[serde(default)]
+    pub route_id: String,
+    #[serde(default)]
+    pub model_hash: String,
+    #[serde(default)]
+    pub label: String,
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+}
+
+impl Default for DevinRoute {
+    fn default() -> Self {
+        Self {
+            route_id: String::new(),
+            model_hash: String::new(),
+            label: String::new(),
+            enabled: true,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct DevinModelBinding {
     pub model_uid: String,
     pub model_hash: String,
@@ -49,6 +85,12 @@ pub struct DevinModelBinding {
     pub context_window_tokens: Option<u64>,
     #[serde(default = "default_true")]
     pub enabled: bool,
+    #[serde(default)]
+    pub kind: DevinBindingKind,
+    #[serde(default)]
+    pub routes: Vec<DevinRoute>,
+    #[serde(default)]
+    pub active_route_id: Option<String>,
 }
 
 impl DevinModelBinding {
@@ -59,7 +101,24 @@ impl DevinModelBinding {
             display_name: String::new(),
             context_window_tokens: None,
             enabled: true,
+            kind: DevinBindingKind::default(),
+            routes: Vec::new(),
+            active_route_id: None,
         }
+    }
+
+    pub fn effective_model_hash(&self) -> &str {
+        self.active_route_id
+            .as_deref()
+            .and_then(|active_route_id| {
+                self.routes.iter().find(|route| {
+                    route.enabled
+                        && !route.model_hash.trim().is_empty()
+                        && route.route_id == active_route_id
+                })
+            })
+            .map(|route| route.model_hash.as_str())
+            .unwrap_or(&self.model_hash)
     }
 }
 
@@ -94,6 +153,43 @@ impl DevinSettings {
             }
             if !uids.insert(uid.to_owned()) {
                 return Err(Error::Config(format!("duplicate Devin model UID: {uid}")));
+            }
+
+            let mut route_ids = HashSet::with_capacity(binding.routes.len());
+            for route in &binding.routes {
+                let route_id = route.route_id.as_str();
+                if route_id.trim().is_empty() {
+                    return Err(Error::Config("Devin route ID must not be empty".into()));
+                }
+                if route.model_hash.trim().is_empty() {
+                    return Err(Error::Config(format!(
+                        "Devin route {route_id} must include a cursor-byok model hash"
+                    )));
+                }
+                if !route_ids.insert(route_id.to_owned()) {
+                    return Err(Error::Config(format!(
+                        "duplicate Devin route ID: {route_id}"
+                    )));
+                }
+            }
+            if let Some(active_route_id) = binding.active_route_id.as_deref() {
+                match binding
+                    .routes
+                    .iter()
+                    .find(|route| route.route_id == active_route_id)
+                {
+                    None => {
+                        return Err(Error::Config(format!(
+                            "Devin active route not found: {active_route_id}"
+                        )))
+                    }
+                    Some(route) if !route.enabled => {
+                        return Err(Error::Config(format!(
+                            "Devin active route must be enabled: {active_route_id}"
+                        )))
+                    }
+                    Some(_) => {}
+                }
             }
         }
         Ok(())
@@ -136,3 +232,173 @@ pub mod host_status;
 pub mod request;
 pub mod response;
 pub mod wire;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn route(route_id: &str, model_hash: &str, enabled: bool) -> DevinRoute {
+        DevinRoute {
+            route_id: route_id.into(),
+            model_hash: model_hash.into(),
+            label: route_id.into(),
+            enabled,
+        }
+    }
+
+    fn settings_with_binding(binding: DevinModelBinding) -> DevinSettings {
+        DevinSettings {
+            bindings: vec![binding],
+            ..DevinSettings::default()
+        }
+    }
+
+    #[test]
+    fn legacy_binding_json_keeps_the_legacy_hash_effective() {
+        let binding: DevinModelBinding = serde_json::from_str(
+            r#"{
+                "model_uid": "devin-legacy",
+                "model_hash": "legacy-hash",
+                "display_name": "Legacy binding",
+                "context_window_tokens": 200000,
+                "enabled": true
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(binding.kind, DevinBindingKind::Standard);
+        assert!(binding.routes.is_empty());
+        assert_eq!(binding.active_route_id, None);
+        assert_eq!(binding.effective_model_hash(), "legacy-hash");
+    }
+
+    #[test]
+    fn enabled_active_route_hash_is_effective() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.routes = vec![
+            route("disabled-route", "disabled-hash", false),
+            route("active-route", "active-hash", true),
+        ];
+        binding.active_route_id = Some("active-route".into());
+
+        assert_eq!(binding.effective_model_hash(), "active-hash");
+
+        binding.active_route_id = Some("disabled-route".into());
+        assert_eq!(binding.effective_model_hash(), "legacy-hash");
+
+        binding.active_route_id = Some("missing-route".into());
+        assert_eq!(binding.effective_model_hash(), "legacy-hash");
+    }
+
+    #[test]
+    fn route_state_round_trips_with_snake_case_json() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.kind = DevinBindingKind::ContextCompression;
+        binding.routes = vec![route("active-route", "active-hash", true)];
+        binding.active_route_id = Some("active-route".into());
+
+        let value = serde_json::to_value(&binding).unwrap();
+
+        assert_eq!(value["kind"], "context_compression");
+        assert_eq!(value["routes"][0]["route_id"], "active-route");
+        assert_eq!(value["routes"][0]["model_hash"], "active-hash");
+        assert_eq!(value["active_route_id"], "active-route");
+        assert_eq!(
+            serde_json::from_value::<DevinModelBinding>(value).unwrap(),
+            binding
+        );
+    }
+
+    #[test]
+    fn settings_reject_duplicate_route_ids() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.routes = vec![
+            route("same-route", "hash-a", true),
+            route("same-route", "hash-b", true),
+        ];
+
+        let error = settings_with_binding(binding)
+            .validate()
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("duplicate Devin route ID"));
+    }
+
+    #[test]
+    fn settings_reject_empty_route_ids() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.routes = vec![route(" ", "hash-a", true)];
+
+        let error = settings_with_binding(binding)
+            .validate()
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("Devin route ID must not be empty"));
+    }
+
+    #[test]
+    fn settings_reject_empty_route_hashes() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.routes = vec![route("route-a", " ", true)];
+
+        let error = settings_with_binding(binding)
+            .validate()
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("must include a cursor-byok model hash"));
+    }
+
+    #[test]
+    fn settings_reject_missing_active_routes() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.routes = vec![route("route-a", "hash-a", true)];
+        binding.active_route_id = Some("missing-route".into());
+
+        let error = settings_with_binding(binding)
+            .validate()
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("Devin active route not found"));
+    }
+
+    #[test]
+    fn settings_reject_disabled_active_routes() {
+        let mut binding = DevinModelBinding::new("devin-model", "legacy-hash");
+        binding.routes = vec![route("route-a", "hash-a", false)];
+        binding.active_route_id = Some("route-a".into());
+
+        let error = settings_with_binding(binding)
+            .validate()
+            .unwrap_err()
+            .to_string();
+
+        assert!(error.contains("Devin active route must be enabled"));
+    }
+
+    #[test]
+    fn settings_keep_primary_hash_and_uid_validation() {
+        let empty_hash = settings_with_binding(DevinModelBinding::new("devin-model", " "));
+        assert!(empty_hash
+            .validate()
+            .unwrap_err()
+            .to_string()
+            .contains("must include a cursor-byok model hash"));
+
+        let duplicate_uid = DevinSettings {
+            bindings: vec![
+                DevinModelBinding::new("devin-model", "hash-a"),
+                DevinModelBinding::new("devin-model", "hash-b"),
+            ],
+            ..DevinSettings::default()
+        };
+        assert!(duplicate_uid
+            .validate()
+            .unwrap_err()
+            .to_string()
+            .contains("duplicate Devin model UID"));
+    }
+}

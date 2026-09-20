@@ -325,6 +325,7 @@ fn nested_string_field(fields: &[wire::Field], outer: u32, inner: u32) -> Option
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::devin::{DevinBindingKind, DevinRoute};
 
     fn settings() -> DevinSettings {
         let mut settings = DevinSettings::default();
@@ -335,6 +336,7 @@ mod tests {
                 display_name: "Model A".into(),
                 context_window_tokens: Some(128_000),
                 enabled: true,
+                ..super::super::DevinModelBinding::new("", "")
             },
             super::super::DevinModelBinding {
                 model_uid: "model-disabled".into(),
@@ -342,6 +344,7 @@ mod tests {
                 display_name: "Disabled".into(),
                 context_window_tokens: None,
                 enabled: false,
+                ..super::super::DevinModelBinding::new("", "")
             },
         ];
         settings
@@ -417,5 +420,46 @@ mod tests {
             rewrite_model_configs(&payload, &settings(), "http://local").unwrap(),
             payload
         );
+    }
+
+    #[test]
+    fn catalog_generation_does_not_mutate_binding_route_state() {
+        let mut settings = settings();
+        settings.bindings[0].kind = DevinBindingKind::ContextCompression;
+        settings.bindings[0].routes = vec![
+            DevinRoute {
+                route_id: "secondary".into(),
+                model_hash: "hash-secondary".into(),
+                label: "Secondary".into(),
+                enabled: false,
+            },
+            DevinRoute {
+                route_id: "primary".into(),
+                model_hash: "hash-primary".into(),
+                label: "Primary".into(),
+                enabled: true,
+            },
+        ];
+        settings.bindings[0].active_route_id = Some("primary".into());
+
+        let before = serde_json::to_value(&settings).unwrap();
+        let payload = model_configs_payload(&settings, "http://127.0.0.1:43112").unwrap();
+        rewrite_model_configs(&payload, &settings, "http://127.0.0.1:43112").unwrap();
+        let after = serde_json::to_value(&settings).unwrap();
+
+        assert_eq!(before, after);
+        let binding = &settings.bindings[0];
+        assert_eq!(binding.kind, DevinBindingKind::ContextCompression);
+        assert_eq!(binding.active_route_id.as_deref(), Some("primary"));
+        assert_eq!(
+            binding
+                .routes
+                .iter()
+                .map(|route| (route.route_id.as_str(), route.enabled))
+                .collect::<Vec<_>>(),
+            vec![("secondary", false), ("primary", true)]
+        );
+        assert_eq!(binding.routes[0].label, "Secondary");
+        assert!(!settings.bindings[1].enabled);
     }
 }

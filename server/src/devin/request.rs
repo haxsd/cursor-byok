@@ -118,10 +118,11 @@ pub fn to_invocation(
             request.requested_model
         )));
     }
-    if binding.model_hash != model.model_hash {
+    let model_hash = binding.effective_model_hash();
+    if model_hash != model.model_hash {
         return Err(Error::Config(format!(
             "Devin binding for '{}' points to unknown cursor-byok model hash {}",
-            binding.model_uid, binding.model_hash
+            binding.model_uid, model_hash
         )));
     }
 
@@ -348,9 +349,42 @@ impl EmptyStringExt for String {
 mod tests {
     use super::*;
     use crate::{
-        devin::wire::{serialize_fields, Field},
+        devin::{
+            wire::{serialize_fields, Field},
+            DevinRoute,
+        },
         model::{ModelConfig, ModelType, ProjectedContent, Role, OPENAI_CHAT_ENDPOINT},
     };
+
+    fn model_config(model_hash: &str) -> ModelConfig {
+        ModelConfig {
+            model_hash: model_hash.into(),
+            sort_order: 0,
+            display_name: "Cursor Sonnet".into(),
+            group_name: None,
+            model_type: ModelType::OpenAi,
+            base_url: "http://127.0.0.1:9000".into(),
+            use_full_url: false,
+            api_key: "secret-must-stay-in-store".into(),
+            tooltip_data: String::new(),
+            model_id: "sonnet".into(),
+            reasoning_effort: None,
+            openai_endpoint: OPENAI_CHAT_ENDPOINT.into(),
+            openai_extra_params_enabled: false,
+            openai_extra_params: serde_json::json!({}),
+            custom_headers_enabled: false,
+            custom_headers: serde_json::json!({}),
+            anthropic_extra_params_enabled: false,
+            anthropic_extra_params: serde_json::json!({}),
+            context_window_tokens: Some(128_000),
+            max_completion_tokens: Some(8_192),
+            anthropic_max_tokens: None,
+            anthropic_thinking_effort: None,
+            thinking_budget_tokens: None,
+            created_at_ms: 0,
+            updated_at_ms: 0,
+        }
+    }
 
     fn message(fields: Vec<Field>) -> Field {
         Field::bytes(3, serialize_fields(&fields).unwrap())
@@ -438,34 +472,9 @@ mod tests {
             display_name: "Devin Sonnet".into(),
             context_window_tokens: Some(200_000),
             enabled: true,
+            ..DevinModelBinding::new("", "")
         };
-        let model = ModelConfig {
-            model_hash: "0123abcd".into(),
-            sort_order: 0,
-            display_name: "Cursor Sonnet".into(),
-            group_name: None,
-            model_type: ModelType::OpenAi,
-            base_url: "http://127.0.0.1:9000".into(),
-            use_full_url: false,
-            api_key: "secret-must-stay-in-store".into(),
-            tooltip_data: String::new(),
-            model_id: "sonnet".into(),
-            reasoning_effort: None,
-            openai_endpoint: OPENAI_CHAT_ENDPOINT.into(),
-            openai_extra_params_enabled: false,
-            openai_extra_params: serde_json::json!({}),
-            custom_headers_enabled: false,
-            custom_headers: serde_json::json!({}),
-            anthropic_extra_params_enabled: false,
-            anthropic_extra_params: serde_json::json!({}),
-            context_window_tokens: Some(128_000),
-            max_completion_tokens: Some(8_192),
-            anthropic_max_tokens: None,
-            anthropic_thinking_effort: None,
-            thinking_budget_tokens: None,
-            created_at_ms: 0,
-            updated_at_ms: 0,
-        };
+        let model = model_config("0123abcd");
 
         let invocation = to_invocation(request, &binding, &model).unwrap();
 
@@ -491,5 +500,43 @@ mod tests {
         let first = to_invocation(anonymous_request.clone(), &binding, &model).unwrap();
         let second = to_invocation(anonymous_request, &binding, &model).unwrap();
         assert_ne!(first.call_id, second.call_id);
+    }
+
+    #[test]
+    fn routes_invocation_to_the_enabled_active_route_hash() {
+        let request = parse_chat_request(&fixture()).unwrap();
+        let binding = DevinModelBinding {
+            model_uid: "MODEL_CLAUDE_4_SONNET_BYOK".into(),
+            model_hash: "legacy-hash".into(),
+            enabled: true,
+            routes: vec![
+                DevinRoute {
+                    route_id: "disabled".into(),
+                    model_hash: "disabled-hash".into(),
+                    label: "Disabled".into(),
+                    enabled: false,
+                },
+                DevinRoute {
+                    route_id: "active".into(),
+                    model_hash: "active-hash".into(),
+                    label: "Active".into(),
+                    enabled: true,
+                },
+            ],
+            active_route_id: Some("active".into()),
+            ..DevinModelBinding::new("", "")
+        };
+
+        let invocation =
+            to_invocation(request.clone(), &binding, &model_config("active-hash")).unwrap();
+        assert_eq!(invocation.request.model.model_id, "active-hash");
+        assert_eq!(binding.model_uid, "MODEL_CLAUDE_4_SONNET_BYOK");
+        assert_eq!(binding.model_hash, "legacy-hash");
+        assert!(to_invocation(request.clone(), &binding, &model_config("legacy-hash")).is_err());
+
+        let legacy = DevinModelBinding::new("MODEL_CLAUDE_4_SONNET_BYOK", "legacy-hash");
+        let legacy_invocation =
+            to_invocation(request, &legacy, &model_config("legacy-hash")).unwrap();
+        assert_eq!(legacy_invocation.request.model.model_id, "legacy-hash");
     }
 }
