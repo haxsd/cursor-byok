@@ -9,8 +9,17 @@
 .bindings { display: grid; gap: 12px; }
 .binding { border-top: 1px solid var(--vscode-panel-border); }
 .bindingFooter { padding-top: 10px; }
+.routes { display: grid; gap: 10px; padding: 0 16px 16px; }
+.routesHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.routesHeader > span { font-size: type.$font-size-base; }
+.routeHint { color: var(--vscode-descriptionForeground); font-size: type.$font-size-xs; }
+.route { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; }
+.routeFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.routeFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.routeActions { display: flex; align-items: center; gap: 8px; }
 .remove { padding: 4px; color: var(--vscode-textLink-foreground); background: transparent; border: 0; cursor: pointer; }
 .remove:hover { color: var(--vscode-textLink-activeForeground); }
+.remove:disabled { opacity: .5; cursor: default; }
 .hostActions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 16px 16px; }
 .hostStatus { display: block; margin: 0 16px 16px; color: var(--vscode-descriptionForeground); overflow-wrap: anywhere; }
-@media (max-width: 700px) { .fields, .bindingFields { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .fields, .bindingFields, .routeFields { grid-template-columns: 1fr; } }

@@ -112,12 +112,24 @@ export interface PortSettings {
   service_port: number;
 }
 
+export type DevinBindingKind = "standard" | "context_compression";
+
+export interface DevinRoute {
+  route_id: string;
+  model_hash: string;
+  label: string;
+  enabled: boolean;
+}
+
 export interface DevinModelBinding {
   model_uid: string;
   model_hash: string;
   display_name: string;
   context_window_tokens: number | null;
   enabled: boolean;
+  kind: DevinBindingKind;
+  routes: DevinRoute[];
+  active_route_id: string | null;
 }
 
 export interface DevinSettings {
