@@ -1,16 +1,19 @@
 <div align="center">
 
-# cursor-byok · 个人修改版
+# haxsd byok · Devin 独立产品版
 
 基于 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的个人分支。
 
-[English](./README-EN.md) · [上游仓库](https://github.com/leookun/cursor-byok) · [上游文档](https://docs.leokun.cn)
+[English](./README-EN.md) · [分支隔离规则](./BRANCH_ISOLATION.md) · [上游仓库](https://github.com/leookun/cursor-byok) · [上游文档](https://docs.leokun.cn)
 
 </div>
 
 ![cursor-byok 仪表盘](./images/en-home-1.png)
 
 ## 关于这个仓库
+
+> [!CAUTION]
+> 本仓库的 `main` 与 `feat/devin-router` 是两条相互隔离的产品线，**禁止合并**。`main` 只维护 Cursor BYOK；当前分支只维护 `haxsd byok` 和 Devin 集成。开发、测试、打包或推送前，请先确认当前分支。完整规则见 [`BRANCH_ISOLATION.md`](./BRANCH_ISOLATION.md)。
 
 本仓库是 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的 fork，基线为上游 **v1.0.0**（提交 `3725f27`）。上游是 MIT 许可的开源项目，本分支在上游基础上做了以下几处改动，供个人自用：
 
@@ -19,7 +22,7 @@
 | 移除广告 | 删除桌面端广告位与服务端广告接口，应用不再向广告服务发起请求 |
 | 价值估算改为分时计价 | 首页「价值估算」按 DeepSeek-V4.1-Flash 的高峰 / 低谷单价**逐小时**计算 |
 | 语言精简 | 界面语言只保留简体中文与英文（移除葡萄牙语） |
-| 更新地址 | 自动更新指向本仓库，避免被更新回上游带广告的版本 |
+| 独立产品身份 | 使用 `haxsd byok` 的独立应用标识、数据目录与安装包；自动更新暂时关闭 |
 
 除此之外，项目的功能、代码结构与上游保持一致，便于后续同步上游改动。
 
@@ -142,7 +145,7 @@ make build-desktop
 
 ## 发布安装包
 
-仓库已配置好 GitHub Actions，**打标签即自动构建并发布 Windows 安装包**：
+此分支的 GitHub Actions 只服务于 `haxsd byok`，**必须从 `feat/devin-router` 打专用标签**：
 
 ```bash
 # 1. 三处版本号改成同一个值
@@ -150,24 +153,22 @@ make build-desktop
 #    apps/desktop/src-tauri/Cargo.toml
 #    apps/desktop/src-tauri/tauri.conf.json
 
-# 2. 提交推送后打标签（标签名必须是 v<版本号>）
-git tag v1.0.1
-git push origin v1.0.1
+# 2. 提交推送后打 Devin 产品专用标签
+git tag haxsd-byok-v1.0.1
+git push origin haxsd-byok-v1.0.1
 ```
 
 构建完成后会出现在 Releases 页面，包含：
 
 | 产物 | 说明 |
 | --- | --- |
-| `Cursor BYOK_<版本>_x64-setup.exe` | NSIS 安装包，双击安装 |
-| `cursor-byok-<版本>-windows-amd64.zip` | 免安装便携版，解压即用（内含单个 `cursor-byok-desktop.exe`） |
-| `latest.json` / `portable-latest.json` | 应用内「检查更新」用的清单 |
+| `haxsd byok_<版本>_x64-setup.exe` | NSIS 安装包，双击安装 |
 
 想先验证构建能否通过而不发布，可在 Actions 页面手动触发 `Release desktop app`，它只产出 Actions 产物。
 
 发布流程只构建 Windows。需要 macOS / Linux 产物时，在 `.github/workflows/release.yml` 的 `publish` 任务里补回对应的 `matrix` 条目与平台专属步骤即可（可参考上游的 `release.yml`）。
 
-签名说明：更新包用本仓库自己的密钥签名，私钥保存在仓库的 Actions 密钥中，公钥写在 `tauri.conf.json` 的 `plugins.updater.pubkey`。**私钥与密码务必另行备份**，丢失后无法再为更新包签名（`.tauri/` 目录下有说明）。
+更新说明：当前版本不生成更新清单，也不会连接 Cursor BYOK 的更新地址。以后若启用更新，必须先建立独立的 `haxsd byok` 发布通道。
 
 ## 与原版保持同步
 

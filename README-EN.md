@@ -1,16 +1,19 @@
 <div align="center">
 
-# cursor-byok · personal fork
+# haxsd byok · Devin product fork
 
 A personal fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok).
 
-[中文说明](./README.md) · [Upstream repository](https://github.com/leookun/cursor-byok) · [Upstream docs](https://docs.leokun.cn)
+[中文说明](./README.md) · [Branch isolation rules](./BRANCH_ISOLATION.md) · [Upstream repository](https://github.com/leookun/cursor-byok) · [Upstream docs](https://docs.leokun.cn)
 
 </div>
 
 ![cursor-byok dashboard](./images/en-home-1.png)
 
 ## About this repository
+
+> [!CAUTION]
+> `main` and `feat/devin-router` are **separate product lines and must never be merged**. `main` is the Cursor BYOK line; this branch is the `haxsd byok` Devin line. Verify the current branch before development, testing, packaging, or pushing. See [`BRANCH_ISOLATION.md`](./BRANCH_ISOLATION.md) for the full rules.
 
 This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok), based on upstream **v1.0.0** (commit `3725f27`). Upstream is an MIT-licensed open-source project. This fork makes the following changes for personal use:
 
@@ -19,7 +22,7 @@ This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cu
 | Ads removed | The desktop ad slots and the server-side ad endpoints are gone; the app no longer talks to the ad service |
 | Value estimate uses time-of-day pricing | The home page "value estimate" is priced hour by hour with DeepSeek-V4.1-Flash peak / off-peak rates |
 | Languages trimmed | Only Simplified Chinese and English remain (Portuguese removed) |
-| Update endpoint | Auto-update points at this fork so the app is not updated back into an ad-carrying upstream build |
+| Independent product identity | Uses the `haxsd byok` app identifier, data directory and installer; automatic updates are temporarily disabled |
 
 Everything else keeps upstream's behavior and code structure, which makes future upstream syncs straightforward.
 
@@ -107,7 +110,7 @@ Verification performed on this fork:
 
 ## Publishing installers
 
-This repository is wired to GitHub Actions: **pushing a tag builds and publishes the Windows installer automatically**.
+This branch's GitHub Actions workflow is only for `haxsd byok`: **create the dedicated tag from `feat/devin-router`**.
 
 ```bash
 # 1. set the same version in all three files
@@ -115,24 +118,22 @@ This repository is wired to GitHub Actions: **pushing a tag builds and publishes
 #    apps/desktop/src-tauri/Cargo.toml
 #    apps/desktop/src-tauri/tauri.conf.json
 
-# 2. commit, push, then tag (the tag must be v<version>)
-git tag v1.0.1
-git push origin v1.0.1
+# 2. commit, push, then create the Devin product tag
+git tag haxsd-byok-v1.0.1
+git push origin haxsd-byok-v1.0.1
 ```
 
 The release then appears on the Releases page with:
 
 | Asset | Description |
 | --- | --- |
-| `Cursor BYOK_<version>_x64-setup.exe` | NSIS installer, double-click to install |
-| `cursor-byok-<version>-windows-amd64.zip` | Portable build, unzip and run (a single `cursor-byok-desktop.exe`) |
-| `latest.json` / `portable-latest.json` | Manifests used by the in-app update check |
+| `haxsd byok_<version>_x64-setup.exe` | NSIS installer, double-click to install |
 
 To validate a build without publishing, run the `Release desktop app` workflow manually from the Actions tab; it only produces workflow artifacts.
 
 The workflow builds Windows only. To add macOS / Linux, restore the corresponding `matrix` entries and platform steps in `.github/workflows/release.yml` (upstream's `release.yml` is the reference).
 
-Signing: update packages are signed with this fork's own key. The private key lives in the repository's Actions secrets and the public key in `plugins.updater.pubkey` in `tauri.conf.json`. **Back up the private key and its password** — without them no further update package can be signed (see the notes under `.tauri/`).
+Updates: this build does not generate update manifests and never contacts the Cursor BYOK update channel. If updates are enabled later, create a dedicated `haxsd byok` release channel first.
 
 ## Syncing with upstream
 

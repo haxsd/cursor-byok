@@ -75,7 +75,7 @@ export type AppSnapshot = {
 };
 
 const savedTheme = (): ThemeId => {
-  const saved = localStorage.getItem("cursor-byok.theme");
+  const saved = localStorage.getItem("haxsd-byok.theme");
   return isThemeId(saved) ? saved : "default-dark";
 };
 
@@ -326,7 +326,7 @@ export const appStore = {
     }
   },
   selectTheme(theme: ThemeId) {
-    localStorage.setItem("cursor-byok.theme", theme);
+    localStorage.setItem("haxsd-byok.theme", theme);
     applyTheme(theme);
     update({ theme });
   },

@@ -105,7 +105,7 @@ impl CursorHarness {
     }
 
     pub async fn cleanup_stale_settings(&self) -> Result<()> {
-        if std::env::var_os("CURSOR_BYOK_DATA_DIR").is_some() {
+        if std::env::var_os("HAXSD_BYOK_DATA_DIR").is_some() {
             return Ok(());
         }
         settings::clear_stale_managed_settings()
@@ -224,7 +224,7 @@ impl CursorHarness {
     }
 
     pub async fn disable(&self) -> Result<()> {
-        if std::env::var_os("CURSOR_BYOK_DATA_DIR").is_none() {
+        if std::env::var_os("HAXSD_BYOK_DATA_DIR").is_none() {
             settings::clear_proxy_settings()?;
         }
         self.inner.proxy.lock().await.stop().await;
@@ -233,7 +233,7 @@ impl CursorHarness {
 }
 
 fn reject_isolated_integration() -> Result<()> {
-    if std::env::var_os("CURSOR_BYOK_DATA_DIR").is_some() {
+    if std::env::var_os("HAXSD_BYOK_DATA_DIR").is_some() {
         return Err(Error::Config(
             "Cursor integration is disabled with an isolated data directory".into(),
         ));

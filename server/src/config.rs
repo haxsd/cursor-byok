@@ -6,15 +6,17 @@ use std::os::unix::fs::PermissionsExt;
 
 use crate::{Error, Result};
 
-const DATA_DIR_NAME: &str = ".cursor-byok-v3";
-const DATABASE_FILE_NAME: &str = "cursor-byok.db";
+const DATA_DIR_NAME: &str = ".haxsd-byok-devin-v3";
+const DATABASE_FILE_NAME: &str = "haxsd-byok.db";
+const DATA_DIR_ENV_NAME: &str = "HAXSD_BYOK_DATA_DIR";
+const DATABASE_URL_ENV_NAME: &str = "HAXSD_BYOK_DATABASE_URL";
 const V0049_DATA_DIR_NAME: &str = ".cursor-local-assistant-v2";
 const V0049_CONFIG_FILE_NAME: &str = "config.yaml";
 const DEFAULT_PROVIDER_REQUEST_TIMEOUT: Duration = Duration::from_secs(60 * 60);
 const DEFAULT_PROVIDER_STREAM_IDLE_TIMEOUT: Duration = Duration::from_secs(30 * 60);
 
 pub fn managed_data_dir() -> Result<PathBuf> {
-    if let Some(directory) = env::var_os("CURSOR_BYOK_DATA_DIR") {
+    if let Some(directory) = env::var_os(DATA_DIR_ENV_NAME) {
         let data_dir = isolated_data_dir(PathBuf::from(directory))?;
         fs::create_dir_all(&data_dir)?;
         return Ok(data_dir);
@@ -31,7 +33,7 @@ pub fn managed_data_dir() -> Result<PathBuf> {
 fn isolated_data_dir(directory: PathBuf) -> Result<PathBuf> {
     if !directory.is_absolute() {
         return Err(Error::Config(
-            "CURSOR_BYOK_DATA_DIR must be an absolute path".into(),
+            format!("{DATA_DIR_ENV_NAME} must be an absolute path").into(),
         ));
     }
     Ok(directory)
@@ -144,11 +146,11 @@ impl Config {
 }
 
 fn database_url_from_env() -> Result<String> {
-    match env::var("CURSOR_DATABASE_URL") {
+    match env::var(DATABASE_URL_ENV_NAME) {
         Ok(database_url) => Ok(database_url),
         Err(env::VarError::NotPresent) => default_database_url(),
         Err(error) => Err(Error::Config(format!(
-            "invalid CURSOR_DATABASE_URL: {error}"
+            "invalid {DATABASE_URL_ENV_NAME}: {error}"
         ))),
     }
 }
@@ -190,5 +192,18 @@ mod tests {
             DEFAULT_PROVIDER_REQUEST_TIMEOUT,
             Duration::from_secs(60 * 60)
         );
+    }
+
+    #[test]
+    fn haxsd_byok_uses_an_isolated_storage_identity() {
+        assert_eq!(DATA_DIR_NAME, ".haxsd-byok-devin-v3");
+        assert_eq!(DATABASE_FILE_NAME, "haxsd-byok.db");
+        assert_eq!(DATA_DIR_ENV_NAME, "HAXSD_BYOK_DATA_DIR");
+        assert_eq!(DATABASE_URL_ENV_NAME, "HAXSD_BYOK_DATABASE_URL");
+
+        let temp = tempfile::tempdir().unwrap();
+        assert!(database_url_for_dir(temp.path())
+            .unwrap()
+            .ends_with("haxsd-byok.db"));
     }
 }
