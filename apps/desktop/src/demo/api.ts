@@ -99,6 +99,9 @@ let devinSettings: DevinSettings = {
     display_name: models[0].display_name,
     context_window_tokens: models[0].context_window_tokens,
     enabled: true,
+    kind: "standard",
+    routes: [],
+    active_route_id: null,
   }],
 };
 

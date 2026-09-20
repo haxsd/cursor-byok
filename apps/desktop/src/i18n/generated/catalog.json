@@ -74,7 +74,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 72,
+          "line": 162,
           "column": 57
         }
       ]
@@ -183,6 +183,18 @@
           "file": "features/plugins/PluginManagementPage.tsx",
           "line": 314,
           "column": 21
+        }
+      ]
+    },
+    "07583337d905daaa": {
+      "source": "路由名称",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 203,
+          "column": 37
         }
       ]
     },
@@ -303,7 +315,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 60,
+          "line": 146,
           "column": 15
         }
       ]
@@ -315,7 +327,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 76,
+          "line": 166,
           "column": 44
         }
       ]
@@ -417,7 +429,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 84,
+          "line": 174,
           "column": 24
         }
       ]
@@ -567,7 +579,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 104,
+          "line": 222,
           "column": 24
         }
       ]
@@ -697,20 +709,8 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 70,
+          "line": 160,
           "column": 24
-        }
-      ]
-    },
-    "19658d9fa9aa8de4": {
-      "source": "安装中…",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 158,
-          "column": 27
         }
       ]
     },
@@ -816,7 +816,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 76,
+          "line": 166,
           "column": 27
         }
       ]
@@ -914,6 +914,18 @@
           "file": "features/models/LegacyModelImport.tsx",
           "line": 65,
           "column": 20
+        }
+      ]
+    },
+    "1db23d75fb436af4": {
+      "source": "登录系统后自动启动 haxsd byok。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/settings/AppLifecycleSettingsCard.tsx",
+          "line": 91,
+          "column": 17
         }
       ]
     },
@@ -1023,7 +1035,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 77,
+          "line": 167,
           "column": 132
         }
       ]
@@ -1037,20 +1049,6 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 308,
           "column": 24
-        }
-      ]
-    },
-    "23e49479e15e6770": {
-      "source": "发现新版本 {version}",
-      "kind": "template",
-      "placeholders": [
-        "version"
-      ],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 96,
-          "column": 29
         }
       ]
     },
@@ -1087,7 +1085,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 80,
+          "line": 170,
           "column": 27
         }
       ]
@@ -1101,20 +1099,6 @@
           "file": "features/models/CursorModelEditor.tsx",
           "line": 159,
           "column": 42
-        }
-      ]
-    },
-    "29585d7193539200": {
-      "source": "当前版本 {version}",
-      "kind": "template",
-      "placeholders": [
-        "version"
-      ],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 154,
-          "column": 13
         }
       ]
     },
@@ -1248,7 +1232,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 119,
+          "line": 116,
           "column": 20
         }
       ]
@@ -1365,7 +1349,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 118,
+          "line": 115,
           "column": 14
         }
       ]
@@ -1435,18 +1419,6 @@
           "file": "features/plugins/PluginResourcePanels.tsx",
           "line": 355,
           "column": 56
-        }
-      ]
-    },
-    "304ddada65d234d3": {
-      "source": "还没有映射。添加一个 Cursor BYOK 模型后，Devin 才能使用它。",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 86,
-          "column": 72
         }
       ]
     },
@@ -1713,6 +1685,18 @@
         }
       ]
     },
+    "3ab90314a30f7be1": {
+      "source": "上下文压缩只是标记；绑定仍然对应一个 Devin 模型 UID。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 190,
+          "column": 50
+        }
+      ]
+    },
     "3b67824289b5fa1e": {
       "source": "已隐藏 Dock 栏图标",
       "kind": "text",
@@ -1720,7 +1704,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 85,
+          "line": 79,
           "column": 45
         }
       ]
@@ -1955,7 +1939,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 128,
+          "line": 103,
           "column": 17
         }
       ]
@@ -1998,20 +1982,6 @@
         }
       ]
     },
-    "492042ed1fdc29ed": {
-      "source": "版本 {version} 可以安装",
-      "kind": "template",
-      "placeholders": [
-        "version"
-      ],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 153,
-          "column": 13
-        }
-      ]
-    },
     "4927a53bcc886afb": {
       "source": "加载中…",
       "kind": "text",
@@ -2019,7 +1989,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 69,
+          "line": 159,
           "column": 62
         },
         {
@@ -2155,7 +2125,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 87,
+          "line": 85,
           "column": 67
         }
       ]
@@ -2221,6 +2191,30 @@
         }
       ]
     },
+    "5076bd13c0b3d7c5": {
+      "source": "设为当前路由",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 208,
+          "column": 281
+        }
+      ]
+    },
+    "51036171601d9f3f": {
+      "source": "还没有映射。添加一个 haxsd byok 模型后，Devin 才能使用它。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 176,
+          "column": 72
+        }
+      ]
+    },
     "51d04bc3d286f018": {
       "source": "近1自然日",
       "kind": "text",
@@ -2271,7 +2265,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 107,
+          "line": 105,
           "column": 51
         }
       ]
@@ -2336,23 +2330,6 @@
         }
       ]
     },
-    "553ecf7ce56976f9": {
-      "source": "Cursor BYOK 模型",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 90,
-          "column": 31
-        },
-        {
-          "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 90,
-          "column": 121
-        }
-      ]
-    },
     "56432ba297009bdc": {
       "source": "请先初始化 CA",
       "kind": "text",
@@ -2406,8 +2383,8 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 95,
-          "column": 31
+          "line": 189,
+          "column": 33
         }
       ]
     },
@@ -2548,17 +2525,32 @@
         }
       ]
     },
-    "5d59857bf039cac9": {
-      "source": "Cursor 助手 v{version}",
-      "kind": "template",
-      "placeholders": [
-        "version"
-      ],
+    "5e6f7189b863852b": {
+      "source": "路由模型",
+      "kind": "text",
+      "placeholders": [],
       "refs": [
         {
-          "file": "shell/AppHeader.tsx",
-          "line": 34,
-          "column": 18
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 202,
+          "column": 37
+        },
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 202,
+          "column": 115
+        }
+      ]
+    },
+    "5f78e17a41c8fdbf": {
+      "source": "添加候选路由",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 197,
+          "column": 117
         }
       ]
     },
@@ -2569,7 +2561,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 59,
+          "line": 53,
           "column": 40
         }
       ]
@@ -2636,8 +2628,13 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 99,
-          "column": 99
+          "line": 209,
+          "column": 156
+        },
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 216,
+          "column": 101
         }
       ]
     },
@@ -2753,20 +2750,8 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 566,
+          "line": 609,
           "column": 43
-        }
-      ]
-    },
-    "651f274470153a05": {
-      "source": "软件更新",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 151,
-          "column": 18
         }
       ]
     },
@@ -2851,12 +2836,12 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 139,
+          "line": 114,
           "column": 18
         },
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 145,
+          "line": 120,
           "column": 16
         }
       ]
@@ -2870,6 +2855,18 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 96,
           "column": 55
+        }
+      ]
+    },
+    "685c3ab561375cd3": {
+      "source": "当前路由",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 208,
+          "column": 269
         }
       ]
     },
@@ -2892,7 +2889,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 53,
+          "line": 51,
           "column": 47
         }
       ]
@@ -2948,6 +2945,18 @@
         }
       ]
     },
+    "6bea77acefb364ac": {
+      "source": "标准",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 156,
+          "column": 53
+        }
+      ]
+    },
     "6d1876364ac6457d": {
       "source": "代理方式",
       "kind": "text",
@@ -2977,20 +2986,8 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 98,
-          "column": 54
-        }
-      ]
-    },
-    "6e86570183c3cdd0": {
-      "source": "当前已是最新版本",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 96,
-          "column": 78
+          "line": 215,
+          "column": 56
         }
       ]
     },
@@ -3092,7 +3089,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 561,
+          "line": 604,
           "column": 43
         }
       ]
@@ -3172,20 +3169,6 @@
         }
       ]
     },
-    "7d9f043f8f7ab45c": {
-      "source": "发现新版本 {version}，可在设置中安装",
-      "kind": "template",
-      "placeholders": [
-        "version"
-      ],
-      "refs": [
-        {
-          "file": "App.tsx",
-          "line": 64,
-          "column": 21
-        }
-      ]
-    },
     "7e0891860c9e6374": {
       "source": "TAB 服务地址不能为空",
       "kind": "text",
@@ -3219,18 +3202,6 @@
           "file": "features/models/CursorGates.tsx",
           "line": 22,
           "column": 121
-        }
-      ]
-    },
-    "7f68ebad19ba6bcd": {
-      "source": "检查更新",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 162,
-          "column": 37
         }
       ]
     },
@@ -3268,7 +3239,7 @@
       "refs": [
         {
           "file": "shared/api.ts",
-          "line": 503,
+          "line": 543,
           "column": 21
         }
       ]
@@ -3346,12 +3317,12 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 115,
+          "line": 90,
           "column": 18
         },
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 121,
+          "line": 96,
           "column": 16
         }
       ]
@@ -3404,7 +3375,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 72,
+          "line": 66,
           "column": 25
         }
       ]
@@ -3525,7 +3496,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 48,
+          "line": 46,
           "column": 29
         }
       ]
@@ -3642,7 +3613,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 46,
+          "line": 44,
           "column": 39
         }
       ]
@@ -3671,20 +3642,6 @@
         }
       ]
     },
-    "92e26b27d5ea8f0e": {
-      "source": "检查更新失败：{error}",
-      "kind": "template",
-      "placeholders": [
-        "error"
-      ],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 99,
-          "column": 15
-        }
-      ]
-    },
     "9305c0e13642cab4": {
       "source": "未接管",
       "kind": "text",
@@ -3697,7 +3654,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 107,
+          "line": 105,
           "column": 62
         }
       ]
@@ -3817,8 +3774,20 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 84,
+          "line": 174,
           "column": 112
+        }
+      ]
+    },
+    "994d57382c62ada4": {
+      "source": "候选路由",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 196,
+          "column": 24
         }
       ]
     },
@@ -3853,7 +3822,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 124,
+          "line": 121,
           "column": 11
         }
       ]
@@ -3865,7 +3834,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 81,
+          "line": 171,
           "column": 27
         }
       ]
@@ -3909,6 +3878,18 @@
         }
       ]
     },
+    "9ccd0ad6fd2e79e7": {
+      "source": "网关固定监听 127.0.0.1，并限制单次请求体为 24 MiB。Devin 负责执行工具，haxsd byok 负责模型调用和事件转发。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 223,
+          "column": 35
+        }
+      ]
+    },
     "9db205c6055bacc4": {
       "source": "插件运行时初始化失败",
       "kind": "text",
@@ -3933,7 +3914,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 72,
+          "line": 66,
           "column": 40
         }
       ]
@@ -4093,6 +4074,23 @@
         }
       ]
     },
+    "a19395b9e938233c": {
+      "source": "绑定类型",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 190,
+          "column": 33
+        },
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 191,
+          "column": 79
+        }
+      ]
+    },
     "a1a42cd9b16e2162": {
       "source": "应用设置",
       "kind": "text",
@@ -4100,7 +4098,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 112,
+          "line": 87,
           "column": 29
         }
       ]
@@ -4112,12 +4110,12 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 127,
+          "line": 102,
           "column": 18
         },
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 133,
+          "line": 108,
           "column": 16
         }
       ]
@@ -4134,6 +4132,18 @@
         }
       ]
     },
+    "a267f1bace7f743d": {
+      "source": "启用此路由",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 206,
+          "column": 58
+        }
+      ]
+    },
     "a3030bf8f16dc63c": {
       "source": "保存",
       "kind": "text",
@@ -4141,7 +4151,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 70,
+          "line": 160,
           "column": 155
         },
         {
@@ -4262,7 +4272,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 120,
+          "line": 117,
           "column": 21
         }
       ]
@@ -4378,20 +4388,6 @@
         }
       ]
     },
-    "a80b53f8848e6d27": {
-      "source": "安装更新失败：{error}",
-      "kind": "template",
-      "placeholders": [
-        "error"
-      ],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 108,
-          "column": 15
-        }
-      ]
-    },
     "a8e812a13db72b2b": {
       "source": "全时段",
       "kind": "text",
@@ -4431,8 +4427,8 @@
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 94,
-          "column": 31
+          "line": 188,
+          "column": 33
         },
         {
           "file": "features/models/CursorModelEditor.tsx",
@@ -4487,7 +4483,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 59,
+          "line": 53,
           "column": 25
         }
       ]
@@ -4501,18 +4497,6 @@
           "file": "features/models/CursorModelEditor.tsx",
           "line": 161,
           "column": 118
-        }
-      ]
-    },
-    "ac69f68b7010ec79": {
-      "source": "下载并安装",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 158,
-          "column": 39
         }
       ]
     },
@@ -4535,7 +4519,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 140,
+          "line": 115,
           "column": 17
         }
       ]
@@ -4562,12 +4546,12 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 130,
+          "line": 127,
           "column": 64
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 130,
+          "line": 127,
           "column": 125
         }
       ]
@@ -4740,7 +4724,7 @@
       "refs": [
         {
           "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 85,
+          "line": 79,
           "column": 25
         }
       ]
@@ -4955,6 +4939,18 @@
         }
       ]
     },
+    "bddc29ad011a93a6": {
+      "source": "上下文压缩",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 157,
+          "column": 64
+        }
+      ]
+    },
     "be961dc60ab610da": {
       "source": "修改后应用于该分组下的全部模型；留空保持各模型现有配置不变。",
       "kind": "text",
@@ -5072,18 +5068,6 @@
         }
       ]
     },
-    "c41ca50349b63cf7": {
-      "source": "网关固定监听 127.0.0.1，并限制单次请求体为 24 MiB。Devin 负责执行工具，Cursor BYOK 只负责模型调用和事件转发。",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 105,
-          "column": 35
-        }
-      ]
-    },
     "c42c07f7d2c78bf2": {
       "source": "API 端口",
       "kind": "text",
@@ -5091,7 +5075,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 79,
+          "line": 169,
           "column": 27
         }
       ]
@@ -5378,8 +5362,8 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 89,
-          "column": 31
+          "line": 183,
+          "column": 33
         }
       ]
     },
@@ -5409,18 +5393,6 @@
           "file": "features/plugins/PluginManagementPage.tsx",
           "line": 188,
           "column": 20
-        }
-      ]
-    },
-    "d34335433395cd3a": {
-      "source": "登录系统后自动启动 Cursor BYOK。",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 116,
-          "column": 17
         }
       ]
     },
@@ -5601,7 +5573,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 73,
+          "line": 71,
           "column": 54
         }
       ]
@@ -5777,7 +5749,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 51,
+          "line": 49,
           "column": 29
         }
       ]
@@ -5942,7 +5914,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 47,
+          "line": 45,
           "column": 44
         }
       ]
@@ -6108,12 +6080,12 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 72,
+          "line": 162,
           "column": 23
         },
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 73,
+          "line": 163,
           "column": 51
         }
       ]
@@ -6283,6 +6255,23 @@
         }
       ]
     },
+    "f13fba1dc134ef06": {
+      "source": "haxsd byok 模型",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 184,
+          "column": 33
+        },
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 184,
+          "column": 122
+        }
+      ]
+    },
     "f4694c46b1e19602": {
       "source": "最终请求类型",
       "kind": "text",
@@ -6382,6 +6371,18 @@
         }
       ]
     },
+    "f71bf41ca7416e36": {
+      "source": "尚未配置候选路由，当前直接使用上面的主模型。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/devin/DevinSettingsPage.tsx",
+          "line": 199,
+          "column": 67
+        }
+      ]
+    },
     "f78265089144369a": {
       "source": "插件配置",
       "kind": "text",
@@ -6394,7 +6395,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 52,
+          "line": 50,
           "column": 46
         }
       ]
@@ -6537,11 +6538,6 @@
           "file": "features/plugins/PluginManagementPage.tsx",
           "line": 112,
           "column": 19
-        },
-        {
-          "file": "features/settings/AppLifecycleSettingsCard.tsx",
-          "line": 162,
-          "column": 25
         }
       ]
     },
@@ -6697,7 +6693,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 54,
+          "line": 52,
           "column": 48
         }
       ]
@@ -6721,7 +6717,7 @@
       "refs": [
         {
           "file": "features/devin/DevinSettingsPage.tsx",
-          "line": 70,
+          "line": 160,
           "column": 143
         },
         {
