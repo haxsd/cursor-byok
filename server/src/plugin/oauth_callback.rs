@@ -262,8 +262,8 @@ fn render_page(
     });
     let close = localized(
         locale,
-        "您现在可以关闭本页面并返回 Cursor BYOK。",
-        "You can now close this page and return to Cursor BYOK.",
+        "您现在可以关闭本页面并返回 haxsd byok。",
+        "You can now close this page and return to haxsd byok.",
     );
     format!(
         r#"<!doctype html>

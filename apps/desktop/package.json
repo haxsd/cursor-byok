@@ -1,7 +1,7 @@
 {
-  "name": "cursor-byok-desktop",
+  "name": "haxsd-byok-desktop",
   "version": "1.0.1",
-  "description": "Cursor BYOK desktop management application",
+  "description": "haxsd byok desktop management application",
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -28,7 +28,6 @@
     "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
     "@tauri-apps/plugin-opener": "^2.5.4",
     "@tauri-apps/plugin-process": "^2.3.1",
-    "@tauri-apps/plugin-updater": "^2.10.1",
     "echarts": "^6.1.0",
     "keepalive-for-react": "^5.0.11",
     "keepalive-for-react-router": "^5.0.7",

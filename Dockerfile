@@ -31,19 +31,19 @@ FROM debian:bookworm-slim
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends ca-certificates curl && \
     rm -rf /var/lib/apt/lists/* && \
-    useradd --system --uid 10001 --home-dir /nonexistent --shell /usr/sbin/nologin cursor-byok && \
+    useradd --system --uid 10001 --home-dir /nonexistent --shell /usr/sbin/nologin haxsd-byok && \
     mkdir -p /app/console /data && \
-    chown cursor-byok:cursor-byok /data
+    chown haxsd-byok:haxsd-byok /data
 
 COPY --from=server /tmp/cursor-server /usr/local/bin/cursor-server
 COPY --from=web /src/apps/desktop/dist/ /app/console/
 
 ENV CURSOR_LISTEN_ADDR=0.0.0.0:3000 \
-    CURSOR_DATABASE_URL=sqlite:///data/cursor-server.db \
+    HAXSD_BYOK_DATABASE_URL=sqlite:///data/haxsd-byok.db \
     CURSOR_CONSOLE_DIR=/app/console \
     RUST_LOG=cursor_server=info
 
-USER cursor-byok
+USER haxsd-byok
 EXPOSE 3000
 VOLUME ["/data"]
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 \
