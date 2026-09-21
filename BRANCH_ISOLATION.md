@@ -24,11 +24,19 @@ The Devin product currently has automatic updates disabled. A future update
 channel must be created specifically for `haxsd byok`; it must never point to
 the Cursor BYOK `main` release manifest.
 
-## Local worktrees
+## Local checkouts
 
-- Cursor worktree: `D:\project\cursor-byok-storage`
-- Devin worktree: `D:\project\cursor-byok-devin-router`
+The two product lines live in two separate clones of this repository, not in one
+clone with two worktrees:
 
-If a task concerns Devin, work only in the Devin worktree and push only
+| Product | Checkout | Branch | Remote |
+| --- | --- | --- | --- |
+| `haxsd byok` (Devin) | `D:\cursor-byok\byok-dev\cursor-byok-devin-router` | `feat/devin-router` | `haxsd/cursor-byok` |
+| Cursor BYOK | `D:\cursor-byok\byok-dev\cursor-byok-upstream` | `main` | `leookun/cursor-byok` |
+
+The Cursor checkout tracks the upstream repository itself, so it must not receive
+Devin commits and must not push product changes back to upstream.
+
+If a task concerns Devin, work only in the Devin checkout and push only
 `feat/devin-router`. If a task concerns the Cursor product, work only in the
-Cursor worktree and keep the Devin branch untouched.
+Cursor checkout and keep the Devin branch untouched.

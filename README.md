@@ -1,10 +1,10 @@
 <div align="center">
 
-# haxsd byok · Devin 独立产品版
+# haxsd byok
 
-基于 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的个人分支。
+基于 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的个人分支，独立产品名为 `haxsd byok`，并额外提供一个可选的本机 Devin 兼容网关。
 
-[English](./README-EN.md) · [分支隔离规则](./BRANCH_ISOLATION.md) · [上游仓库](https://github.com/leookun/cursor-byok) · [上游文档](https://docs.leokun.cn)
+[English](./README-EN.md) · [分支隔离规则](./BRANCH_ISOLATION.md) · [Devin 集成说明](./docs/devin-integration.md) · [故障排查](./docs/troubleshooting.md) · [上游仓库](https://github.com/leookun/cursor-byok) · [上游文档](https://docs.leokun.cn)
 
 </div>
 
@@ -14,6 +14,8 @@
 
 > [!CAUTION]
 > 本仓库的 `main` 与 `feat/devin-router` 是两条相互隔离的产品线，**禁止合并**。`main` 只维护 Cursor BYOK；当前分支只维护 `haxsd byok` 和 Devin 集成。开发、测试、打包或推送前，请先确认当前分支。完整规则见 [`BRANCH_ISOLATION.md`](./BRANCH_ISOLATION.md)。
+>
+> 两个产品线在本地是**两个独立克隆**：Devin 线在 `D:\cursor-byok\byok-dev\cursor-byok-devin-router`，Cursor 线在 `D:\cursor-byok\byok-dev\cursor-byok-upstream`。
 
 本仓库是 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的 fork，基线为上游 **v1.0.0**（提交 `3725f27`）。上游是 MIT 许可的开源项目，本分支在上游基础上做了以下几处改动，供个人自用：
 
@@ -23,6 +25,7 @@
 | 价值估算改为分时计价 | 首页「价值估算」按 DeepSeek-V4.1-Flash 的高峰 / 低谷单价**逐小时**计算 |
 | 语言精简 | 界面语言只保留简体中文与英文（移除葡萄牙语） |
 | 独立产品身份 | 使用 `haxsd byok` 的独立应用标识、数据目录与安装包；自动更新暂时关闭 |
+| Devin 兼容网关 | 额外提供默认关闭的本机 Devin 网关，把 Devin 的模型请求接到已有的模型通道上 |
 
 除此之外，项目的功能、代码结构与上游保持一致，便于后续同步上游改动。
 
@@ -109,6 +112,37 @@ npm --prefix apps/desktop run i18n:scan
 > [!IMPORTANT]
 > 本仓库保留了上游的 Tauri 更新公钥。若要正式发布带自动更新的 Release，需要自行生成签名密钥并把公钥填回 `apps/desktop/src-tauri/tauri.conf.json` 的 `plugins.updater.pubkey`，否则客户端会因签名校验失败而不更新（不会报错，也不会安装任何东西）。
 
+### 5. Devin 兼容网关
+
+默认**关闭**，关闭时不监听任何端口，Cursor 侧行为完全不变。开启后在本机回环地址上多起三个监听：
+
+| 监听 | 默认端口 | 作用 |
+| --- | --- | --- |
+| API / 目录 | `43110` | Devin 模型目录与 `AssignModel` |
+| 推理 | `43111` | Connect 协议的流式模型请求 |
+| 本机 API | `43112` | 本机管理接口 |
+
+一次请求的走向：
+
+```text
+Devin 客户端
+    │ Connect 帧（protobuf 字段 + gzip）
+    ▼
+Devin 网关（默认关闭，仅 127.0.0.1，24 MiB 上限）
+    │ 按 Devin 模型 UID 查绑定 → 选中路由的模型哈希
+    ▼
+模型通道 / ProviderRouter（与 Cursor 共用，密钥仍只在模型记录里）
+    │ 流式事件
+    ▼
+转回 Connect 帧（文本、thinking、工具调用、用量、结束原因）
+```
+
+绑定与路由：每个绑定把一个 Devin 模型 UID 映射到一个已有模型哈希；可选多个候选路由（`routes` + `active_route_id`），切换是手动动作，不会因为保存或刷新目录而改动。标记为 `context_compression` 的绑定是单行绑定，用于上下文压缩，不允许配候选路由。旧版本的设置 JSON 不需要迁移：没有路由字段时继续用原来的 `model_hash`。
+
+明确**不做**的部分：不做官方 Devin 直连路由、不做上游目录拉取、provider 失败后不会自动切到另一个候选路由。这三项都需要真实的 Devin 抓包证据，见 [`docs/devin-integration.md`](./docs/devin-integration.md)。
+
+宿主补丁是显式动作：需要用户自己给出 `extension.js` 的绝对路径，校验四个锚点后才写入，写入前生成带 SHA-256 的备份；宿主文件被改过或备份对不上时，「恢复原文件」会拒绝执行。
+
 ## 构建与验证
 
 依赖：Node.js 22、Rust stable、Tauri 的系统依赖（Windows 下为 WebView2 与 MSVC 工具链）。
@@ -133,6 +167,21 @@ make build-desktop
 - 逐小时计价与独立复算脚本对账，四项费用完全一致；
 - 分桶用量之和与服务端汇总数据相等，不存在漏算；
 - 币种跟随语言的映射用真实模块跑过 14 项断言（中/英 × 币种 × 价格表 × 金额格式化）全部通过。
+
+2026-09-21 在 rustc 1.98.1 上重跑的当前状态：
+
+- `cargo fmt --all -- --check` → 通过；
+- `cargo clippy --workspace --all-targets -- -D warnings` → 通过；
+- `cargo test --workspace --exclude haxsd-byok-desktop` → 通过，各套件 0 失败；
+- `npm --prefix apps/desktop run check` → 通过（`vite build` 成功，仅有既有的 chunk 体积提示）；
+- Devin 网关按 [docs/devin-integration.md](./docs/devin-integration.md) 的表格逐项端到端验证通过。
+
+> [!WARNING]
+> `haxsd-byok-desktop` 的单元测试二进制在本机加载失败（`0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND`），
+> 因此 `cargo test --workspace --all-targets` 会在最后一个目标上报错。已排除构建缓存、DLL 缺失与
+> 导入表损坏，改 `cargo clean` 全量重编无效；原因与处置见
+> [docs/troubleshooting.md](./docs/troubleshooting.md)。桌面侧的改动请用
+> `cargo check -p haxsd-byok-desktop` 与 `npm run check` 覆盖。
 
 > [!NOTE]
 > **Windows 上请把仓库的行尾策略设为按原样检出**，否则 `prefix_stability` 会因为提示词模板被检出成 CRLF 而失败（`include_str!` 会把 CRLF 一起编进模板）：

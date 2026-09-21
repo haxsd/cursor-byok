@@ -27,3 +27,44 @@
 - 可恢复，但根因尚未最终确认（主要嫌疑是较老版本的 Npcap 与当前 Windows 版本的组合）；改端口不属于已验证的修复手段。
 - 不要把 Cursor 的 `http.proxy` 指向 Clash 等外部代理来绕开该错误，那会使 BYOK 的本地接管失效。
 - 详细证据链、时间线与复现步骤见本机记录（未纳入仓库）。
+
+## `cargo test --workspace --all-targets` 在桌面 crate 上失败（`0xc0000139`）
+
+### 现象
+
+`cargo test --workspace --all-targets` 走到最后一个目标时失败：
+
+```
+Running unittests src\lib.rs (target\debug\deps\haxsd_byok_desktop-<hash>.exe)
+error: test failed, to rerun pass `-p haxsd-byok-desktop --lib`
+  process didn't exit successfully: ... (exit code: 0xc0000139, STATUS_ENTRYPOINT_NOT_FOUND)
+```
+
+其余所有目标（`cursor-server` 的 11 个套件、`semble-*`）全部通过，失败只发生在
+`haxsd-byok-desktop` 的单元测试二进制上。
+
+### 已排除的原因
+
+| 假设 | 证据 |
+| --- | --- |
+| 构建产物过期/损坏 | `cargo clean` 后全量重编（23.8 GiB 清空重建），新二进制仍然报同一个错 |
+| 重链接即可 | 删掉该 exe 触发单独重链接，哈希变化，报错不变 |
+| 缺少 `libmcfgthread-2.dll` | 用 C 写探针 `LoadLibrary` + `GetProcAddress`，8 个待解析符号全部返回有效地址；exe 所在目录放置该 DLL 也无效 |
+| 缺别的 DLL | 逐个核对导入表：KERNEL32 203 项、ntdll、user32、ucrtbase 系、crypt32 等 0 缺失 |
+| PATH / 工作目录 | 净化 PATH、换工作目录、把 DLL 放到 exe 旁，全部一致报错 |
+| PE 导入表损坏 | `objdump -p` 的导入描述符、导入名表、导出表结构均正常；那 8 个名字在当前 DLL 里都存在且序号一致 |
+
+### 已知线索
+
+该 exe 的导入 hint 序号比当前 DLL 的导出序号小 1~2（例如 import hint 25 / DLL 里是 26），
+说明链接它的静态库是在另一套 MCF 头文件下编出来的。按名字解析本应忽略 hint，
+所以这解释不了报错，但这是目前唯一未对齐的地方。
+
+### 处理
+
+- 质量闸门用 `cargo test --workspace --exclude haxsd-byok-desktop`；`cargo fmt`、
+  `cargo clippy --workspace --all-targets -- -D warnings`、`cargo check` 均不受影响。
+- 桌面侧改动靠 `cargo check -p haxsd-byok-desktop` 与 `npm --prefix apps/desktop run check`
+  覆盖，二者都通过。
+- 彻底解决的方向是换 MSVC 目标工具链（`stable-x86_64-pc-windows-msvc`），
+  该工具链不依赖 MCF 运行时，代价是重装工具链并全量重编。

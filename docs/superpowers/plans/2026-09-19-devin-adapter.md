@@ -18,7 +18,7 @@
 - Cursor API routes, CursorHarness, RunEngine, provider implementations, and tool execution behavior remain unchanged.
 - Do not copy commercial Devin license, public-key, lease, vendor SQLite, SSH, or status-extension code.
 - Every new production function has a test written and observed failing before implementation.
-- All commands run from the isolated worktree `D:\project\cursor-byok-devin-router`.
+- All commands run from the isolated checkout `D:\cursor-byok\byok-dev\cursor-byok-devin-router`.
 
 ---
 
@@ -271,7 +271,7 @@ Commit: `git add server/src/devin server/src/control/devin.rs apps/desktop/src/f
 
 - [ ] **Step 1: Verify live checkout isolation**
 
-Run `git -C D:\project\cursor-byok-storage status --short --branch` and confirm the original branch has the same three modified permission files and untracked `target-release/`, with no Devin files.
+Run `git -C D:\cursor-byok\byok-dev\cursor-byok-upstream status --short --branch` and confirm the Cursor checkout is on a clean `main` with no Devin files.
 
 - [ ] **Step 2: Run complete verification from the Devin worktree**
 
