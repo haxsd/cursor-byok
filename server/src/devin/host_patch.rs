@@ -28,10 +28,7 @@ pub struct DevinPorts {
 
 impl DevinPorts {
     pub fn validate(self) -> Result<Self> {
-        if [self.api_port, self.inference_port, self.local_api_port]
-            .iter()
-            .any(|port| *port == 0)
-        {
+        if [self.api_port, self.inference_port, self.local_api_port].contains(&0) {
             return Err(Error::Config(
                 "Devin host patch ports must be non-zero".into(),
             ));

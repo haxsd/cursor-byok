@@ -229,7 +229,7 @@ fn scan_fields(
             });
         }
         if depth < MAX_SCAN_DEPTH && !value.is_empty() && value.len() <= MAX_NESTED_BYTES {
-            if let Ok(nested) = wire::parse_fields(&value) {
+            if let Ok(nested) = wire::parse_fields(value) {
                 path.push(field.number);
                 scan_fields(&nested, candidates, sessions, depth + 1, path, output);
                 path.pop();

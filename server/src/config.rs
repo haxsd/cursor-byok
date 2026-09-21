@@ -32,9 +32,9 @@ pub fn managed_data_dir() -> Result<PathBuf> {
 
 fn isolated_data_dir(directory: PathBuf) -> Result<PathBuf> {
     if !directory.is_absolute() {
-        return Err(Error::Config(
-            format!("{DATA_DIR_ENV_NAME} must be an absolute path").into(),
-        ));
+        return Err(Error::Config(format!(
+            "{DATA_DIR_ENV_NAME} must be an absolute path"
+        )));
     }
     Ok(directory)
 }

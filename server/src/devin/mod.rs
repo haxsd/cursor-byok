@@ -39,17 +39,12 @@ impl Default for DevinSettings {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DevinBindingKind {
+    #[default]
     Standard,
     ContextCompression,
-}
-
-impl Default for DevinBindingKind {
-    fn default() -> Self {
-        Self::Standard
-    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
