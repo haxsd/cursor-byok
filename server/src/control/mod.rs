@@ -8,6 +8,8 @@ mod plugins;
 mod service;
 mod settings;
 
+use std::sync::Arc;
+
 use axum::{
     body::{to_bytes, Body},
     extract::State,
@@ -21,9 +23,12 @@ use tower_http::{
 };
 use url::{Host, Url};
 
+use crate::devin::gateway::DevinListening;
+
 pub use service::{
-    CallDetail, CallSummary, ControlService, DiscoveredModels, LegacyModelImportPreview,
-    LegacyModelImportResult, ModelConnectivityResult, ModelDiscoveryInput, ObservabilitySettings,
+    CallDetail, CallSummary, ControlService, DevinStatus, DiscoveredModels,
+    LegacyModelImportPreview, LegacyModelImportResult, ModelConnectivityResult,
+    ModelDiscoveryInput, ObservabilitySettings,
 };
 
 pub fn web_router(service: ControlService, assets: impl AsRef<std::path::Path>) -> Router {
@@ -240,6 +245,15 @@ pub fn api_router(service: ControlService) -> Router {
             post(devin::host_restore),
         )
         .with_state(service)
+        .layer(desktop_cors())
+}
+
+/// Whether Devin can already work, answered by the server because the gateway
+/// ports belong to another origin and cannot be probed from the page.
+pub fn devin_status_router(service: ControlService, listening: DevinListening) -> Router {
+    Router::new()
+        .route("/__byok-api__/api/devin/status", get(devin::status))
+        .with_state(Arc::new(devin::DevinStatusState { service, listening }))
         .layer(desktop_cors())
 }
 

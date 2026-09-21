@@ -143,6 +143,13 @@ export interface DevinSettings {
   bindings: DevinModelBinding[];
 }
 
+/** Reported by the server: the gateway ports belong to another origin, so the page cannot probe them. */
+export interface DevinStatus {
+  enabled: boolean;
+  listening: boolean;
+  calls: number;
+}
+
 export interface DevinHostPorts {
   api_port: number;
   inference_port: number;
@@ -583,6 +590,7 @@ export const api = {
   },
   cursorHarness: () => request<CursorHarnessStatus>("/harness/cursor/status"),
   devinSettings: () => request<DevinSettings>("/devin/settings"),
+  devinStatus: () => request<DevinStatus>("/devin/status"),
   setDevinSettings: (settings: DevinSettings) => request<DevinSettings>("/devin/settings", { method: "PUT", body: JSON.stringify(settings) }),
   devinHostStatus: (path: string) => request<DevinHostPatchStatus>(`/harness/devin/host/status?path=${encodeURIComponent(path)}`),
   applyDevinHostPatch: (path: string) => request<DevinHostPatchReceipt>("/harness/devin/host/apply", { method: "POST", body: JSON.stringify({ path }) }),

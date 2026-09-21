@@ -93,6 +93,16 @@ fn empty_json_object_ref() -> &'static serde_json::Value {
     EMPTY.get_or_init(empty_json_object)
 }
 
+/// What the management UI needs to show whether Devin can already work. The
+/// listening flag comes from the gateway itself, because those ports belong to a
+/// different origin and answer no browser probe.
+#[derive(Clone, Debug, Serialize)]
+pub struct DevinStatus {
+    pub enabled: bool,
+    pub listening: bool,
+    pub calls: usize,
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub struct ModelConnectivityResult {
     pub duration_ms: u64,
@@ -526,6 +536,24 @@ impl ControlService {
                     existing: model.existing,
                 })
                 .collect(),
+        })
+    }
+
+    /// Counts the calls Devin produced, which is how the UI knows whether a real
+    /// conversation has travelled through the gateway yet.
+    pub async fn devin_status(&self, listening: bool) -> Result<DevinStatus> {
+        let settings = self.store.devin_settings().await?;
+        let calls = self
+            .store
+            .llm_calls(200)
+            .await?
+            .into_iter()
+            .filter(|call| call.call_id.starts_with("devin:"))
+            .count();
+        Ok(DevinStatus {
+            enabled: settings.enabled,
+            listening,
+            calls,
         })
     }
 

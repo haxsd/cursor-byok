@@ -1,6 +1,7 @@
 //! Devin router settings and explicit host integration endpoints.
 
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
@@ -10,16 +11,28 @@ use serde::Deserialize;
 
 use crate::{
     devin::{
+        gateway::DevinListening,
         host_patch::{self, DevinPorts, PatchReceipt, PatchStatus},
         host_status as host_status_module, DevinSettings,
     },
     Error, Result,
 };
 
-use super::ControlService;
+use super::{ControlService, DevinStatus};
 
 pub async fn get(State(service): State<ControlService>) -> Result<Json<DevinSettings>> {
     Ok(Json(service.devin_settings().await?))
+}
+
+#[derive(Clone)]
+pub struct DevinStatusState {
+    pub service: ControlService,
+    pub listening: DevinListening,
+}
+
+pub async fn status(State(state): State<Arc<DevinStatusState>>) -> Result<Json<DevinStatus>> {
+    let listening = state.listening.is_listening();
+    Ok(Json(state.service.devin_status(listening).await?))
 }
 
 pub async fn update(
