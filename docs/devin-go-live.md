@@ -5,7 +5,8 @@
 
 ## 最终产物是什么
 
-一个能跑的 `haxsd byok` 桌面应用（内嵌服务端，数据目录 `%APPDATA%\.haxsd-byok-devin-v3`），
+一个能跑的 `haxsd byok` 桌面应用（内嵌服务端，数据目录在**用户主目录**下：
+`%USERPROFILE%\.haxsd-byok-devin-v3`，本机即 `C:\Users\Administrator\.haxsd-byok-devin-v3`），
 加上一台已经切到它的 Devin 安装。
 
 数据流：
@@ -30,8 +31,9 @@ haxsd byok 的模型通道（你在界面里配置的模型与密钥）
 | 宿主补丁引擎 | 已验证：在真实 Devin 文件的副本上跑通 打补丁 → 校验 → 还原 |
 | Devin 安装 | 已被厂商路由器打过补丁，端点为 `127.0.0.1:43100/43101/43102` |
 | 厂商路由器 | 未运行，43100 无监听 |
-| 桌面应用 | **尚未安装**，数据目录不存在 |
-| 安装包 | 本地没有；由 CI 手动构建产出（见第 1 步） |
+| 桌面应用 | **尚未安装**（无进程、无安装目录） |
+| 数据目录 | 存在但只有空的 `rules\`，无数据库与日志，即产品从未真正运行过 |
+| 安装包 | 已在本地：`D:\cursor-byok\byok-dev\installer\haxsd byok_1.0.1_x64-setup.exe`（见第 1 步） |
 
 ## 第 1 步：拿到并安装桌面应用
 
@@ -67,8 +69,8 @@ SHA-256 AC4FC03B461A806EA6954206C79315C113032D1B75B3ACC4BA5D1B239A2223C1
 > 而工作流原本去 `apps/desktop/src-tauri/target/...` 找，配合 `if-no-files-found: warn`，
 > 于是"构建成功但没有产物"。现已修正路径并把缺失产物改为显式失败。
 
-装完后确认数据目录会出现（首次启动后才生成）：
-`%APPDATA%\.haxsd-byok-devin-v3`
+装完后确认数据目录出现（在用户主目录下，不是 `%APPDATA%`）：
+`%USERPROFILE%\.haxsd-byok-devin-v3`
 
 ## 第 2 步：配置网关并绑定模型
 
