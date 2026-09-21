@@ -141,6 +141,8 @@ Devin 网关（默认关闭，仅 127.0.0.1，24 MiB 上限）
 
 明确**不做**的部分：不做官方 Devin 直连路由、不做上游目录拉取、provider 失败后不会自动切到另一个候选路由。这三项都需要真实的 Devin 抓包证据，见 [`docs/devin-integration.md`](./docs/devin-integration.md)。
 
+和厂商版 Devin Model Router 的逐项对照（它在本机真实存在，结构与字段已记录在案）见 [`docs/devin-router-vendor-evidence.md`](./docs/devin-router-vendor-evidence.md)：厂商用「家族（family）」为单位保存选择、把「用户配置的默认」与「当前选中」分开、并给上下文压缩绑定独立的缓存命名空间——这些都值得后续借鉴，而 wire 层的字段形状仍缺真实抓包。
+
 宿主补丁是显式动作：需要用户自己给出 `extension.js` 的绝对路径，校验四个锚点后才写入，写入前生成带 SHA-256 的备份；宿主文件被改过或备份对不上时，「恢复原文件」会拒绝执行。
 
 ## 构建与验证
@@ -177,11 +179,11 @@ make build-desktop
 - Devin 网关按 [docs/devin-integration.md](./docs/devin-integration.md) 的表格逐项端到端验证通过。
 
 > [!WARNING]
-> `haxsd-byok-desktop` 的单元测试二进制在本机加载失败（`0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND`），
-> 因此 `cargo test --workspace --all-targets` 会在最后一个目标上报错。已排除构建缓存、DLL 缺失与
-> 导入表损坏，改 `cargo clean` 全量重编无效；原因与处置见
-> [docs/troubleshooting.md](./docs/troubleshooting.md)。桌面侧的改动请用
-> `cargo check -p haxsd-byok-desktop` 与 `npm run check` 覆盖。
+> `haxsd-byok-desktop` 的单元测试二进制在**本机**加载失败（`0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND`），
+> 因此本机 `cargo test --workspace --all-targets` 会在最后一个目标上报错。已确认这是本机
+> Windows GNU / MCF 运行时的问题，而不是代码问题：同一份代码在 CI 的 MSVC runner 上正常运行
+> （`1 passed`）。CI 的 `Desktop Rust (windows-latest)` 里那一步就是它的门禁，默认开启；
+> 本机绕行方式与完整排查过程见 [docs/troubleshooting.md](./docs/troubleshooting.md)。
 
 > [!NOTE]
 > **Windows 上请把仓库的行尾策略设为按原样检出**，否则 `prefix_stability` 会因为提示词模板被检出成 CRLF 而失败（`include_str!` 会把 CRLF 一起编进模板）：

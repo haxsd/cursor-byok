@@ -120,9 +120,10 @@ jobs:
         run: cargo clippy --package haxsd-byok-desktop --all-targets -- -D warnings
 
       # The developer's Windows GNU toolchain cannot load this test binary
-      # (`0xc0000139`), so the only way to tell a local toolchain quirk from a
-      # real defect is to execute it on the MSVC runner. Skipped until it is
-      # known to pass, so a red job always means a regression.
-      - name: Run the desktop unit tests (MSVC experiment)
+      # (`0xc0000139`); that was traced to the local MCF runtime rather than to
+      # the code, because the same binary runs here on MSVC. This step is the
+      # gate that keeps the desktop unit tests covered, and it stays skippable so
+      # a red job always means a regression instead of a missing variable.
+      - name: Run the desktop unit tests on MSVC
         if: matrix.os == 'windows-latest' && vars.RUN_DESKTOP_UNIT_TESTS == 'true'
         run: cargo test --package haxsd-byok-desktop --lib
