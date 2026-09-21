@@ -100,6 +100,39 @@ Three consequences:
    patched to `127.0.0.1:43100`, which is why this switch matters in practice
    and not only in theory.
 
+### Why the endpoint cannot be redirected by configuration
+
+Devin also declares settings keys for this, so a configuration route looks
+tempting at first:
+
+```
+codeium.apiServerUrl            (Config.API_SERVER_URL)
+codeium.registerApiServerUrl
+codeium.inferenceApiServerUrl   (Config.INFERENCE_API_SERVER_URL)
+```
+
+The live bundle resolves the endpoint through a different function, and the
+vendor's patch is exactly what changed it. The two forms side by side:
+
+```js
+// the clean backup: the endpoint is read from configuration
+getApiServerUrl = A => getConfig(Config.API_SERVER_URL) !== DEFAULT_API_SERVER_URL
+                       || isEmpty(A) ? getConfig(Config.API_SERVER_URL) : A
+async restart(A) { this.apiServerUrl = A; ... }        // takes the URL it is given
+
+// the live, vendor-patched file: the endpoint is a literal
+getApiServerUrlFromContext = A => "http://127.0.0.1:43100"
+async restart(A) { A = "http://127.0.0.1:43100"; ... } // ignores what it is given
+```
+
+`getApiServerUrlFromContext` is what the extension calls before
+`LanguageServerClient.initialize`, and no environment variable overrides it
+(`process.env` carries no match for it). On a patched installation the setting
+keys are therefore a dead end: writing `codeium.apiServerUrl` into
+`%APPDATA%\Devin\User\settings.json` will not move the endpoint, and a runbook
+must not suggest it. Patching the file is the working mechanism, so the swap
+sequence below is required rather than optional.
+
 ### The switch was exercised on a copy of that real file
 
 Running this branch's endpoints against copies only — the live installation was
