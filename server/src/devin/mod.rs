@@ -256,6 +256,7 @@ fn default_upstream_api_url() -> String {
 pub mod assignment;
 pub mod catalog;
 pub mod gateway;
+pub mod host_detect;
 pub mod host_patch;
 pub mod host_status;
 pub mod request;
