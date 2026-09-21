@@ -77,42 +77,26 @@ export function DevinSettingsPage() {
     }).catch((cause) => message(cause instanceof Error ? cause.message : String(cause))).finally(() => setLoading(false));
   }, [message]);
 
-  // 状态面板要回答"现在通没通"：端口是否真的在听，以及是否已经跑过 Devin 的调用。
-  useEffect(() => {
-    if (loading || !settings.enabled) {
-      setGatewayPortsUp(null);
-      return;
-    }
-    let cancelled = false;
-    void Promise.all([settings.api_port, settings.inference_port, settings.local_api_port].map(async (port) => {
-      try {
-        const response = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1500) });
-        return response.ok;
-      } catch {
-        return false;
-      }
-    })).then((results) => {
-      if (!cancelled) setGatewayPortsUp(results.every(Boolean));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [loading, settings.enabled, settings.api_port, settings.inference_port, settings.local_api_port]);
-
+  // 状态面板要回答"现在通没通"。端口是否在听只能由服务端回答：网关端口属于另一个源，
+  // 浏览器直接探测会被 CORS 拒绝，从而把健康的网关误报成"端口未监听"。
   useEffect(() => {
     if (loading) return;
     let cancelled = false;
-    void api.calls()
-      .then((calls) => {
-        if (!cancelled) setDevinCalls(calls.filter((call) => call.call_id.startsWith("devin:")).length);
+    void api.devinStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setGatewayPortsUp(status.listening);
+        setDevinCalls(status.calls);
       })
       .catch(() => {
-        if (!cancelled) setDevinCalls(null);
+        if (cancelled) return;
+        setGatewayPortsUp(null);
+        setDevinCalls(null);
       });
     return () => {
       cancelled = true;
     };
-  }, [loading]);
+  }, [loading, settings.enabled]);
 
   // 已知路径就自动检查一次，让状态面板开箱即用。
   useEffect(() => {

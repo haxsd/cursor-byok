@@ -36,10 +36,28 @@ use super::{
 
 const TOKEN_HEADER: &str = "x-devin-router-token";
 
+/// Tracks whether the gateway is currently accepting requests. The management UI
+/// must ask the server instead of probing the ports from the browser: those ports
+/// serve a different origin and answer no CORS request, so a browser probe would
+/// report a healthy gateway as unreachable.
+#[derive(Clone, Default)]
+pub struct DevinListening(Arc<std::sync::atomic::AtomicBool>);
+
+impl DevinListening {
+    pub fn is_listening(&self) -> bool {
+        self.0.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    fn set(&self, listening: bool) {
+        self.0.store(listening, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
 #[derive(Clone)]
 pub struct DevinGateway {
     store: Store,
     provider: Arc<dyn Provider>,
+    listening: DevinListening,
 }
 
 #[derive(Clone)]
@@ -54,7 +72,16 @@ struct GatewayState {
 
 impl DevinGateway {
     pub fn new(store: Store, provider: Arc<dyn Provider>) -> Self {
-        Self { store, provider }
+        Self {
+            store,
+            provider,
+            listening: DevinListening::default(),
+        }
+    }
+
+    /// A handle the management API reads to answer whether the ports are open.
+    pub fn listening(&self) -> DevinListening {
+        self.listening.clone()
     }
 
     pub async fn serve(self, shutdown: CancellationToken) -> Result<()> {
@@ -101,12 +128,17 @@ impl DevinGateway {
         let inference = axum::serve(inference_listener, router.clone()).into_future();
         let local = axum::serve(local_listener, router).into_future();
         tokio::pin!(api, inference, local);
-        tokio::select! {
+        // The ports are bound, so from here on the management API must report them
+        // as open until this task returns for any reason.
+        self.listening.set(true);
+        let result = tokio::select! {
             result = &mut api => result.map_err(Error::Io),
             result = &mut inference => result.map_err(Error::Io),
             result = &mut local => result.map_err(Error::Io),
             _ = shutdown.cancelled() => Ok(()),
-        }
+        };
+        self.listening.set(false);
+        result
     }
 
     /// The HTTP surface shared by all three listeners. Kept separate from

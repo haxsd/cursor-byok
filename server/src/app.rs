@@ -72,6 +72,12 @@ impl App {
         )?;
         let harness = control.cursor_harness().clone();
         let mut router = api::router(registry.clone(), clients)?;
+        // The status endpoint needs both the control service and the gateway's
+        // own listening flag, so it is merged here rather than inside either one.
+        router = router.merge(control::devin_status_router(
+            control.clone(),
+            devin_gateway.listening(),
+        ));
         router = match &config.console {
             Some(ConsoleSource::Directory(directory)) => {
                 router.merge(control::web_router(control.clone(), directory))
