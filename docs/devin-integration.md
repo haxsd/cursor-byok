@@ -98,6 +98,39 @@ automatic fallback needs a verified Devin request lifecycle and a separate
 idempotency policy. Official routing needs real black-box Devin captures before
 any wire field is invented.
 
+## Verified behavior
+
+The following was verified end to end against a built `cursor-server.exe` with an
+isolated data directory (`HAXSD_BYOK_DATA_DIR`), never against the running
+desktop product and never against real Devin traffic:
+
+| Check | Result |
+| --- | --- |
+| Fresh settings default | `enabled=false`, ports `43110/43111/43112`, empty bindings |
+| Disabled gateway | no listener on any of the three ports |
+| Empty UID/hash binding | rejected with HTTP 400 |
+| Duplicate UID bindings | rejected with HTTP 400 |
+| Port `0` | rejected with HTTP 400 |
+| Enabled gateway after restart | all three ports listen on `127.0.0.1` only |
+| `/health` on each port | `{"ok":true,"service":"devin"}` |
+| Non-POST on an RPC path | HTTP 405, `Devin gateway accepts POST only` |
+| Unknown RPC method | HTTP 404, `unsupported Devin RPC method` |
+| Missing or wrong token | Connect end-frame `unauthenticated` |
+| `GetCliModelConfigs` | returns the enabled binding's UID, display name and the local API URL |
+| `AssignModel` with the mapped UID | returns a fresh UUID session token scoped to the UID |
+| `AssignModel` with an unmapped UID | Connect error `invalid_argument`, `Devin AssignModel has no mapped model UID` |
+
+RPC errors are returned the way the Connect protocol expects: the HTTP status is
+`200` and the failure travels in the end-stream frame, while transport-level
+failures (wrong method, unknown path) keep their plain HTTP status. A successful
+RPC answers a framed request with a framed body plus the end-stream frame,
+which is how streaming clients distinguish "no more messages" from transport
+failure.
+
+Not covered by this run: a full `GetChatMessage` streaming round trip needs a
+real model record in the model store with a reachable provider endpoint, so it
+was exercised only at the unit-test level.
+
 ## Intentional limits
 
 The current integration does not automatically discover, edit, or SSH into a

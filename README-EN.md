@@ -1,10 +1,10 @@
 <div align="center">
 
-# haxsd byok · Devin product fork
+# haxsd byok
 
-A personal fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok).
+A personal fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok), shipped as an independent product named `haxsd byok`, plus an optional loopback Devin-compatible gateway.
 
-[中文说明](./README.md) · [Branch isolation rules](./BRANCH_ISOLATION.md) · [Upstream repository](https://github.com/leookun/cursor-byok) · [Upstream docs](https://docs.leokun.cn)
+[中文说明](./README.md) · [Branch isolation rules](./BRANCH_ISOLATION.md) · [Devin integration](./docs/devin-integration.md) · [Upstream repository](https://github.com/leookun/cursor-byok) · [Upstream docs](https://docs.leokun.cn)
 
 </div>
 
@@ -14,6 +14,8 @@ A personal fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok)
 
 > [!CAUTION]
 > `main` and `feat/devin-router` are **separate product lines and must never be merged**. `main` is the Cursor BYOK line; this branch is the `haxsd byok` Devin line. Verify the current branch before development, testing, packaging, or pushing. See [`BRANCH_ISOLATION.md`](./BRANCH_ISOLATION.md) for the full rules.
+>
+> The two product lines are **two separate local clones**: the Devin line lives in `D:\cursor-byok\byok-dev\cursor-byok-devin-router`, the Cursor line in `D:\cursor-byok\byok-dev\cursor-byok-upstream`.
 
 This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok), based on upstream **v1.0.0** (commit `3725f27`). Upstream is an MIT-licensed open-source project. This fork makes the following changes for personal use:
 
@@ -23,6 +25,7 @@ This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cu
 | Value estimate uses time-of-day pricing | The home page "value estimate" is priced hour by hour with DeepSeek-V4.1-Flash peak / off-peak rates |
 | Languages trimmed | Only Simplified Chinese and English remain (Portuguese removed) |
 | Independent product identity | Uses the `haxsd byok` app identifier, data directory and installer; automatic updates are temporarily disabled |
+| Devin-compatible gateway | Adds an optional, off-by-default loopback gateway that routes Devin model requests through the existing model channels |
 
 Everything else keeps upstream's behavior and code structure, which makes future upstream syncs straightforward.
 
@@ -87,6 +90,37 @@ The update endpoint now points at `haxsd/cursor-byok` instead of upstream.
 > [!IMPORTANT]
 > This fork keeps upstream's Tauri updater public key. To publish signed releases with working auto-update, generate your own key pair, put the public key into `plugins.updater.pubkey` in `apps/desktop/src-tauri/tauri.conf.json`, and sign builds with the private key. Until then the update check fails signature verification and simply installs nothing.
 
+### 5. Devin-compatible gateway
+
+Off by default; while disabled it binds no port and Cursor behavior is unchanged. When enabled it starts three loopback listeners:
+
+| Listener | Default | Purpose |
+| --- | ---: | --- |
+| API / catalog | `43110` | Devin model catalog and `AssignModel` |
+| Inference | `43111` | Connect-protocol streaming model requests |
+| Local API | `43112` | Local management surface |
+
+Request flow:
+
+```text
+Devin client
+    │ Connect frames (protobuf-style fields + gzip)
+    ▼
+Devin gateway (off by default, loopback only, 24 MiB limit)
+    │ resolve the Devin model UID binding → the active route's model hash
+    ▼
+Model channels / ProviderRouter (shared with Cursor; keys stay in model records)
+    │ streaming events
+    ▼
+Connect frames (text, thinking, tool calls, usage, stop reason)
+```
+
+Bindings and routes: each binding maps one Devin model UID to one existing model hash. Optional candidate routes (`routes` plus `active_route_id`) are switched manually and survive saves and catalog refreshes. A binding marked `context_compression` is single-line by design and may not define candidate routes. Old settings JSON needs no migration: without route fields it keeps using its original `model_hash`.
+
+Deliberately not implemented: official Devin direct routing, upstream catalog fetching, and automatic fallback to another candidate route after a provider failure. All three need real Devin capture evidence; see [`docs/devin-integration.md`](./docs/devin-integration.md).
+
+Host patching is always an explicit action: the user supplies the absolute `extension.js` path, all four anchors must match, an SHA-256-verified backup is written first, and "restore" refuses to run when the host file or the backup changed.
+
 ## Build and verify
 
 Requirements: Node.js 22, Rust stable, and Tauri's platform prerequisites (WebView2 and the MSVC toolchain on Windows).
@@ -107,6 +141,17 @@ Verification performed on this fork:
 - the hourly pricing was cross-checked against an independent implementation with all four cost components matching exactly;
 - the sum of the usage buckets equals the aggregate figures returned by the service, so nothing is dropped;
 - the language-to-currency mapping was exercised against the real module with 14 assertions (zh/en × currency × price list × money formatting), all passing.
+
+Current state, re-run on rustc 1.98.1 (2026-09-21):
+
+- `cargo fmt --all -- --check` passes;
+- `cargo clippy --workspace --all-targets -- -D warnings` passes;
+- `cargo test --workspace --exclude haxsd-byok-desktop` passes with zero failures;
+- `npm --prefix apps/desktop run check` passes (Vite production build succeeds; only the pre-existing chunk-size notice remains);
+- the Devin gateway was verified end to end item by item, as tabulated in [docs/devin-integration.md](./docs/devin-integration.md).
+
+> [!WARNING]
+> The `haxsd-byok-desktop` unit-test binary fails to load on this machine (`0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND`), so `cargo test --workspace --all-targets` reports an error on its last target. A stale build, a missing DLL and a malformed import table were all ruled out, and a full `cargo clean` rebuild reproduces it; see [docs/troubleshooting.md](./docs/troubleshooting.md). Cover desktop changes with `cargo check -p haxsd-byok-desktop` plus `npm run check`.
 
 ## Publishing installers
 
