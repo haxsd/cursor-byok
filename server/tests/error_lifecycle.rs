@@ -20,6 +20,11 @@ use cursor_server::{
 };
 use prost::Message;
 
+/// These tests assert that a terminal frame eventually reaches the stream, so
+/// the wait only has to outlast a busy machine. A tight bound turns scheduler
+/// noise into a red run without testing anything extra.
+const TERMINAL_FRAME_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
+
 #[tokio::test]
 async fn abort_command_cancels_the_run_and_closes_output() {
     let (_directory, store) = fixtures::temp_store().await;
@@ -204,7 +209,7 @@ async fn provider_failure_keeps_the_initial_checkpoint_then_returns_structured_e
     let mut checkpoints = Vec::new();
     let mut saw_turn_ended = false;
     let error_json = loop {
-        let frame = tokio::time::timeout(std::time::Duration::from_secs(5), output.recv())
+        let frame = tokio::time::timeout(TERMINAL_FRAME_TIMEOUT, output.recv())
             .await
             .unwrap()
             .expect("RunSSE closed before EndStream");
@@ -344,7 +349,7 @@ async fn unknown_tool_response_id_is_ignored_and_the_run_continues() {
     let mut append_seqno = 1;
     let mut saw_turn_ended = false;
     let end_stream = loop {
-        let frame = tokio::time::timeout(std::time::Duration::from_secs(5), output.recv())
+        let frame = tokio::time::timeout(TERMINAL_FRAME_TIMEOUT, output.recv())
             .await
             .unwrap()
             .expect("RunSSE closed before Error EndStream");
@@ -496,7 +501,7 @@ async fn newer_run_request_on_one_bidi_stream_replaces_the_active_run() {
     let mut saw_abort = false;
     let mut cropped_state = None;
     let terminal_json = loop {
-        let frame = tokio::time::timeout(std::time::Duration::from_secs(5), output.recv())
+        let frame = tokio::time::timeout(TERMINAL_FRAME_TIMEOUT, output.recv())
             .await
             .unwrap()
             .expect("RunSSE closed before Error EndStream");
@@ -668,7 +673,7 @@ async fn assert_run_starts_without_parent_dependency(
 
     let mut seqno = 1;
     let terminal_json = loop {
-        let frame = tokio::time::timeout(std::time::Duration::from_secs(5), output.recv())
+        let frame = tokio::time::timeout(TERMINAL_FRAME_TIMEOUT, output.recv())
             .await
             .unwrap()
             .expect("RunSSE closed before EndStream");
