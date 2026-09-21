@@ -7,6 +7,7 @@ import { CommitSettingsCard } from "./CommitSettingsCard";
 import { PricingSettingsCard } from "./PricingSettingsCard";
 import { ProxySettingsCard } from "./ProxySettingsCard";
 import { TabSettingsCard } from "./TabSettingsCard";
+import { UpdateCard } from "./UpdateCard";
 import { Button } from "../../shared/ui/Button";
 import { Checkbox } from "../../shared/ui/Checkbox";
 import { ConfirmDialog } from "../../shared/ui/ConfirmDialog";
@@ -163,6 +164,7 @@ export function SettingsPage() {
     : t("仅删除请求、响应和追踪附件等详细内容，保留调用汇总、统计指标和配置。");
   const content = (
     <div className={styles.page}>
+      <UpdateCard />
       <TitledCard title={t("调用观测")}>
         <div className={styles.settingRow}>
           <div>
