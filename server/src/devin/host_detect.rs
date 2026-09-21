@@ -40,9 +40,7 @@ pub enum Detected {
     },
     /// Nothing matched; the searched candidates let the failure explain itself
     /// instead of surfacing as "unknown".
-    NotFound {
-        searched: Vec<PathBuf>,
-    },
+    NotFound { searched: Vec<PathBuf> },
 }
 
 impl Detected {
@@ -113,10 +111,7 @@ fn candidates() -> Vec<(PathBuf, DetectionSource)> {
                 continue;
             }
             if let Some(directory) = app.parent() {
-                candidates.push((
-                    directory.join(HOST_RELATIVE),
-                    DetectionSource::Guessed,
-                ));
+                candidates.push((directory.join(HOST_RELATIVE), DetectionSource::Guessed));
             }
         }
     }
@@ -137,7 +132,12 @@ fn scan_roots() -> Vec<PathBuf> {
             first_level.push(PathBuf::from(format!("{letter}:\\Program Files\\{name}")));
         }
     }
-    for base in ["LOCALAPPDATA", "APPDATA", "ProgramFiles", "ProgramFiles(x86)"] {
+    for base in [
+        "LOCALAPPDATA",
+        "APPDATA",
+        "ProgramFiles",
+        "ProgramFiles(x86)",
+    ] {
         let Some(directory) = non_empty_env(base) else {
             continue;
         };
