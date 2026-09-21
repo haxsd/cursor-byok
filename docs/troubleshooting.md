@@ -60,11 +60,27 @@ error: test failed, to rerun pass `-p haxsd-byok-desktop --lib`
 说明链接它的静态库是在另一套 MCF 头文件下编出来的。按名字解析本应忽略 hint，
 所以这解释不了报错，但这是目前唯一未对齐的地方。
 
+### 结论：本机 GNU 工具链的问题，不是代码问题
+
+同一份代码、同一个测试二进制，在 CI 的 MSVC runner 上正常加载并运行：
+
+```
+running 1 test
+test startup::tests::fatal_report_includes_the_complete_error_chain ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+（CI 运行 `35567454874`，`Desktop Rust (windows-latest)` 的
+「Run the desktop unit tests on MSVC」步骤。）
+
+所以不需要为它换本地工具链：CI 已经用 MSVC 覆盖了这个测试，工作流里那一步就是门禁，
+默认由仓库变量 `RUN_DESKTOP_UNIT_TESTS=true` 打开。
+
 ### 处理
 
 - 质量闸门用 `cargo test --workspace --exclude haxsd-byok-desktop`；`cargo fmt`、
   `cargo clippy --workspace --all-targets -- -D warnings`、`cargo check` 均不受影响。
 - 桌面侧改动靠 `cargo check -p haxsd-byok-desktop` 与 `npm --prefix apps/desktop run check`
-  覆盖，二者都通过。
-- 彻底解决的方向是换 MSVC 目标工具链（`stable-x86_64-pc-windows-msvc`），
-  该工具链不依赖 MCF 运行时，代价是重装工具链并全量重编。
+  覆盖，二者都通过；这个测试二进制的实际运行由 CI 的 MSVC 步骤负责。
+- 本机若想自己跑一遍，需要换 MSVC 目标工具链（`stable-x86_64-pc-windows-msvc`），
+  它不依赖 MCF 运行时；但既然 CI 已覆盖，这只是可选。
