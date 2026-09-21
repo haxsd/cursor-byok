@@ -72,7 +72,12 @@ async fn cursor_listener_stub() -> (u16, tokio::task::JoinHandle<()>) {
 }
 
 async fn get(port: u16, path: &str) -> Result<(u16, String), reqwest::Error> {
-    let response = reqwest::Client::new()
+    // A loopback probe must not be routed through whatever system proxy the
+    // machine happens to run, otherwise the assertion tests the proxy.
+    let response = reqwest::Client::builder()
+        .no_proxy()
+        .build()
+        .unwrap()
         .get(format!("http://127.0.0.1:{port}{path}"))
         .timeout(Duration::from_secs(5))
         .send()

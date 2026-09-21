@@ -65,12 +65,13 @@ mod tests {
     async fn non_success_status_is_one_failed_attempt() {
         let url =
             server(b"HTTP/1.1 503 Service Unavailable\r\nContent-Length: 4\r\n\r\ndown").await;
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
         let error = send_once("test", || client.get(&url), &CancellationToken::new(), None)
             .await
             .unwrap_err();
         assert!(
-            matches!(error, Error::Provider(message) if message.contains("503") && message.contains("down"))
+            matches!(&error, Error::Provider(message) if message.contains("503") && message.contains("down")),
+            "unexpected error: {error:?}"
         );
     }
 
@@ -78,11 +79,14 @@ mod tests {
     async fn response_body_transport_failure_is_one_failed_attempt() {
         let url =
             server(b"HTTP/1.1 500 Internal Server Error\r\nContent-Length: 100\r\n\r\nshort").await;
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
         let error = send_once("test", || client.get(&url), &CancellationToken::new(), None)
             .await
             .unwrap_err();
-        assert!(matches!(error, Error::Http(_)));
+        assert!(
+            matches!(error, Error::Http(_)),
+            "unexpected error: {error:?}"
+        );
     }
 
     #[tokio::test]
@@ -91,10 +95,13 @@ mod tests {
         let address = listener.local_addr().unwrap();
         drop(listener);
         let url = format!("http://{address}");
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
         let error = send_once("test", || client.get(&url), &CancellationToken::new(), None)
             .await
             .unwrap_err();
-        assert!(matches!(error, Error::Http(_)));
+        assert!(
+            matches!(error, Error::Http(_)),
+            "unexpected error: {error:?}"
+        );
     }
 }
