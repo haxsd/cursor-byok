@@ -142,7 +142,12 @@ pub fn restore(receipt: &PatchReceipt) -> Result<()> {
             "Devin host file changed after patch; restore refused".into(),
         ));
     }
-    let backup = fs::read(&receipt.backup_path).map_err(Error::Io)?;
+    let backup = fs::read(&receipt.backup_path).map_err(|error| {
+        Error::Config(format!(
+            "Devin host backup {} is unavailable ({error}); restore refused",
+            receipt.backup_path.display()
+        ))
+    })?;
     if sha256(&backup) != receipt.original_sha256 {
         return Err(Error::Config(
             "Devin host backup SHA-256 mismatch; restore refused".into(),
@@ -494,5 +499,26 @@ mod tests {
         fs::write(&receipt.backup_path, b"tampered").unwrap();
         assert!(restore(&receipt).is_err());
         assert!(inspect(&path).unwrap().patched);
+    }
+
+    /// A missing backup is an expected user situation, not a crash: the caller
+    /// must get a readable configuration error instead of a raw io error.
+    #[test]
+    fn reports_a_missing_backup_as_a_configuration_error() {
+        let directory = tempdir().unwrap();
+        let path = directory.path().join("extension.js");
+        fs::write(&path, fixture()).unwrap();
+        let receipt = apply(&path, ports()).unwrap();
+        fs::remove_file(&receipt.backup_path).unwrap();
+
+        let error = restore(&receipt).unwrap_err();
+        assert!(
+            matches!(error, Error::Config(_)),
+            "expected a configuration error, got {error:?}"
+        );
+        assert!(
+            error.to_string().contains("backup"),
+            "unexpected message: {error}"
+        );
     }
 }
