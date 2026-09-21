@@ -592,8 +592,9 @@ export const api = {
   devinSettings: () => request<DevinSettings>("/devin/settings"),
   devinStatus: () => request<DevinStatus>("/devin/status"),
   setDevinSettings: (settings: DevinSettings) => request<DevinSettings>("/devin/settings", { method: "PUT", body: JSON.stringify(settings) }),
-  devinHostStatus: (path: string) => request<DevinHostPatchStatus>(`/harness/devin/host/status?path=${encodeURIComponent(path)}`),
-  applyDevinHostPatch: (path: string) => request<DevinHostPatchReceipt>("/harness/devin/host/apply", { method: "POST", body: JSON.stringify({ path }) }),
+  /** Without a path the server finds the installation itself. */
+  devinHostStatus: (path?: string) => request<DevinHostPatchStatus>(path ? `/harness/devin/host/status?path=${encodeURIComponent(path)}` : "/harness/devin/host/status"),
+  applyDevinHostPatch: (path?: string) => request<DevinHostPatchReceipt>("/harness/devin/host/apply", { method: "POST", body: JSON.stringify(path ? { path } : {}) }),
   restoreDevinHostPatch: (receipt: DevinHostPatchReceipt) => request<{ restored: boolean }>("/harness/devin/host/restore", { method: "POST", body: JSON.stringify({ receipt }) }),
   initializeCursorCa: () => request<CursorHarnessStatus>("/harness/cursor/ca/initialize", { method: "POST" }),
   plugins: () => request<PluginDescriptor[]>("/plugins"),

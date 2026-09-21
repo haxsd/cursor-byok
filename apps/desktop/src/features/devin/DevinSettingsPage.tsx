@@ -98,21 +98,31 @@ export function DevinSettingsPage() {
     };
   }, [loading, settings.enabled]);
 
-  // 已知路径就自动检查一次，让状态面板开箱即用。
+  // 宿主路径不再要求用户填写：服务端自己找到安装位置，再回填到界面。
   useEffect(() => {
-    if (loading || !hostPath.trim() || hostStatus) return;
+    if (loading) return;
     let cancelled = false;
-    void api.devinHostStatus(hostPath)
+    void api.devinHostStatus(hostPath.trim() || undefined)
       .then((status) => {
-        if (!cancelled) setHostStatus(status);
+        if (cancelled) return;
+        setHostStatus(status);
+        if (!hostPath.trim()) {
+          setHostPath(status.path);
+          try {
+            localStorage.setItem(hostPathStorageKey, status.path);
+          } catch {
+            // Persisting the path is best effort.
+          }
+        }
       })
-      .catch(() => {
-        // 路径失效时保持未知，由用户重新检查。
+      .catch((cause) => {
+        // 探测失败要说出原因，不能静默成"未知"。
+        if (!cancelled) message(cause instanceof Error ? cause.message : String(cause));
       });
     return () => {
       cancelled = true;
     };
-  }, [loading, hostPath, hostStatus]);
+  }, [loading, message]);
 
   const rememberHostPath = (value: string) => {
     setHostPath(value);

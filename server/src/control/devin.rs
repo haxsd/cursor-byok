@@ -44,12 +44,15 @@ pub async fn update(
 
 #[derive(Debug, Deserialize)]
 pub struct HostPathQuery {
-    pub path: String,
+    /// Omitted means "find the installation yourself".
+    #[serde(default)]
+    pub path: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct HostPatchInput {
-    pub path: String,
+    #[serde(default)]
+    pub path: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -57,8 +60,21 @@ pub struct HostRestoreInput {
     pub receipt: PatchReceipt,
 }
 
+/// A missing or blank path resolves the installation automatically, so the page
+/// works without the user pasting an absolute path.
+fn resolve_host_path(input: Option<&str>) -> Result<PathBuf> {
+    if let Some(value) = input.map(str::trim).filter(|value| !value.is_empty()) {
+        return explicit_path(value);
+    }
+    let detected = crate::devin::host_detect::detect();
+    match detected.path() {
+        Some(path) => Ok(path.to_path_buf()),
+        None => Err(Error::Config(detected.explanation())),
+    }
+}
+
 pub async fn host_status(Query(query): Query<HostPathQuery>) -> Result<Json<PatchStatus>> {
-    let path = explicit_path(&query.path)?;
+    let path = resolve_host_path(query.path.as_deref())?;
     Ok(Json(host_status_module::status(&path)?))
 }
 
@@ -70,7 +86,7 @@ pub async fn host_apply(
     if !settings.enabled {
         return Err(Error::Config("启用 Devin 网关后才能应用宿主补丁".into()));
     }
-    let path = explicit_path(&input.path)?;
+    let path = resolve_host_path(input.path.as_deref())?;
     let ports = DevinPorts {
         api_port: settings.api_port,
         inference_port: settings.inference_port,
