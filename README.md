@@ -145,6 +145,8 @@ Devin 网关（默认关闭，仅 127.0.0.1，24 MiB 上限）
 
 宿主补丁是显式动作：需要用户自己给出 `extension.js` 的绝对路径，校验四个锚点后才写入，写入前生成带 SHA-256 的备份；宿主文件被改过或备份对不上时，「恢复原文件」会拒绝执行。
 
+**从零到用起来**的完整操作序列（装应用 → 配置网关与绑定模型 → 把 Devin 切过来 → 验证 → 回退）见 [`docs/devin-go-live.md`](./docs/devin-go-live.md)。其中"交换宿主文件"的原因值得先读：Devin 的端点写在它自己的 `extension.js` 里，若已被别的路由器改过，本项目补丁会 fail-closed 拒绝，必须先还原干净版本再打补丁。
+
 ## 构建与验证
 
 依赖：Node.js 22、Rust stable、Tauri 的系统依赖（Windows 下为 WebView2 与 MSVC 工具链）。
