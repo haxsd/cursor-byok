@@ -143,9 +143,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: manual-build-windows
+          # Cargo builds this workspace into the workspace-level target, so the
+          # bundle lands there, not under apps/desktop/src-tauri.
           path: |
-            apps/desktop/src-tauri/target/release/bundle/nsis/*.exe
-          if-no-files-found: warn
+            target/release/bundle/nsis/*.exe
+          if-no-files-found: error
 
   finalize:
     name: Publish GitHub Release
