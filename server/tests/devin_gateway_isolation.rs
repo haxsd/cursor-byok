@@ -86,6 +86,39 @@ async fn get(port: u16, path: &str) -> Result<(u16, String), reqwest::Error> {
     Ok((status, response.text().await?))
 }
 
+/// Waits until the health endpoint answers. `serve` is spawned, so binding is
+/// asynchronous and a bare request can race it on a slow machine.
+async fn await_health(port: u16) -> (u16, String) {
+    let deadline = std::time::Instant::now() + Duration::from_secs(10);
+    loop {
+        if let Ok(response) = get(port, "/health").await {
+            return response;
+        }
+        assert!(
+            std::time::Instant::now() < deadline,
+            "the gateway never became reachable on port {port}"
+        );
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+}
+
+/// Reports whether anything still answers on the port. Rebinding is not a
+/// reliable probe: a freshly closed listener can sit in TIME_WAIT and refuse
+/// the rebind even though the service is gone.
+async fn serving(port: u16) -> bool {
+    let deadline = std::time::Instant::now() + Duration::from_secs(3);
+    loop {
+        match get(port, "/health").await {
+            Ok(_) => return true,
+            // A refused connection proves nothing is listening; only an
+            // ambiguous failure is worth retrying.
+            Err(error) if error.is_connect() => return false,
+            Err(_) if std::time::Instant::now() >= deadline => return false,
+            Err(_) => tokio::time::sleep(Duration::from_millis(20)).await,
+        }
+    }
+}
+
 #[tokio::test]
 async fn a_disabled_gateway_binds_no_port_and_leaves_cursor_serving() {
     let (_directory, store) = fixtures::temp_store().await;
@@ -105,8 +138,8 @@ async fn a_disabled_gateway_binds_no_port_and_leaves_cursor_serving() {
     assert_eq!(get(cursor_port, "/").await.unwrap().0, 200);
     for port in [api_port, inference_port, local_api_port] {
         assert!(
-            TcpListener::bind(("127.0.0.1", port)).await.is_ok(),
-            "a disabled gateway must not hold port {port}"
+            !serving(port).await,
+            "a disabled gateway must not answer on port {port}"
         );
     }
 }
@@ -125,9 +158,9 @@ async fn stopping_the_gateway_keeps_the_cursor_listener_serving() {
 
     let shutdown = CancellationToken::new();
     let gateway = DevinGateway::new(store.clone(), provider);
-    let serving = tokio::spawn(gateway.serve(shutdown.clone()));
+    let gateway_task = tokio::spawn(gateway.serve(shutdown.clone()));
 
-    let (status, body) = get(api_port, "/health").await.unwrap();
+    let (status, body) = await_health(api_port).await;
     assert_eq!(status, 200);
     assert!(
         body.contains("\"service\":\"devin\""),
@@ -135,7 +168,7 @@ async fn stopping_the_gateway_keeps_the_cursor_listener_serving() {
     );
 
     shutdown.cancel();
-    tokio::time::timeout(Duration::from_secs(5), serving)
+    tokio::time::timeout(Duration::from_secs(5), gateway_task)
         .await
         .expect("the gateway must stop when its shutdown token is cancelled")
         .unwrap()
@@ -143,11 +176,11 @@ async fn stopping_the_gateway_keeps_the_cursor_listener_serving() {
 
     // The Cursor listener is untouched by the gateway's exit.
     assert_eq!(get(cursor_port, "/").await.unwrap().0, 200);
-    // And the gateway really released its own ports.
+    // And the gateway really stopped answering on its own ports.
     for port in [api_port, inference_port, local_api_port] {
         assert!(
-            TcpListener::bind(("127.0.0.1", port)).await.is_ok(),
-            "a stopped gateway must release port {port}"
+            !serving(port).await,
+            "a stopped gateway must not answer on port {port}"
         );
     }
 }
