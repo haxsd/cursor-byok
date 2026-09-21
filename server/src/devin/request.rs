@@ -44,21 +44,17 @@ pub fn parse_chat_request(payload: &[u8]) -> Result<DevinChatRequest> {
 
     for field in super::wire::all_fields(&fields, 3) {
         let bytes = bytes_value(field)?;
-        let message = parse_message(bytes, &mut declared_context_tokens)?;
-        match message {
-            Some(message) => {
-                if message.role == Role::System {
-                    if !system.is_empty() {
-                        system.push('\n');
-                    }
-                    if let ProjectedContent::Parts(parts) = message.content {
-                        append_text_parts(&mut system, &parts);
-                    }
-                } else {
-                    history.push(message);
+        if let Some(message) = parse_message(bytes, &mut declared_context_tokens)? {
+            if message.role == Role::System {
+                if !system.is_empty() {
+                    system.push('\n');
                 }
+                if let ProjectedContent::Parts(parts) = message.content {
+                    append_text_parts(&mut system, &parts);
+                }
+            } else {
+                history.push(message);
             }
-            None => {}
         }
     }
     if history.is_empty() {

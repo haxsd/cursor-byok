@@ -169,12 +169,13 @@ impl App {
         tokio::pin!(maintenance);
 
         let result = tokio::select! {
-            () = &mut maintenance => {},
+            () = &mut maintenance => Ok(()),
             result = &mut server => {
                 if let Err(error) = harness.disable().await {
                     tracing::warn!(%error, "failed to disable Cursor harness after server stop");
                 }
-                result?
+                result?;
+                Ok(())
             },
             () = shutdown.cancelled() => {
                 if let Err(error) = harness.disable().await {
@@ -183,13 +184,16 @@ impl App {
                 registry.shutdown().await;
                 match tokio::time::timeout(Duration::from_secs(10), &mut server).await {
                     Ok(result) => result?,
-                    Err(_) => tracing::warn!("graceful shutdown timed out; forcing server close"),
+                    Err(_) => {
+                        tracing::warn!("graceful shutdown timed out; forcing server close");
+                    }
                 }
+                Ok(())
             }
         };
         gateway_task.abort();
         let _ = gateway_task.await;
-        Ok(result)
+        result
     }
 }
 

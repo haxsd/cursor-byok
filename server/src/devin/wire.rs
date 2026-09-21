@@ -118,11 +118,11 @@ pub fn serialize_fields(fields: &[Field]) -> Result<Vec<u8>> {
     Ok(output)
 }
 
-pub fn first_field<'a>(fields: &'a [Field], number: u32) -> Option<&'a Field> {
+pub fn first_field(fields: &[Field], number: u32) -> Option<&Field> {
     fields.iter().find(|field| field.number == number)
 }
 
-pub fn all_fields<'a>(fields: &'a [Field], number: u32) -> impl Iterator<Item = &'a Field> {
+pub fn all_fields(fields: &[Field], number: u32) -> impl Iterator<Item = &Field> {
     fields.iter().filter(move |field| field.number == number)
 }
 
@@ -345,7 +345,7 @@ mod tests {
         assert_eq!(frame[0], 2);
         let payload = &frame[5..];
         assert_eq!(
-            serde_json::from_slice::<serde_json::Value>(&payload).unwrap(),
+            serde_json::from_slice::<serde_json::Value>(payload).unwrap(),
             serde_json::json!({
                 "error": {"code": "invalid_argument", "message": "bad Devin payload"}
             })

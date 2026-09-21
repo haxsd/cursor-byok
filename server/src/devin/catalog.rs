@@ -328,26 +328,27 @@ mod tests {
     use crate::devin::{DevinBindingKind, DevinRoute};
 
     fn settings() -> DevinSettings {
-        let mut settings = DevinSettings::default();
-        settings.bindings = vec![
-            super::super::DevinModelBinding {
-                model_uid: "model-a".into(),
-                model_hash: "hash-a".into(),
-                display_name: "Model A".into(),
-                context_window_tokens: Some(128_000),
-                enabled: true,
-                ..super::super::DevinModelBinding::new("", "")
-            },
-            super::super::DevinModelBinding {
-                model_uid: "model-disabled".into(),
-                model_hash: "hash-disabled".into(),
-                display_name: "Disabled".into(),
-                context_window_tokens: None,
-                enabled: false,
-                ..super::super::DevinModelBinding::new("", "")
-            },
-        ];
-        settings
+        DevinSettings {
+            bindings: vec![
+                super::super::DevinModelBinding {
+                    model_uid: "model-a".into(),
+                    model_hash: "hash-a".into(),
+                    display_name: "Model A".into(),
+                    context_window_tokens: Some(128_000),
+                    enabled: true,
+                    ..super::super::DevinModelBinding::new("", "")
+                },
+                super::super::DevinModelBinding {
+                    model_uid: "model-disabled".into(),
+                    model_hash: "hash-disabled".into(),
+                    display_name: "Disabled".into(),
+                    context_window_tokens: None,
+                    enabled: false,
+                    ..super::super::DevinModelBinding::new("", "")
+                },
+            ],
+            ..Default::default()
+        }
     }
 
     #[test]
