@@ -15,6 +15,7 @@ const emptySettings: DevinSettings = {
   api_port: 43_110,
   inference_port: 43_111,
   local_api_port: 43_112,
+  upstream_api_url: "https://server.self-serve.windsurf.com",
   bindings: [],
 };
 
@@ -169,6 +170,9 @@ export function DevinSettingsPage() {
         <FormField label={t("API 端口")}><TextInput type="number" value={settings.api_port} onChange={(event) => update("api_port", Number(event.target.value))} /></FormField>
         <FormField label={t("推理端口")}><TextInput type="number" value={settings.inference_port} onChange={(event) => update("inference_port", Number(event.target.value))} /></FormField>
         <FormField label={t("本地 API 端口")}><TextInput type="number" value={settings.local_api_port} onChange={(event) => update("local_api_port", Number(event.target.value))} /></FormField>
+        <FormField label={t("上游 API 地址")} hint={t("登录、账号与遥测等本地不处理的方法会转发到这里；模型请求不经过它。")}>
+          <TextInput value={settings.upstream_api_url} onChange={(event) => update("upstream_api_url", event.target.value)} placeholder="https://server.self-serve.windsurf.com" />
+        </FormField>
       </div>
     </TitledCard>
     <TitledCard title={t("模型映射")} action={<Button size="small" disabled={!models.length} onClick={addBinding}>{t("添加映射")}</Button>}>
