@@ -817,6 +817,42 @@ mod tests {
         assert!(!raw.contains("api_key"));
     }
 
+    /// 旧版本的 Devin 设置行在读取时必须完整可用：绑定保持启用，路由字段取默认值，
+    /// 原主哈希仍然是生效模型。保存回读不得改变这三点。
+    #[tokio::test]
+    async fn legacy_devin_row_keeps_its_primary_hash_across_load_and_save() {
+        let directory = tempfile::tempdir().unwrap();
+        let url = format!("sqlite://{}", directory.path().join("test.db").display());
+        let store = Store::connect(&url).await.unwrap();
+        let legacy = r#"{"enabled":true,"auth_token":"","api_port":43110,"inference_port":43111,"local_api_port":43112,"bindings":[{"model_uid":"deven-model","model_hash":"0123abcd","display_name":"Legacy","enabled":true}]}"#;
+        sqlx::query(
+            "INSERT INTO service_settings(setting_key, value_json, updated_at_ms) VALUES ('devin_router', ?, 0)",
+        )
+        .bind(legacy)
+        .execute(store.pool())
+        .await
+        .unwrap();
+
+        let loaded = store.devin_settings().await.unwrap();
+        assert!(loaded.enabled);
+        let binding = &loaded.bindings[0];
+        assert_eq!(binding.model_uid, "deven-model");
+        assert_eq!(binding.model_hash, "0123abcd");
+        assert!(binding.enabled);
+        assert_eq!(binding.kind, crate::devin::DevinBindingKind::Standard);
+        assert!(binding.routes.is_empty());
+        assert_eq!(binding.active_route_id, None);
+        assert_eq!(binding.effective_model_hash(), "0123abcd");
+
+        // Saving through the store must not silently migrate the binding away
+        // from its legacy primary hash.
+        store.set_devin_settings(loaded.clone()).await.unwrap();
+        let reloaded = store.devin_settings().await.unwrap();
+        assert_eq!(reloaded.bindings[0].model_hash, "0123abcd");
+        assert!(reloaded.bindings[0].routes.is_empty());
+        assert_eq!(reloaded.bindings[0].effective_model_hash(), "0123abcd");
+    }
+
     /// 旧版本只存了四个单价字段，读取时必须能平滑降级到新的默认值，
     /// 而不是解析失败导致首页报错。
     #[test]
