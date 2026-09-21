@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api, type DevinBindingKind, type DevinHostPatchReceipt, type DevinHostPatchStatus, type DevinModelBinding, type DevinRoute, type DevinSettings, type Model } from "../../shared/api";
 import { Button } from "../../shared/ui/Button";
 import { FormField, SecretTextInput, TextInput } from "../../shared/ui/FormControls";
@@ -21,6 +22,9 @@ const emptySettings: DevinSettings = {
 
 /** 旧设置只有主模型哈希，界面把它显示成一条合成的主路由，直到用户真正编辑绑定。 */
 const legacyRouteId = "primary";
+
+/** 宿主文件路径必须记住：状态面板、检查、打补丁全靠它，刷新即丢会让人以为功能坏了。 */
+const hostPathStorageKey = "haxsd-byok.devin.host-path";
 
 function routesForDisplay(binding: DevinModelBinding): DevinRoute[] {
   if (binding.routes.length) return binding.routes;
@@ -45,6 +49,7 @@ function nextRouteId(routes: DevinRoute[]): string {
 
 export function DevinSettingsPage() {
   const message = useMessage();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<DevinSettings>(emptySettings);
   const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +58,17 @@ export function DevinSettingsPage() {
   const [hostStatus, setHostStatus] = useState<DevinHostPatchStatus | null>(null);
   const [hostReceipt, setHostReceipt] = useState<DevinHostPatchReceipt | null>(null);
   const [hostBusy, setHostBusy] = useState(false);
+  const [gatewayPortsUp, setGatewayPortsUp] = useState<boolean | null>(null);
+  const [devinCalls, setDevinCalls] = useState<number | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(hostPathStorageKey);
+      if (stored) setHostPath(stored);
+    } catch {
+      // Storage may be unavailable; the field simply stays empty.
+    }
+  }, []);
 
   useEffect(() => {
     void Promise.all([api.devinSettings(), api.models()]).then(([nextSettings, nextModels]) => {
@@ -60,6 +76,69 @@ export function DevinSettingsPage() {
       setModels(nextModels);
     }).catch((cause) => message(cause instanceof Error ? cause.message : String(cause))).finally(() => setLoading(false));
   }, [message]);
+
+  // 状态面板要回答"现在通没通"：端口是否真的在听，以及是否已经跑过 Devin 的调用。
+  useEffect(() => {
+    if (loading || !settings.enabled) {
+      setGatewayPortsUp(null);
+      return;
+    }
+    let cancelled = false;
+    void Promise.all([settings.api_port, settings.inference_port, settings.local_api_port].map(async (port) => {
+      try {
+        const response = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1500) });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    })).then((results) => {
+      if (!cancelled) setGatewayPortsUp(results.every(Boolean));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, settings.enabled, settings.api_port, settings.inference_port, settings.local_api_port]);
+
+  useEffect(() => {
+    if (loading) return;
+    let cancelled = false;
+    void api.calls()
+      .then((calls) => {
+        if (!cancelled) setDevinCalls(calls.filter((call) => call.call_id.startsWith("devin:")).length);
+      })
+      .catch(() => {
+        if (!cancelled) setDevinCalls(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loading]);
+
+  // 已知路径就自动检查一次，让状态面板开箱即用。
+  useEffect(() => {
+    if (loading || !hostPath.trim() || hostStatus) return;
+    let cancelled = false;
+    void api.devinHostStatus(hostPath)
+      .then((status) => {
+        if (!cancelled) setHostStatus(status);
+      })
+      .catch(() => {
+        // 路径失效时保持未知，由用户重新检查。
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, hostPath, hostStatus]);
+
+  const rememberHostPath = (value: string) => {
+    setHostPath(value);
+    setHostStatus(null);
+    try {
+      if (value.trim()) localStorage.setItem(hostPathStorageKey, value);
+    } catch {
+      // Persisting the path is best effort.
+    }
+  };
 
   const update = <K extends keyof DevinSettings>(key: K, value: DevinSettings[K]) => {
     setSettings((current) => ({ ...current, [key]: value }));
@@ -158,6 +237,101 @@ export function DevinSettingsPage() {
     { value: "context_compression" as DevinBindingKind, label: t("上下文压缩") },
   ];
   const content = loading ? <div className={styles.loading}>{t("加载中…")}</div> : <div className={styles.page}>
+    {(() => {
+      const standard = settings.bindings.filter((binding) => binding.enabled && binding.kind !== "context_compression");
+      const compression = settings.bindings.filter((binding) => binding.enabled && binding.kind === "context_compression");
+      const activeBinding = standard[0] ?? null;
+      const activeHash = activeBinding
+        ? (activeBinding.active_route_id
+          ? activeBinding.routes.find((route) => route.route_id === activeBinding.active_route_id && route.enabled)?.model_hash ?? activeBinding.model_hash
+          : activeBinding.model_hash)
+        : "";
+      const activeModel = models.find((model) => model.model_hash === activeHash) ?? null;
+      const devinPatched = hostStatus?.patched ?? false;
+      const devinPointsHere = devinPatched && hostStatus?.ports?.api_port === settings.api_port;
+      const devinPatchedElsewhere = devinPatched && !devinPointsHere;
+      const gatewayLabel = !settings.enabled
+        ? t("已关闭")
+        : gatewayPortsUp === null
+          ? t("检查中…")
+          : gatewayPortsUp
+            ? t("运行中")
+            : t("已启用，端口未监听");
+      const gatewayTone = settings.enabled && gatewayPortsUp === true ? "ok" : settings.enabled ? "warn" : "idle";
+      const devinLabel = !settings.enabled
+        ? t("未知")
+        : devinPointsHere
+          ? t("已指向本机网关")
+          : devinPatchedElsewhere
+            ? t("已指向其他路由器")
+            : hostStatus?.clean
+              ? t("尚未接入")
+              : t("未知");
+      const devinTone = devinPointsHere ? "ok" : devinPatchedElsewhere || devinLabel === t("未知") ? "idle" : "warn";
+      const steps = [
+        {
+          key: "enable",
+          done: settings.enabled && gatewayPortsUp === true,
+          label: t("启用 Devin 网关"),
+          hint: settings.enabled
+            ? gatewayPortsUp === true
+              ? t("端口已就绪")
+              : t("已保存，重启应用后端口才会打开")
+            : t("打开上面的开关并保存"),
+        },
+        {
+          key: "bind",
+          done: standard.length > 0,
+          label: t("绑定一个模型"),
+          hint: standard.length > 0 ? t("已绑定 {count} 个", { count: standard.length }) : t("还没有映射"),
+        },
+        {
+          key: "connect",
+          done: devinPointsHere,
+          label: t("把 Devin 指到本机网关"),
+          hint: devinPointsHere ? t("已接入") : t("用下面的宿主接入完成"),
+        },
+        {
+          key: "verify",
+          done: (devinCalls ?? 0) > 0,
+          label: t("在 Devin 里跑一次对话"),
+          hint: devinCalls === null
+            ? t("无法读取调用记录")
+            : devinCalls > 0
+              ? t("已有 {count} 条 Devin 调用记录", { count: devinCalls })
+              : t("还没有 Devin 调用记录"),
+        },
+      ];
+      return <TitledCard title={t("接入状态")} action={<Button size="small" onClick={() => navigate("/calls")}>{t("查看调用记录")}</Button>}>
+        <div className={styles.status}>
+          <div className={styles.statusHead}>
+            <div className={styles.statusItems}>
+              <div className={styles.statusItem}>
+                <span>{t("网关")}</span>
+                <strong><span className={`${styles.badge} ${gatewayTone === "ok" ? styles.badgeOk : gatewayTone === "warn" ? styles.badgeWarn : styles.badgeIdle}`}>{gatewayLabel}</span></strong>
+              </div>
+              <div className={styles.statusItem}><span>{t("端口")}</span><strong>{settings.api_port} / {settings.inference_port} / {settings.local_api_port}</strong></div>
+              <div className={styles.statusItem}>
+                <span>Devin</span>
+                <strong><span className={`${styles.badge} ${devinTone === "ok" ? styles.badgeOk : devinTone === "warn" ? styles.badgeWarn : styles.badgeIdle}`}>{devinLabel}</span></strong>
+              </div>
+              <div className={styles.statusItem}>
+                <span>{t("当前生效模型")}</span>
+                <strong>{activeModel ? activeModel.display_name : standard.length ? t("模型已删除或哈希无效") : t("未绑定")}</strong>
+              </div>
+              <div className={styles.statusItem}><span>{t("上下文压缩绑定")}</span><strong>{compression.length ? t("已配置 {count} 个", { count: compression.length }) : t("未配置")}</strong></div>
+            </div>
+          </div>
+          <div className={styles.steps}>
+            {steps.map((step, index) => <div key={step.key} className={styles.step}>
+              <span className={`${styles.stepMark} ${step.done ? styles.stepMarkDone : ""}`}>{step.done ? "✓" : index + 1}</span>
+              <span className={styles.stepText}><strong>{step.label}</strong><small>{step.hint}</small></span>
+              <span />
+            </div>)}
+          </div>
+        </div>
+      </TitledCard>;
+    })()}
     <TitledCard title={t("Devin 接入") } action={<Button variant="primary" size="small" disabled={saving} onClick={() => void save()}>{saving ? t("保存中…") : t("保存")}</Button>}>
       <div className={styles.settingRow}>
         <div><strong>{t("启用 Devin 网关")}</strong><small>{t("关闭时不会打开任何 Devin 端口，也不会影响 Cursor。")}</small></div>
@@ -234,7 +408,7 @@ export function DevinSettingsPage() {
       <p className={styles.note}>只对你明确填写的 extension.js 操作。应用补丁前会校验四个版本锚点并创建 SHA-256 备份；未知版本、部分补丁或备份不一致时会拒绝写入。</p>
       <div className={styles.fields}>
         <FormField label="Devin / Windsurf extension.js 路径" hint="例如：C:\\Program Files\\Devin\\resources\\app\\extensions\\windsurf\\dist\\extension.js">
-          <TextInput value={hostPath} onChange={(event) => setHostPath(event.target.value)} placeholder="请输入绝对路径" />
+          <TextInput value={hostPath} onChange={(event) => rememberHostPath(event.target.value)} placeholder="请输入绝对路径" />
         </FormField>
       </div>
       <div className={styles.hostActions}>
