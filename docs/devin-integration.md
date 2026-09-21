@@ -135,6 +135,22 @@ ID.
 | Product call log | `call_id=devin:exec-e2e`, `conversation_id=devin:cascade-e2e`, `model_hash` of the binding's model, `provider_type=openai-chat`, `status=completed`, `finish_reason=stop` |
 | Usage accounting | the product recorded the provider's `11` input / `4` output tokens; those numbers are what the gateway folds into its finish frame |
 
+### Tool-call round trip
+
+The same harness was run with a tool definition in the request and a stub that
+streams a tool call in pieces (id and name first, argument fragments after):
+
+| Stage | Observed |
+| --- | --- |
+| Provider request | the Devin tool definition arrived as an OpenAI `tools[0]` entry with `type: function`, the name, the description, and the JSON schema |
+| Gateway framed response | a text frame, then a tool-call frame carrying `call_stub_1`, `read_file`, and the fully aggregated `{"path":"src/main.rs"}` |
+| Product call log | `finish_reason=tool_use`, `tool_count=1`, `input_tokens=21`, `output_tokens=9` |
+
+A tool call that arrives as several provider deltas is therefore aggregated into
+one Devin tool call with its arguments intact, and a Devin tool definition
+survives the trip to the provider. Executing the tool stays Devin's job; the
+gateway only forwards it.
+
 To re-run the whole thing: start the server with `HAXSD_BYOK_DATA_DIR` pointed at
 a throwaway directory, `POST /__byok-api__/api/models` to add a model whose
 `base_url` is a local OpenAI-compatible endpoint, `PUT /__byok-api__/api/devin/settings`
