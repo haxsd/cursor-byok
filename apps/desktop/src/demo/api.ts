@@ -93,6 +93,7 @@ let devinSettings: DevinSettings = {
   api_port: 43_110,
   inference_port: 43_111,
   local_api_port: 43_112,
+  upstream_api_url: "https://server.self-serve.windsurf.com",
   bindings: [{
     model_uid: "demo-model",
     model_hash: models[0].model_hash,

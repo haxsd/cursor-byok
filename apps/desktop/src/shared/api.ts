@@ -138,6 +138,8 @@ export interface DevinSettings {
   api_port: number;
   inference_port: number;
   local_api_port: number;
+  /** Every request the gateway does not serve locally is forwarded here. */
+  upstream_api_url: string;
   bindings: DevinModelBinding[];
 }
 

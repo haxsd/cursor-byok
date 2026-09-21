@@ -10,6 +10,11 @@ pub const DEFAULT_DEVIN_API_PORT: u16 = 43_110;
 pub const DEFAULT_DEVIN_INFERENCE_PORT: u16 = 43_111;
 pub const DEFAULT_DEVIN_LOCAL_API_PORT: u16 = 43_112;
 
+/// Everything the gateway does not serve locally is forwarded here, the same way
+/// the reference router forwards it. Sign-in, account state and telemetry keep
+/// reaching Devin's own service; only model traffic is answered locally.
+pub const DEFAULT_DEVIN_UPSTREAM_API_URL: &str = "https://server.self-serve.windsurf.com";
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct DevinSettings {
     #[serde(default)]
@@ -22,6 +27,8 @@ pub struct DevinSettings {
     pub inference_port: u16,
     #[serde(default = "default_local_api_port")]
     pub local_api_port: u16,
+    #[serde(default = "default_upstream_api_url")]
+    pub upstream_api_url: String,
     #[serde(default)]
     pub bindings: Vec<DevinModelBinding>,
 }
@@ -34,6 +41,7 @@ impl Default for DevinSettings {
             api_port: DEFAULT_DEVIN_API_PORT,
             inference_port: DEFAULT_DEVIN_INFERENCE_PORT,
             local_api_port: DEFAULT_DEVIN_LOCAL_API_PORT,
+            upstream_api_url: default_upstream_api_url(),
             bindings: Vec::new(),
         }
     }
@@ -135,6 +143,22 @@ impl DevinSettings {
             return Err(Error::Config("Devin ports must be distinct".into()));
         }
 
+        let upstream = self.upstream_api_url.trim();
+        if upstream.is_empty() {
+            return Err(Error::Config(
+                "Devin upstream API URL must not be empty; it receives every request the gateway does not serve locally".into(),
+            ));
+        }
+        match url::Url::parse(upstream) {
+            Ok(parsed)
+                if matches!(parsed.scheme(), "http" | "https") && parsed.host().is_some() => {}
+            _ => {
+                return Err(Error::Config(format!(
+                    "Devin upstream API URL must be an absolute http(s) URL: {upstream}"
+                )))
+            }
+        }
+
         let mut uids = HashSet::with_capacity(self.bindings.len());
         for binding in &self.bindings {
             let uid = binding.model_uid.trim();
@@ -223,6 +247,10 @@ fn default_inference_port() -> u16 {
 
 fn default_local_api_port() -> u16 {
     DEFAULT_DEVIN_LOCAL_API_PORT
+}
+
+fn default_upstream_api_url() -> String {
+    DEFAULT_DEVIN_UPSTREAM_API_URL.to_owned()
 }
 
 pub mod assignment;
