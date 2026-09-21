@@ -120,6 +120,29 @@ desktop product and never against real Devin traffic:
 | `AssignModel` with the mapped UID | returns a fresh UUID session token scoped to the UID |
 | `AssignModel` with an unmapped UID | Connect error `invalid_argument`, `Devin AssignModel has no mapped model UID` |
 
+### Streaming round trip
+
+A full `GetChatMessage` round trip was verified with a real model record whose
+`base_url` pointed at a local OpenAI-compatible stub that streams fixed text and
+a usage block. The request was a hand-built Connect frame carrying a system
+prompt, one user message, the mapped model UID, a cascade ID, and an execution
+ID.
+
+| Stage | Observed |
+| --- | --- |
+| Gateway framed response | two message frames carrying `gateway ` and `round trip ok`, then a finish frame, then the end-stream frame |
+| Provider request | `POST http://127.0.0.1:<stub>/v1/chat/completions` with `model=stub-model`, the system message, the user message `say hello`, `stream=true` |
+| Product call log | `call_id=devin:exec-e2e`, `conversation_id=devin:cascade-e2e`, `model_hash` of the binding's model, `provider_type=openai-chat`, `status=completed`, `finish_reason=stop` |
+| Usage accounting | the product recorded the provider's `11` input / `4` output tokens; those numbers are what the gateway folds into its finish frame |
+
+To re-run the whole thing: start the server with `HAXSD_BYOK_DATA_DIR` pointed at
+a throwaway directory, `POST /__byok-api__/api/models` to add a model whose
+`base_url` is a local OpenAI-compatible endpoint, `PUT /__byok-api__/api/devin/settings`
+to bind that model's hash to a Devin model UID, restart the server, then
+`POST http://127.0.0.1:43111/devin.ConnectService/GetChatMessage` with a framed
+body and a valid `Authorization: Bearer` header. Nothing about that procedure
+touches the desktop product's own data directory.
+
 RPC errors are returned the way the Connect protocol expects: the HTTP status is
 `200` and the failure travels in the end-stream frame, while transport-level
 failures (wrong method, unknown path) keep their plain HTTP status. A successful
@@ -127,9 +150,9 @@ RPC answers a framed request with a framed body plus the end-stream frame,
 which is how streaming clients distinguish "no more messages" from transport
 failure.
 
-Not covered by this run: a full `GetChatMessage` streaming round trip needs a
-real model record in the model store with a reachable provider endpoint, so it
-was exercised only at the unit-test level.
+Still not covered: tool-call streaming, thinking/signature replay, and image
+parts were exercised only at the unit-test level, and no real Devin client has
+been pointed at the gateway yet.
 
 ## Intentional limits
 
