@@ -6,6 +6,9 @@ on:
     branches:
       - main
       - feat/devin-router
+  # Manual runs let the guarded MSVC experiment below be triggered without an
+  # empty commit.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -115,3 +118,11 @@ jobs:
 
       - name: Run platform Clippy
         run: cargo clippy --package haxsd-byok-desktop --all-targets -- -D warnings
+
+      # The developer's Windows GNU toolchain cannot load this test binary
+      # (`0xc0000139`), so the only way to tell a local toolchain quirk from a
+      # real defect is to execute it on the MSVC runner. Skipped until it is
+      # known to pass, so a red job always means a regression.
+      - name: Run the desktop unit tests (MSVC experiment)
+        if: matrix.os == 'windows-latest' && vars.RUN_DESKTOP_UNIT_TESTS == 'true'
+        run: cargo test --package haxsd-byok-desktop --lib
