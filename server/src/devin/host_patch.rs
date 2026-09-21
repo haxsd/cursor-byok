@@ -99,11 +99,7 @@ pub fn apply(path: &Path, ports: DevinPorts) -> Result<PatchReceipt> {
         .map_err(|_| Error::Config("Devin host file is not UTF-8; patch refused".into()))?;
     let status = inspect_content(path, &current_content)?;
     if !status.compatible || !status.clean {
-        return Err(Error::Config(
-            status
-                .message
-                .if_empty_then("Devin host file is not a known clean version"),
-        ));
+        return Err(Error::Config(refusal_message(&status)));
     }
 
     let backup_path = backup_path(path);
@@ -210,6 +206,34 @@ fn inspect_content(path: &Path, content: &str) -> Result<PatchStatus> {
         backup_sha256,
         message,
     })
+}
+
+/// Explains why `apply` refused, and what to do instead. An already patched file
+/// is the common case on a machine that runs another router, so the message has
+/// to name the way out rather than only the refusal.
+fn refusal_message(status: &PatchStatus) -> String {
+    if status.patched {
+        let ports = match status.ports {
+            Some(ports) => format!(
+                "{} / {} / {}",
+                ports.api_port, ports.inference_port, ports.local_api_port
+            ),
+            None => "unknown ports".into(),
+        };
+        return format!(
+            "Devin host file is already patched (ports {ports}); restore the clean version first, \
+             for example the router's own backup next to the file, and then apply this patch"
+        );
+    }
+    if status.compatible {
+        return "Devin host file is patched but its ports could not be read; restore the clean \
+                version first"
+            .into();
+    }
+    if !status.message.is_empty() {
+        return status.message.clone();
+    }
+    "Devin host file is not a known clean version".into()
 }
 
 fn clean_anchors_present(content: &str) -> bool {
@@ -430,20 +454,6 @@ fn patched_local_regex() -> Regex {
         .expect("valid patched local API anchor")
 }
 
-trait EmptyString {
-    fn if_empty_then(self, fallback: &str) -> String;
-}
-
-impl EmptyString for String {
-    fn if_empty_then(self, fallback: &str) -> String {
-        if self.is_empty() {
-            fallback.to_owned()
-        } else {
-            self
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::{fs, path::PathBuf};
@@ -519,6 +529,27 @@ mod tests {
         assert!(
             error.to_string().contains("backup"),
             "unexpected message: {error}"
+        );
+    }
+
+    /// Applying on top of another router's patch is refused, and the refusal has
+    /// to show the way out: the ports it found and the need for a clean file.
+    #[test]
+    fn explains_how_to_proceed_when_the_file_is_already_patched() {
+        let directory = tempdir().unwrap();
+        let path = directory.path().join("extension.js");
+        fs::write(&path, fixture()).unwrap();
+        apply(&path, ports()).unwrap();
+
+        let error = apply(&path, ports()).unwrap_err();
+        let message = error.to_string();
+        assert!(
+            message.contains("43110") && message.contains("43111") && message.contains("43112"),
+            "the refusal must name the ports it found: {message}"
+        );
+        assert!(
+            message.contains("restore the clean version"),
+            "the refusal must name the way out: {message}"
         );
     }
 }
