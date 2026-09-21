@@ -52,6 +52,21 @@ gh run watch --repo haxsd/cursor-byok
 gh run download --repo haxsd/cursor-byok --name manual-build-windows --dir .
 ```
 
+已在本机构建并校验过一份（2026-09-21，run `35578406854`）：
+
+```
+D:\cursor-byok\byok-dev\installer\haxsd byok_1.0.1_x64-setup.exe
+20 462 559 字节
+SHA-256 AC4FC03B461A806EA6954206C79315C113032D1B75B3ACC4BA5D1B239A2223C1
+```
+
+未签名，属于预期：本项目没有代码签名证书，安装时 Windows 会提示来源未知。
+
+> [!IMPORTANT]
+> 产物路径有过一次真实缺陷：Tauri 把安装包输出到**工作区级** `target/release/bundle/nsis/`，
+> 而工作流原本去 `apps/desktop/src-tauri/target/...` 找，配合 `if-no-files-found: warn`，
+> 于是"构建成功但没有产物"。现已修正路径并把缺失产物改为显式失败。
+
 装完后确认数据目录会出现（首次启动后才生成）：
 `%APPDATA%\.haxsd-byok-devin-v3`
 
