@@ -67,6 +67,65 @@ into selection.
 | Runtime health | `health` section in route state | Not modelled |
 | Remote execution | `remoteSsh` with auto patch/connect | Explicit local path only, never automatic |
 
+## The host file on a real installation
+
+The vendor patches the same file this branch's host-patch boundary targets:
+
+```
+D:\devin\Devin\resources\app\extensions\windsurf\dist\extension.js
+```
+
+Its own backup sits next to it as `extension.js.devin-model-router.backup`
+(9 739 343 bytes; the live file is 9 739 096 bytes — the difference is the longer
+`getConfig(...)` calls the vendor replaced with literal URLs).
+
+Running this branch's `inspect` against copies of both files gives:
+
+| File | `compatible` | `clean` | `patched` | `ports` |
+| --- | --- | --- | --- | --- |
+| the vendor's backup | true | **true** | false | none |
+| the live file (vendor-patched) | true | false | **true** | `43100 / 43101 / 43102` |
+
+Three consequences:
+
+1. The four anchors this branch looks for do occur in a real Devin build, in the
+   shape the patcher expects, so the anchor model is not a guess.
+2. `apply` refuses a vendor-patched file with
+   `Devin host file is not a known clean version`. That is the intended
+   fail-closed behaviour, but it means switching from the vendor router to this
+   gateway needs the clean file first. The vendor's own backup is exactly that,
+   so the route is: point the status check at the backup, confirm `clean`,
+   restore it over the live file, then apply this branch's patch.
+3. On this machine the vendor router is installed but not running while Devin is
+   patched to `127.0.0.1:43100`, which is why this switch matters in practice
+   and not only in theory.
+
+### The switch was exercised on a copy of that real file
+
+Running this branch's endpoints against copies only — the live installation was
+never touched — produced a complete cycle:
+
+| Step | Result |
+| --- | --- |
+| Inspect the vendor backup | `clean=true`, no ports |
+| Apply this branch's patch to it | receipt with `original_sha256` of the clean file and `patched_sha256` of the result; a SHA-256-verified backup was written first |
+| Inspect patched result | `patched=true`, ports `43110 / 43111 / 43112` |
+| Patched content | 2 × `http://127.0.0.1:43110`, 1 × `43111`, 1 × `43112`; the official `getConfig(...)` calls it replaced are gone |
+| Restore | `{"restored":true}`, and the file's SHA-256 returned to the vendor backup's exact value |
+
+So the procedure for switching an existing installation from the vendor router to
+this gateway is:
+
+1. copy the vendor backup to a scratch path and make that path the subject of
+   every step, so a mistake cannot damage the installation, for example
+   `Copy-Item <windsurf dist>\extension.js.devin-model-router.backup <scratch>\extension.clean.js`;
+2. point the status check at that copy and confirm it reports `clean`;
+3. apply this branch's patch to the copy and confirm the reported ports;
+4. only then repeat the same two steps against the live file and restart Devin.
+
+The opposite direction works the same way, because this branch's patch writes its
+own backup next to the file.
+
 ## What is still not proven
 
 The vendor's **wire** behaviour — which Devin RPC fields carry a family UID,
