@@ -1,11 +1,14 @@
 name: Release haxsd byok desktop app
 
 # 触发方式：
-#   1. 从 feat/devin-router 打专用标签：git tag haxsd-byok-v1.0.0 && git push origin haxsd-byok-v1.0.0
+#   1. 打版本标签：git tag haxsd-byok-v1.0.0 && git push origin haxsd-byok-v1.0.0
 #   2. 在 Actions 页面手动触发（用于验证构建是否能通过）
 #
-# 说明：本分支只构建 haxsd byok 的 Windows 安装包。
-# 需要 macOS / Linux 产物时，把下面 publish 任务的 matrix 补齐即可（见上游 release.yml）。
+# 说明：本工作流运行在产品自己的仓库里，只构建 Windows 安装包。
+# 需要 macOS / Linux 产物时，把下面 publish 任务的 matrix 补齐即可。
+#
+# 发布正式版本需要仓库机密 TAURI_SIGNING_PRIVATE_KEY；
+# 应用内更新读取 Release 里的 latest.json，由 tauri-action 用该密钥签名产生。
 on:
   push:
     tags:
@@ -54,9 +57,9 @@ jobs:
           test "${version}" = "${cargo_version}"
           if [[ "${GITHUB_REF_TYPE}" = "tag" ]]; then
             test "${GITHUB_REF_NAME}" = "haxsd-byok-v${version}"
-            git fetch origin feat/devin-router:refs/remotes/origin/feat/devin-router
-            if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/feat/devin-router; then
-              echo "haxsd byok release tag must point to a commit contained in feat/devin-router" >&2
+            git fetch origin main:refs/remotes/origin/main
+            if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+              echo "haxsd byok release tag must point to a commit contained in main" >&2
               exit 1
             fi
           else
@@ -120,15 +123,19 @@ jobs:
 
       # 打标签时由 tauri-action 直接建 Release 并上传安装包；
       # 手动触发时只产出 Actions 产物，便于先验证构建是否通过。
+      # TAURI_SIGNING_PRIVATE_KEY 存在时，tauri-action 会同时签名并上传 latest.json，
+      # 应用内更新据此工作：https://github.com/haxsd/haxsd-byok/releases/latest/download/latest.json
       - uses: tauri-apps/tauri-action@v1
         if: needs.prepare.outputs.should_publish == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: apps/desktop
           tagName: haxsd-byok-v__VERSION__
           releaseName: haxsd byok v__VERSION__
-          releaseBody: 从下方资源中下载 haxsd byok Windows 安装包（`-setup.exe`）。
+          releaseBody: 从下方资源中下载 haxsd byok Windows 安装包（`-setup.exe`）。应用内「检查更新」会自动找到这里的最新版本。
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
@@ -136,6 +143,9 @@ jobs:
       - name: Build without publishing (manual run)
         if: needs.prepare.outputs.should_publish != 'true'
         working-directory: apps/desktop
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri:build -- ${{ matrix.args }}
 
       - name: Upload manual build output
