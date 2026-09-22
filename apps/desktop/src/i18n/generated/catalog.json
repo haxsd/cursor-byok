@@ -1663,21 +1663,6 @@
         }
       ]
     },
-    "37cb98ff4d5dcfcc": {
-      "source": "成功 {successful} / 异常 {failed}",
-      "kind": "template",
-      "placeholders": [
-        "successful",
-        "failed"
-      ],
-      "refs": [
-        {
-          "file": "features/home/metrics/HomeMetrics.tsx",
-          "line": 178,
-          "column": 46
-        }
-      ]
-    },
     "382f2e3419a02fef": {
       "source": "仅清理详细记录",
       "kind": "text",
@@ -6195,6 +6180,20 @@
           "file": "features/devin/DevinSettingsPage.tsx",
           "line": 296,
           "column": 17
+        }
+      ]
+    },
+    "d9f1bdb8289c7bd2": {
+      "source": "成功 {successful} / 异常",
+      "kind": "template",
+      "placeholders": [
+        "successful"
+      ],
+      "refs": [
+        {
+          "file": "features/home/metrics/HomeMetrics.tsx",
+          "line": 179,
+          "column": 14
         }
       ]
     },
