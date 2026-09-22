@@ -7,6 +7,9 @@
 :root {
   --oa-card-radius: 9px;
   --oa-overlay-radius: 8px;
+  /* Layout rhythm, overridable per theme so a theme can breathe more. */
+  --oa-section-gap: 16px;
+  --oa-card-padding: 16px;
 }
 
 :root:not([data-platform="macos"]) {
@@ -61,6 +64,63 @@
     checkbox-background: #ffffff0d,
     checkbox-foreground: #ffffff,
     checkbox-border: #ffffff0a,
+  ));
+  color-scheme: dark;
+}
+
+:root[data-theme="midnight"] {
+  /* Deeper base than the default theme, with each surface lifted further than
+     the last so the layout reads as layers instead of one flat grey slab. The
+     borders stay visible so cards do not dissolve into the background. */
+  --oa-tooltip-shadow: 0 16px 40px rgb(0 0 0 / 55%);
+  --oa-dropdown-shadow: 0 18px 44px rgb(0 0 0 / 62%);
+  --oa-card-radius: 12px;
+  --oa-overlay-radius: 10px;
+  --oa-section-gap: 22px;
+  --oa-card-padding: 20px;
+
+  @include vscode-theme((
+    foreground: #eef1f8,
+    errorForeground: #ff6b6b,
+    descriptionForeground: #9aa4bb,
+    focusBorder: #7c9cff,
+    textLink-foreground: #8fa8ff,
+    textCodeBlock-background: #1b2130,
+    editor-background: #0b0e14,
+    editor-selectionBackground: #7c9cff40,
+    editor-selectionForeground: #ffffff,
+    editorCursor-foreground: #ffffff,
+    editorLineNumber-foreground: #64708a,
+    editorLineNumber-activeForeground: #eef1f8,
+    editorWidget-background: #161b25,
+    editorWidget-border: #ffffff1f,
+    editorHoverWidget-background: #1c2330,
+    editorHoverWidget-border: #ffffff2b,
+    editorHoverWidget-foreground: #eef1f8,
+    sideBar-border: #ffffff1f,
+    list-activeSelectionBackground: #7c9cff24,
+    list-activeSelectionForeground: #ffffff,
+    list-hoverBackground: #1c2330,
+    input-background: #11161f,
+    input-foreground: #eef1f8,
+    input-border: #ffffff24,
+    button-background: #6d8cff,
+    button-foreground: #ffffff,
+    dropdown-background: #1c2330,
+    dropdown-foreground: #eef1f8,
+    dropdown-border: #ffffff24,
+    badge-background: #6d8cff,
+    badge-foreground: #ffffff,
+    scrollbarSlider-background: #ffffff1f,
+    scrollbarSlider-hoverBackground: #ffffff2e,
+    scrollbarSlider-activeBackground: #ffffff3d,
+    gitDecoration-addedResourceForeground: #3ddc97,
+    notifications-background: #1c2330,
+    notifications-foreground: #eef1f8,
+    notifications-border: #ffffff24,
+    checkbox-background: #ffffff14,
+    checkbox-foreground: #ffffff,
+    checkbox-border: #ffffff2b,
   ));
   color-scheme: dark;
 }
