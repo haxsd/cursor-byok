@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { IconifyIcon } from "@iconify/react/offline";
 import KeepAliveRouteOutlet from "keepalive-for-react-router";
 import { NavLink, useLocation } from "react-router-dom";
 import cursorIconUrl from "../shared/assets/icons/cursor.svg";
-import { api, type DevinStatus } from "../shared/api";
+import { api } from "../shared/api";
 import { PageLayout } from "./layout/PageLayout";
 import { Card } from "../shared/ui/Card";
 import { ConfirmDialog } from "../shared/ui/ConfirmDialog";
@@ -27,10 +27,9 @@ const tutorialReadStorageKey = "haxsd-byok:tutorial-read";
 const tutorialUrl = "https://docs.leokun.cn";
 
 export function AppLayout() {
-  const { busy, cursorHarness } = useAppStore();
+  const { busy, cursorHarness, devinStatus } = useAppStore();
   const message = useMessage();
   const location = useLocation();
-  const [devinStatus, setDevinStatus] = useState<DevinStatus | null>(null);
   const [leftActionTarget, setLeftActionTarget] = useState<HTMLDivElement | null>(null);
   const [rightActionTarget, setRightActionTarget] = useState<HTMLDivElement | null>(null);
   const [confirmTutorial, setConfirmTutorial] = useState(false);
@@ -43,24 +42,8 @@ export function AppLayout() {
   });
 
   // The sidebar shows the same kind of state for both harnesses, so Cursor and
-  // Devin read as parallel modules rather than one annotated and one bare.
-  useEffect(() => {
-    let cancelled = false;
-    const load = () => void api.devinStatus()
-      .then((status) => {
-        if (!cancelled) setDevinStatus(status);
-      })
-      .catch(() => {
-        if (!cancelled) setDevinStatus(null);
-      });
-    load();
-    const timer = window.setInterval(load, 15_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, []);
-
+  // Devin read as parallel modules rather than one annotated and one bare. Both
+  // values come from the shared store refresh, so there is one source of truth.
   const menuStatus = (path: string) => {
     if (path === "/harness/cursor" && cursorHarness) {
       return {
