@@ -1,9 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { IconifyIcon } from "@iconify/react/offline";
 import KeepAliveRouteOutlet from "keepalive-for-react-router";
 import { NavLink, useLocation } from "react-router-dom";
 import cursorIconUrl from "../shared/assets/icons/cursor.svg";
-import { api } from "../shared/api";
+import { api, type DevinStatus } from "../shared/api";
 import { PageLayout } from "./layout/PageLayout";
 import { Card } from "../shared/ui/Card";
 import { ConfirmDialog } from "../shared/ui/ConfirmDialog";
@@ -30,6 +30,7 @@ export function AppLayout() {
   const { busy, cursorHarness } = useAppStore();
   const message = useMessage();
   const location = useLocation();
+  const [devinStatus, setDevinStatus] = useState<DevinStatus | null>(null);
   const [leftActionTarget, setLeftActionTarget] = useState<HTMLDivElement | null>(null);
   const [rightActionTarget, setRightActionTarget] = useState<HTMLDivElement | null>(null);
   const [confirmTutorial, setConfirmTutorial] = useState(false);
@@ -40,6 +41,42 @@ export function AppLayout() {
       return false;
     }
   });
+
+  // The sidebar shows the same kind of state for both harnesses, so Cursor and
+  // Devin read as parallel modules rather than one annotated and one bare.
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => void api.devinStatus()
+      .then((status) => {
+        if (!cancelled) setDevinStatus(status);
+      })
+      .catch(() => {
+        if (!cancelled) setDevinStatus(null);
+      });
+    load();
+    const timer = window.setInterval(load, 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const menuStatus = (path: string) => {
+    if (path === "/harness/cursor" && cursorHarness) {
+      return {
+        label: cursorHarness.settings_applied ? t("已接管") : t("未接管"),
+        active: cursorHarness.settings_applied,
+      };
+    }
+    if (path === "/harness/devin" && devinStatus) {
+      return {
+        label: devinStatus.listening ? t("运行中") : devinStatus.enabled ? t("待重启") : t("未启用"),
+        active: devinStatus.enabled && devinStatus.listening,
+      };
+    }
+    return null;
+  };
+
   const menuItems: MenuItem[] = [
     { kind: "page", path: "/", label: t("概览"), icon: flatColorAreaChartIcon },
     { kind: "page", path: "/calls", label: t("调用"), icon: flatColorSalesPerformanceIcon },
@@ -100,12 +137,11 @@ export function AppLayout() {
                 ? <Icon src={item.icon} size="1.3em" />
                 : <Icon icon={item.icon} size="1.3em" />}
               <span>{item.label}</span>
-              {item.path === "/harness/cursor" && cursorHarness && <span
-                className={styles.menuStatusTag}
-                data-taken={cursorHarness.settings_applied || undefined}
-              >
-                {cursorHarness.settings_applied ? t("已接管") : t("未接管")}
-              </span>}
+              {(() => {
+                const status = menuStatus(item.path);
+                if (!status) return null;
+                return <span className={styles.menuStatusTag} data-taken={status.active || undefined}>{status.label}</span>;
+              })()}
             </NavLink>
           </div>}
         </VirtualList>
