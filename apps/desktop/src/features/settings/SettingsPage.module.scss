@@ -2,7 +2,7 @@
 
 .page {
   display: grid;
-  gap: 16px;
+  gap: var(--oa-section-gap);
 }
 
 .settingRow {
