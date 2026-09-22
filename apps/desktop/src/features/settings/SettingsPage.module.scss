@@ -94,7 +94,7 @@
     color: var(--vscode-foreground);
     background: var(--vscode-input-background);
     border: 1px solid var(--vscode-input-border);
-    border-radius: 5px;
+    border-radius: var(--oa-radius-sm);
   }
 }
 
