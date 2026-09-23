@@ -12,7 +12,7 @@ A personal fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok)
 
 ## About this repository
 
-This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok), based on upstream **v1.0.0** (commit `3725f27`). Upstream is an MIT-licensed open-source project. This fork makes the following changes for personal use:
+This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok), based on upstream **v1.0.0** (commit `3725f27`), with upstream **v1.0.1** (commit `2068ab2`) folded in. Upstream is an MIT-licensed open-source project. This fork makes the following changes for personal use:
 
 | Change | Description |
 | --- | --- |
@@ -20,6 +20,8 @@ This repository is a fork of [leookun/cursor-byok](https://github.com/leookun/cu
 | Value estimate uses time-of-day pricing | The home page "value estimate" is priced hour by hour with DeepSeek-V4.1-Flash peak / off-peak rates |
 | Languages trimmed | Only Simplified Chinese and English remain (Portuguese removed) |
 | Update endpoint | Auto-update points at this fork so the app is not updated back into an ad-carrying upstream build |
+| Takeover tolerates a stuck Cursor | From upstream v1.0.1: failing to terminate Cursor no longer aborts the takeover |
+| Storage reports real usage | Follows upstream v1.0.1's direction but shows the real database file size instead of upstream's row counts |
 
 Everything else keeps upstream's behavior and code structure, which makes future upstream syncs straightforward.
 
@@ -82,7 +84,32 @@ Only Simplified Chinese and English are available. Other system languages fall b
 The update endpoint now points at `haxsd/cursor-byok` instead of upstream.
 
 > [!IMPORTANT]
-> This fork keeps upstream's Tauri updater public key. To publish signed releases with working auto-update, generate your own key pair, put the public key into `plugins.updater.pubkey` in `apps/desktop/src-tauri/tauri.conf.json`, and sign builds with the private key. Until then the update check fails signature verification and simply installs nothing.
+> Release signing must use a private key that pairs with `plugins.updater.pubkey` in `apps/desktop/src-tauri/tauri.conf.json` (CI injects it as `TAURI_SIGNING_PRIVATE_KEY`). When they do not match, the client simply fails verification: no error, nothing installed. This fork's public key is its own, not upstream's.
+
+### 5. Takeover survives a Cursor that will not terminate (upstream v1.0.1)
+
+Upstream v1.0.1 demotes "terminate Cursor" from a required step to an optional one.
+
+| File | Change |
+| --- | --- |
+| `server/src/local_app/mod.rs` | `process::terminate_cursor().await?` now only logs `tracing::warn!` and continues |
+
+Terminating Cursor merely makes the freshly written `http.proxy` take effect sooner. On Windows the kill fails whenever Cursor is restarting, blocked by permissions or still in use, and the old `?` turned that optional failure into a failed takeover — the user just sees the proxy settings never taking effect.
+
+### 6. Storage shows the real database size (upstream v1.0.1)
+
+Upstream v1.0.1 deleted the column-length size estimate and switched to call and trace counts. This fork keeps showing a size, but reports the database file's real size:
+
+| File | Change |
+| --- | --- |
+| `server/src/store/storage.rs` | The 30-line `LENGTH()` sum with magic constants (256 / 24 / 96 / 48) is replaced by `pragma_page_count()` × `pragma_page_size()`; `bytes` is now the database file size (pages × page size, free pages included) |
+| `apps/desktop/src/features/settings/SettingsPage.tsx` | The value reads "Database {size}"; the three settings loads no longer share one `Promise.all`, so one failing endpoint cannot leave the other two cards empty |
+| `apps/desktop/src/demo/api.ts` | The demo clear branch matches the new meaning: it empties the counts and leaves `bytes` alone |
+
+Two caveats:
+
+- clearing statistics only deletes rows; SQLite moves the freed pages to its free list, so the file shrinks only after `VACUUM` — the size staying put after a clear is expected;
+- the database runs in WAL mode, and pages not yet checkpointed are not part of this number.
 
 ## Build and verify
 
@@ -99,21 +126,25 @@ make build-desktop                           # package the desktop app
 Verification performed on this fork:
 
 - `npm run check` passes (typecheck + production build);
-- `cargo fmt --check`, `cargo clippy -D warnings` and `cargo check --workspace --all-targets` pass;
-- `cargo test -p cursor-server` passes all 242 tests across 16 suites;
+- `cargo fmt --check` and `cargo clippy --workspace --all-targets -- -D warnings` pass;
+- `cargo test -p cursor-server` passes all 243 tests, one of them new: it asserts that the storage figure comes from the page size and is never 0, even on an empty database;
 - the hourly pricing was cross-checked against an independent implementation with all four cost components matching exactly;
 - the sum of the usage buckets equals the aggregate figures returned by the service, so nothing is dropped;
 - the language-to-currency mapping was exercised against the real module with 14 assertions (zh/en × currency × price list × money formatting), all passing.
 
 ## Syncing with upstream
 
+This fork exists to track upstream over the long run, with changes kept small and independent. Its history was re-imported, so the initial commit shares no ancestor with upstream and `git merge upstream/main` does not work. Sync by inspecting what upstream changed and applying it file by file:
+
 ```bash
-git remote add upstream https://github.com/leookun/cursor-byok.git
-git fetch upstream
-git merge upstream/main
+git fetch https://github.com/leookun/cursor-byok.git main
+git diff --stat <last synced upstream commit> FETCH_HEAD    # see the scope first
+git diff <last synced upstream commit> FETCH_HEAD -- <file> | git apply
 ```
 
-Conflicts are limited to the files listed in "What changed".
+Synced up to upstream **v1.0.1** (commit `2068ab2`); the baseline is upstream **v1.0.0** (commit `3725f27`). Between them there are only two behavioural changes (takeover tolerance, storage accounting); everything else is version numbers and generated i18n files.
+
+Files touched by pricing or ads still need to be resolved by hand, following the list in "What changed".
 
 ## Upstream project
 

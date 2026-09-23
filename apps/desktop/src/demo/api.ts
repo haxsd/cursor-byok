@@ -150,9 +150,8 @@ export function installDemoApi() {
     if (path === "/settings/storage/statistics" && method === "GET") return json(storage);
     if (path === "/settings/storage/statistics") {
       const scope = (body as { scope?: string } | null)?.scope ?? "details";
-      storage = scope === "all"
-        ? { bytes: 0, call_count: 0, trace_count: 0 }
-        : { ...storage, bytes: 0 };
+      // 清理只删除记录，数据库文件要等 VACUUM 才会变小，因此 bytes 保持不变。
+      storage = scope === "all" ? { ...storage, call_count: 0, trace_count: 0 } : storage;
       return json(storage);
     }
     if (path === "/settings/proxy" && method === "GET") return json(proxySettings);

@@ -40,13 +40,16 @@ export function SettingsPage() {
   const [editingTab, setEditingTab] = useState(false);
   const [savingTab, setSavingTab] = useState(false);
   useEffect(() => {
-    void Promise.all([api.statisticsStorage(), api.proxySettings(), api.tabSettings()]).then(([nextStorage, nextProxy, nextTab]) => {
-      setStorage(nextStorage);
-      setOutboundProxy(nextProxy);
-      setProxyDraft({ mode: nextProxy.mode, address: nextProxy.address, auth_enabled: nextProxy.auth_enabled, username: nextProxy.username, password: "" });
-      setTabSettings(nextTab);
-      setTabDraft(nextTab);
-    }).catch((cause) => message(cause instanceof Error ? cause.message : String(cause)));
+    const report = (cause: unknown) => message(cause instanceof Error ? cause.message : String(cause));
+    void api.statisticsStorage().then(setStorage).catch(report);
+    void api.proxySettings().then((next) => {
+      setOutboundProxy(next);
+      setProxyDraft({ mode: next.mode, address: next.address, auth_enabled: next.auth_enabled, username: next.username, password: "" });
+    }).catch(report);
+    void api.tabSettings().then((next) => {
+      setTabSettings(next);
+      setTabDraft(next);
+    }).catch(report);
   }, [message]);
   useEffect(() => {
     setProxyPort(String(ports.proxy_port));
@@ -282,7 +285,7 @@ export function SettingsPage() {
         <div className={styles.storageRow}>
           <div>
             <strong>{t("统计数据")}</strong>
-            <small>{storage ? formatBytes(storage.bytes) : t("计算中…")}</small>
+            <small>{storage ? t("数据库 {size}", { size: formatBytes(storage.bytes) }) : t("计算中…")}</small>
           </div>
           <button
             type="button"
