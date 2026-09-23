@@ -1,4 +1,3 @@
-//! Persists content-addressed blobs and their edges.
 //! Storage accounting and cleanup for disposable observability data.
 
 use serde::{Deserialize, Serialize};
@@ -9,6 +8,8 @@ use super::Store;
 
 #[derive(Clone, Copy, Debug, Default, Serialize)]
 pub struct StatisticsStorage {
+    /// 数据库文件的真实大小，由 SQLite 的页数与页大小相乘得到；
+    /// 删除统计数据只会释放页，文件要等 VACUUM 之后才会变小。
     pub bytes: i64,
     pub call_count: i64,
     pub trace_count: i64,
@@ -27,27 +28,7 @@ impl Store {
         let (bytes, call_count, trace_count) = sqlx::query_as::<_, (i64, i64, i64)>(
             r#"
             SELECT
-                COALESCE((
-                    SELECT SUM(
-                        LENGTH(call_id) + LENGTH(run_id) + LENGTH(conversation_id) +
-                        LENGTH(provider_type) + LENGTH(provider_url) + LENGTH(request_type) +
-                        LENGTH(request_url) + LENGTH(model_id) + LENGTH(display_name) +
-                        LENGTH(status) + COALESCE(LENGTH(finish_reason), 0) +
-                        COALESCE(LENGTH(usage_json), 0) + COALESCE(LENGTH(error_kind), 0) +
-                        COALESCE(LENGTH(error_message), 0) + 256
-                    ) FROM llm_calls
-                ), 0) +
-                COALESCE((SELECT SUM(LENGTH(headers_json) + LENGTH(body_json) + 24) FROM llm_call_requests), 0) +
-                COALESCE((SELECT SUM(LENGTH(data) + 24) FROM llm_call_response_chunks), 0) +
-                COALESCE((
-                    SELECT SUM(
-                        LENGTH(request_id) + COALESCE(LENGTH(conversation_id), 0) +
-                        LENGTH(route) + COALESCE(LENGTH(model_id), 0) + LENGTH(status) +
-                        COALESCE(LENGTH(error_message), 0) + 96
-                    ) FROM cursor_run_traces
-                ), 0) +
-                COALESCE((SELECT SUM(LENGTH(artifact_type) + LENGTH(source) + LENGTH(metadata_json) + 48) FROM cursor_run_trace_artifacts), 0) +
-                COALESCE((SELECT SUM(LENGTH(data)) FROM blobs WHERE blob_id IN (SELECT blob_id FROM cursor_run_trace_artifacts)), 0),
+                (SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size()),
                 (SELECT COUNT(*) FROM llm_calls),
                 (SELECT COUNT(*) FROM cursor_run_traces)
             "#,
@@ -135,5 +116,31 @@ impl Store {
             .execute(&mut **transaction)
             .await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 「存储管理」显示的是数据库文件的真实大小：空库也有页，因此不可能是 0。
+    #[tokio::test]
+    async fn statistics_storage_reports_the_database_file_size() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = Store::connect(&format!(
+            "sqlite://{}",
+            directory.path().join("test.db").display()
+        ))
+        .await
+        .unwrap();
+        let page_size: i64 = sqlx::query_scalar("PRAGMA page_size")
+            .fetch_one(&store.pool)
+            .await
+            .unwrap();
+        let storage = store.statistics_storage().await.unwrap();
+        assert!(storage.bytes > 0);
+        assert_eq!(storage.bytes % page_size, 0);
+        assert_eq!(storage.call_count, 0);
+        assert_eq!(storage.trace_count, 0);
     }
 }

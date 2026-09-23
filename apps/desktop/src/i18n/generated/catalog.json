@@ -113,7 +113,7 @@
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 187,
+          "line": 190,
           "column": 82
         },
         {
@@ -352,7 +352,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 96,
+          "line": 99,
           "column": 38
         }
       ]
@@ -381,7 +381,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 281,
+          "line": 284,
           "column": 26
         }
       ]
@@ -756,8 +756,8 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 285,
-          "column": 60
+          "line": 288,
+          "column": 87
         }
       ]
     },
@@ -782,17 +782,17 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 66,
+          "line": 69,
           "column": 42
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 192,
+          "line": 195,
           "column": 22
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 219,
+          "line": 222,
           "column": 58
         }
       ]
@@ -891,7 +891,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 259,
+          "line": 262,
           "column": 43
         }
       ]
@@ -915,7 +915,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 121,
+          "line": 124,
           "column": 15
         }
       ]
@@ -939,7 +939,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 308,
+          "line": 311,
           "column": 24
         }
       ]
@@ -1115,12 +1115,12 @@
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 183,
+          "line": 186,
           "column": 81
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 300,
+          "line": 303,
           "column": 22
         },
         {
@@ -1221,7 +1221,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 145,
+          "line": 148,
           "column": 15
         }
       ]
@@ -1398,7 +1398,7 @@
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 244,
+          "line": 247,
           "column": 27
         }
       ]
@@ -1480,7 +1480,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 310,
+          "line": 313,
           "column": 42
         }
       ]
@@ -1559,7 +1559,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 292,
+          "line": 295,
           "column": 14
         }
       ]
@@ -1588,7 +1588,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 244,
+          "line": 247,
           "column": 39
         }
       ]
@@ -1638,12 +1638,12 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 251,
+          "line": 254,
           "column": 22
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 257,
+          "line": 260,
           "column": 26
         }
       ]
@@ -1713,7 +1713,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 160,
+          "line": 163,
           "column": 66
         }
       ]
@@ -1725,7 +1725,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 276,
+          "line": 279,
           "column": 52
         }
       ]
@@ -2170,7 +2170,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 181,
+          "line": 184,
           "column": 26
         }
       ]
@@ -2264,7 +2264,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 237,
+          "line": 240,
           "column": 78
         }
       ]
@@ -2310,7 +2310,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 241,
+          "line": 244,
           "column": 21
         }
       ]
@@ -2702,7 +2702,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 96,
+          "line": 99,
           "column": 55
         }
       ]
@@ -2866,7 +2866,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 171,
+          "line": 174,
           "column": 16
         }
       ]
@@ -2890,7 +2890,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 268,
+          "line": 271,
           "column": 26
         }
       ]
@@ -2960,7 +2960,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 301,
+          "line": 304,
           "column": 23
         }
       ]
@@ -3015,7 +3015,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 139,
+          "line": 142,
           "column": 83
         }
       ]
@@ -3359,7 +3359,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 240,
+          "line": 243,
           "column": 22
         }
       ]
@@ -3488,7 +3488,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 163,
+          "line": 166,
           "column": 7
         }
       ]
@@ -3812,7 +3812,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 248,
+          "line": 251,
           "column": 26
         }
       ]
@@ -3848,7 +3848,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 59,
+          "line": 62,
           "column": 34
         }
       ]
@@ -3969,7 +3969,7 @@
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 184,
+          "line": 187,
           "column": 133
         },
         {
@@ -4540,7 +4540,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 160,
+          "line": 163,
           "column": 45
         }
       ]
@@ -4566,7 +4566,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 284,
+          "line": 287,
           "column": 22
         }
       ]
@@ -4726,7 +4726,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 276,
+          "line": 279,
           "column": 40
         }
       ]
@@ -5077,12 +5077,12 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 169,
+          "line": 172,
           "column": 22
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 175,
+          "line": 178,
           "column": 20
         }
       ]
@@ -5094,7 +5094,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 206,
+          "line": 209,
           "column": 21
         }
       ]
@@ -5130,7 +5130,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 162,
+          "line": 165,
           "column": 7
         }
       ]
@@ -5524,7 +5524,7 @@
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 320,
+          "line": 323,
           "column": 30
         },
         {
@@ -5716,6 +5716,20 @@
         }
       ]
     },
+    "e3deff526d3369be": {
+      "source": "数据库 {size}",
+      "kind": "template",
+      "placeholders": [
+        "size"
+      ],
+      "refs": [
+        {
+          "file": "features/settings/SettingsPage.tsx",
+          "line": 288,
+          "column": 31
+        }
+      ]
+    },
     "e3fee05f688708b4": {
       "source": "LLM 调用",
       "kind": "text",
@@ -5776,7 +5790,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 72,
+          "line": 75,
           "column": 17
         }
       ]
@@ -5884,7 +5898,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 166,
+          "line": 169,
           "column": 26
         }
       ]
@@ -5999,7 +6013,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 225,
+          "line": 228,
           "column": 16
         }
       ]
@@ -6143,7 +6157,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 252,
+          "line": 255,
           "column": 21
         }
       ]
@@ -6229,7 +6243,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 193,
+          "line": 196,
           "column": 21
         }
       ]
@@ -6444,7 +6458,7 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 311,
+          "line": 314,
           "column": 38
         }
       ]
@@ -6471,7 +6485,7 @@
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 184,
+          "line": 187,
           "column": 121
         },
         {
@@ -6500,17 +6514,17 @@
       "refs": [
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 67,
+          "line": 70,
           "column": 46
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 205,
+          "line": 208,
           "column": 22
         },
         {
           "file": "features/settings/SettingsPage.tsx",
-          "line": 220,
+          "line": 223,
           "column": 58
         }
       ]

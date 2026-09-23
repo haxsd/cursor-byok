@@ -12,7 +12,7 @@
 
 ## 关于这个仓库
 
-本仓库是 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的 fork，基线为上游 **v1.0.0**（提交 `3725f27`）。上游是 MIT 许可的开源项目，本分支在上游基础上做了以下几处改动，供个人自用：
+本仓库是 [leookun/cursor-byok](https://github.com/leookun/cursor-byok) 的 fork，基线为上游 **v1.0.0**（提交 `3725f27`），并已同步上游 **v1.0.1**（提交 `2068ab2`）的改动。上游是 MIT 许可的开源项目，本分支在上游基础上做了以下几处改动，供个人自用：
 
 | 改动 | 说明 |
 | --- | --- |
@@ -20,6 +20,8 @@
 | 价值估算改为分时计价 | 首页「价值估算」按 DeepSeek-V4.1-Flash 的高峰 / 低谷单价**逐小时**计算 |
 | 语言精简 | 界面语言只保留简体中文与英文（移除葡萄牙语） |
 | 更新地址 | 自动更新指向本仓库，避免被更新回上游带广告的版本 |
+| 接管容错 | 同步上游 v1.0.1：终止 Cursor 失败不再中断接管流程 |
+| 存储统计显示真实占用 | 同步上游 v1.0.1 的方向，但显示数据库文件的真实大小，而不是上游的调用条目数 |
 
 除此之外，项目的功能、代码结构与上游保持一致，便于后续同步上游改动。
 
@@ -104,7 +106,32 @@ npm --prefix apps/desktop run i18n:scan
 自动更新地址指向本仓库（`haxsd/cursor-byok`），避免被更新回上游带广告的版本。
 
 > [!IMPORTANT]
-> 本仓库保留了上游的 Tauri 更新公钥。若要正式发布带自动更新的 Release，需要自行生成签名密钥并把公钥填回 `apps/desktop/src-tauri/tauri.conf.json` 的 `plugins.updater.pubkey`，否则客户端会因签名校验失败而不更新（不会报错，也不会安装任何东西）。
+> 发布带自动更新的 Release 时，签名私钥必须与 `apps/desktop/src-tauri/tauri.conf.json` 里的 `plugins.updater.pubkey` 配对（CI 通过 `TAURI_SIGNING_PRIVATE_KEY` 注入私钥）。两者不匹配时客户端只会校验失败：不报错，也不会安装任何东西。本仓库的更新公钥已换成自己的密钥，不再是上游那把。
+
+### 5. 接管容错（同步上游 v1.0.1）
+
+上游 v1.0.1 把「终止 Cursor」从接管流程的必需步骤降级为可选步骤。
+
+| 位置 | 处理 |
+| --- | --- |
+| `server/src/local_app/mod.rs` | `process::terminate_cursor().await?` 改为失败只记 `tracing::warn!` 后继续 |
+
+原因：终止 Cursor 只是让刚写入的 `http.proxy` 更快生效。Windows 上 Cursor 正在重启、被权限挡住或被占用时，终止进程会失败，原来的 `?` 就把这个可选步骤的失败升级成整个接管流程失败，用户看到的现象是代理设置没有生效。
+
+### 6. 「存储管理」显示数据库真实大小（同步上游 v1.0.1）
+
+上游 v1.0.1 删掉了按列长估算存储字节的 SQL，改为显示调用与追踪的条目数。本分支保留「显示大小」这个行为，但把数字换成数据库文件的真实大小：
+
+| 位置 | 处理 |
+| --- | --- |
+| `server/src/store/storage.rs` | 删掉 30 行 `LENGTH()` 求和加魔数（256 / 24 / 96 / 48）的估算，改为 `pragma_page_count()` × `pragma_page_size()`；`bytes` 等于数据库文件大小（页数 × 页大小，含空闲页） |
+| `apps/desktop/src/features/settings/SettingsPage.tsx` | 数值显示为「数据库 {size}」；三路设置读取由 `Promise.all` 拆成三条独立链，任一接口失败不再让另外两块设置一直空着 |
+| `apps/desktop/src/demo/api.ts` | 演示数据的清理分支与新语义一致：只清空条目，`bytes` 保持不变 |
+
+两点注意：
+
+- 清理统计数据只是删除记录，SQLite 会把腾出的页面放进空闲列表，文件要等 `VACUUM` 之后才会变小，所以清理后大小不变是正常的；
+- 数据库开了 WAL，尚未 checkpoint 的页不计入这个数字。
 
 ## 构建与验证
 
@@ -126,8 +153,8 @@ make build-desktop
 本分支的改动已通过以下验证：
 
 - `npm run check`：TypeScript 类型检查与生产构建全部通过；
-- `cargo fmt --check`、`cargo clippy -D warnings`、`cargo check --workspace --all-targets` 通过；
-- `cargo test -p cursor-server`：16 个测试套件、242 项测试全部通过；
+- `cargo fmt --check`、`cargo clippy --workspace --all-targets -- -D warnings` 通过；
+- `cargo test -p cursor-server`：243 项测试全部通过，其中新增一项断言「存储管理」的数值来自页大小（空库也不为 0）；
 - 逐小时计价与独立复算脚本对账，四项费用完全一致；
 - 分桶用量之和与服务端汇总数据相等，不存在漏算；
 - 币种跟随语言的映射用真实模块跑过 14 项断言（中/英 × 币种 × 价格表 × 金额格式化）全部通过。
@@ -143,15 +170,17 @@ make build-desktop
 
 ## 与原版保持同步
 
-本仓库是为了长期跟进上游而建的，改动集中且互不耦合，同步上游的步骤：
+本仓库是为了长期跟进上游而建的，改动集中且互不耦合。本仓库的历史是重新导入的（初始提交与上游没有共同祖先），因此不能直接 `git merge upstream/main`；同步的做法是先看清上游的变更范围，再逐文件套用：
 
 ```bash
-git remote add upstream https://github.com/leookun/cursor-byok.git
-git fetch upstream
-git merge upstream/main
+git fetch https://github.com/leookun/cursor-byok.git main
+git diff --stat <上次同步的上游提交> FETCH_HEAD    # 先看范围：改了哪些文件、增删多少行
+git diff <上次同步的上游提交> FETCH_HEAD -- <文件> | git apply
 ```
 
-若上游同时改动了价格或广告相关文件，按「改动详情」里列出的文件逐一处理冲突即可。
+已同步到上游 **v1.0.1**（提交 `2068ab2`），基线是上游 **v1.0.0**（提交 `3725f27`）。v1.0.0 → v1.0.1 只有两处实质改动（接管容错、存储统计），其余是版本号与 i18n 生成物。
+
+若上游改动了价格或广告相关文件，按「改动详情」里列出的文件逐一处理即可。
 
 ## 原始项目说明（摘自上游）
 
