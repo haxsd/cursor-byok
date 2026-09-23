@@ -295,6 +295,7 @@ export function ModelLibraryPage() {
           actions={<>
             <button type="button" className={controls.primary} disabled={cursorBusy || importingLegacyModels} onClick={openNew}>{t("添加模型")}</button>
             <button type="button" className={controls.secondary} disabled={cursorBusy || importingLegacyModels} onClick={open}>{previewing ? t("读取中…") : t("导入旧版配置")}</button>
+            <button type="button" className={controls.secondary} onClick={() => void navigate("/tutorial")}>{t("先看使用教程")}</button>
           </>}
         />
         : <CursorModelCards

@@ -81,7 +81,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 355,
+          "line": 356,
           "column": 20
         }
       ]
@@ -167,13 +167,18 @@
           "column": 18
         },
         {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 199,
+          "column": 36
+        },
+        {
           "file": "shell/AppLayout.tsx",
-          "line": 133,
+          "line": 113,
           "column": 32
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 136,
+          "line": 116,
           "column": 20
         }
       ]
@@ -185,7 +190,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 353,
+          "line": 354,
           "column": 20
         }
       ]
@@ -338,6 +343,18 @@
         }
       ]
     },
+    "05bb34c03605a64a": {
+      "source": "去调用页",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 100,
+          "column": 15
+        }
+      ]
+    },
     "06619f339fa0ab46": {
       "source": "正在准备插件运行时",
       "kind": "text",
@@ -431,7 +448,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 427,
+          "line": 428,
           "column": 73
         }
       ]
@@ -503,7 +520,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 438,
+          "line": 439,
           "column": 89
         }
       ]
@@ -608,6 +625,18 @@
           "file": "features/calls/CallFacts.tsx",
           "line": 54,
           "column": 62
+        }
+      ]
+    },
+    "0beef2611f402d29": {
+      "source": "术语表",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 216,
+          "column": 24
         }
       ]
     },
@@ -865,6 +894,18 @@
         }
       ]
     },
+    "10f87ef47c22cfc1": {
+      "source": "不会。本应用有独立的端口、数据目录与安装目录，写客户端配置时只处理带自己标记的条目；卸载也不会动别人的配置。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 132,
+          "column": 15
+        }
+      ]
+    },
     "11d76d15222e5697": {
       "source": "还没有这个范围的用量数据。",
       "kind": "text",
@@ -918,7 +959,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 437,
+          "line": 438,
           "column": 36
         }
       ]
@@ -930,7 +971,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 348,
+          "line": 349,
           "column": 39
         }
       ]
@@ -944,6 +985,11 @@
           "file": "features/home/metrics/HomeMetrics.tsx",
           "line": 199,
           "column": 14
+        },
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 145,
+          "column": 6
         }
       ]
     },
@@ -1019,12 +1065,12 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 364,
+          "line": 365,
           "column": 47
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 374,
+          "line": 375,
           "column": 74
         }
       ]
@@ -1255,7 +1301,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 390,
+          "line": 391,
           "column": 52
         }
       ]
@@ -1295,6 +1341,18 @@
           "file": "features/home/metrics/HomeMetrics.tsx",
           "line": 142,
           "column": 5
+        }
+      ]
+    },
+    "1c7cb5326c46141d": {
+      "source": "网关未启用",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 84,
+          "column": 11
         }
       ]
     },
@@ -1397,13 +1455,25 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 59,
+          "line": 53,
           "column": 40
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 139,
+          "line": 119,
           "column": 40
+        }
+      ]
+    },
+    "1f3d4b999251496b": {
+      "source": "你的模型",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 200,
+          "column": 34
         }
       ]
     },
@@ -1465,7 +1535,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 431,
+          "line": 432,
           "column": 89
         }
       ]
@@ -1513,7 +1583,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 335,
+          "line": 336,
           "column": 88
         }
       ]
@@ -1632,6 +1702,18 @@
           "file": "features/calls/CallTable.tsx",
           "line": 112,
           "column": 32
+        }
+      ]
+    },
+    "25b8a738223f3dac": {
+      "source": "网关在运行，还差宿主补丁",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 89,
+          "column": 15
         }
       ]
     },
@@ -1757,7 +1839,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 138,
+          "line": 118,
           "column": 15
         }
       ]
@@ -1786,7 +1868,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 430,
+          "line": 431,
           "column": 186
         }
       ]
@@ -1830,7 +1912,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 390,
+          "line": 391,
           "column": 76
         },
         {
@@ -1882,11 +1964,6 @@
           "file": "shared/ui/Modal.tsx",
           "line": 42,
           "column": 200
-        },
-        {
-          "file": "shell/AppLayout.tsx",
-          "line": 175,
-          "column": 20
         }
       ]
     },
@@ -1954,6 +2031,18 @@
         }
       ]
     },
+    "2f3dea901ef4d3f7": {
+      "source": "网关固定监听 127.0.0.1，不对外网开放。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 203,
+          "column": 20
+        }
+      ]
+    },
     "2f4a361f878176d1": {
       "source": "{label} 必须是有效 JSON",
       "kind": "template",
@@ -1963,7 +2052,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 444,
+          "line": 445,
           "column": 70
         }
       ]
@@ -1992,18 +2081,6 @@
         }
       ]
     },
-    "2f7ba5fd1d12f7f9": {
-      "source": "打开使用教程？",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "shell/AppLayout.tsx",
-          "line": 174,
-          "column": 14
-        }
-      ]
-    },
     "2f9daa828907b93f": {
       "source": "删除",
       "kind": "text",
@@ -2016,7 +2093,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 390,
+          "line": 391,
           "column": 99
         },
         {
@@ -2079,6 +2156,18 @@
         }
       ]
     },
+    "30fc843011f7b9a0": {
+      "source": "调用页能看到每次调用的完整字段：错误信息、HTTP 状态、TTFB 与 Token 构成。先在设置里打开「详细模式」，还能看到请求与响应原文。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 229,
+          "column": 18
+        }
+      ]
+    },
     "311bb313fdeca6aa": {
       "source": "账号",
       "kind": "text",
@@ -2103,6 +2192,18 @@
         }
       ]
     },
+    "31d2547e87f0050e": {
+      "source": "还没有调用记录",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 98,
+          "column": 75
+        }
+      ]
+    },
     "3260348163d03b8e": {
       "source": "留空保持不变",
       "kind": "text",
@@ -2110,12 +2211,12 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 383,
+          "line": 384,
           "column": 35
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 386,
+          "line": 387,
           "column": 41
         }
       ]
@@ -2178,8 +2279,20 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 331,
+          "line": 332,
           "column": 20
+        }
+      ]
+    },
+    "339934a404df0d42": {
+      "source": "先看错误信息：401/403 多半是 Key 或套餐不匹配（有些厂商的编程套餐 Key 与普通 Key 不通用），404 是地址多了或少了路径，超时是网络或代理问题。模型卡上的「测试」会用一次真实请求验证，成功后会显示 tokens/s。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 108,
+          "column": 15
         }
       ]
     },
@@ -2251,6 +2364,18 @@
         }
       ]
     },
+    "3699552035d5a989": {
+      "source": "会影响机器上另一个同类软件吗？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 131,
+          "column": 17
+        }
+      ]
+    },
     "36a43d3dcdca24e6": {
       "source": "配置在启动时读取，重启后请求才会走本机代理。",
       "kind": "text",
@@ -2260,6 +2385,18 @@
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 99,
           "column": 71
+        }
+      ]
+    },
+    "36c3935eaee95b62": {
+      "source": "界面里反复出现、但不一定都眼熟的六个词。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 216,
+          "column": 47
         }
       ]
     },
@@ -2282,7 +2419,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 429,
+          "line": 430,
           "column": 123
         }
       ]
@@ -2407,6 +2544,18 @@
         }
       ]
     },
+    "386ae5e497d00d63": {
+      "source": "一次请求的三段路",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 195,
+          "column": 16
+        }
+      ]
+    },
     "38844b135cf70dfc": {
       "source": "更多",
       "kind": "text",
@@ -2469,6 +2618,18 @@
           "file": "features/calls/CallDetails.tsx",
           "line": 16,
           "column": 32
+        }
+      ]
+    },
+    "39413268a558a8d3": {
+      "source": "设置页可以切换主题与语言、改端口、配置出网代理、清理统计数据。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 233,
+          "column": 18
         }
       ]
     },
@@ -2648,6 +2809,18 @@
         }
       ]
     },
+    "3cbdb36ddf7d316d": {
+      "source": "在客户端里跑一次对话",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 95,
+          "column": 14
+        }
+      ]
+    },
     "3cfae5728b92b334": {
       "source": "Token 用量：{tokens}",
       "kind": "template",
@@ -2664,6 +2837,18 @@
           "file": "features/home/charts/ContributionCalendarChart.tsx",
           "line": 115,
           "column": 14
+        }
+      ]
+    },
+    "3d128734b270e734": {
+      "source": "把客户端的请求指向本机网关。对 Cursor 来说是改它的代理配置；对 Devin 来说是改宿主文件的端口。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 142,
+          "column": 15
         }
       ]
     },
@@ -2703,7 +2888,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 328,
+          "line": 329,
           "column": 22
         }
       ]
@@ -2753,7 +2938,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 348,
+          "line": 349,
           "column": 25
         }
       ]
@@ -2845,6 +3030,18 @@
         }
       ]
     },
+    "419ffe45b0f283eb": {
+      "source": "两件事：生成并信任本地 CA（用于读取 Cursor 的 HTTPS 请求），然后打开接管开关把 Cursor 的请求引到本机。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 68,
+          "column": 15
+        }
+      ]
+    },
     "42655ed8e4108ae2": {
       "source": "输入（非缓存）",
       "kind": "text",
@@ -2924,6 +3121,18 @@
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 116,
           "column": 38
+        }
+      ]
+    },
+    "4377a4e71b8a3cea": {
+      "source": "缓存由模型提供方决定：只有在同一个对话里重复发送相同前缀时才会命中，短对话或每次都换上下文就不会有缓存读取。命中率是「缓存读取 /（缓存读取 + 非缓存输入）」。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 120,
+          "column": 15
         }
       ]
     },
@@ -3017,6 +3226,18 @@
         }
       ]
     },
+    "45a6d115fdfb29bf": {
+      "source": "常见问题",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 207,
+          "column": 24
+        }
+      ]
+    },
     "461d6a57900c2ed7": {
       "source": "连通性测试失败：{error}",
       "kind": "template",
@@ -3057,6 +3278,18 @@
         }
       ]
     },
+    "477581b84e505d10": {
+      "source": "客户端",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 198,
+          "column": 35
+        }
+      ]
+    },
     "4791868cb0a4be4d": {
       "source": "输出价格",
       "kind": "text",
@@ -3090,6 +3323,18 @@
           "file": "features/calls/CallsPage.tsx",
           "line": 80,
           "column": 22
+        }
+      ]
+    },
+    "47e31ed3eb54b74e": {
+      "source": "模型库里配置的服务",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 200,
+          "column": 53
         }
       ]
     },
@@ -3223,7 +3468,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 430,
+          "line": 431,
           "column": 34
         }
       ]
@@ -3250,7 +3495,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 374,
+          "line": 375,
           "column": 944
         }
       ]
@@ -3315,13 +3560,25 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 59,
+          "line": 53,
           "column": 73
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 139,
+          "line": 119,
           "column": 74
+        }
+      ]
+    },
+    "4af136334391c278": {
+      "source": "Devin 页显示端口未监听？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 115,
+          "column": 17
         }
       ]
     },
@@ -3385,18 +3642,6 @@
         }
       ]
     },
-    "4d0680f9efaef147": {
-      "source": "未读",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "shell/AppLayout.tsx",
-          "line": 112,
-          "column": 67
-        }
-      ]
-    },
     "4d4e9f2ad28a4570": {
       "source": "用下面的宿主接入完成",
       "kind": "text",
@@ -3416,7 +3661,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 74,
+          "line": 68,
           "column": 29
         }
       ]
@@ -3495,6 +3740,18 @@
           "file": "features/devin/DevinSettingsPage.tsx",
           "line": 352,
           "column": 61
+        }
+      ]
+    },
+    "4e14c081d9be8266": {
+      "source": "用你在设置里填的单价乘实际用量。默认按高峰/低谷分时计价（UTC 工作日 01:00-04:00 与 06:00-10:00 为高峰），币种跟随界面语言：简体中文用人民币，英文用美元。它是估算，不是账单。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 124,
+          "column": 15
         }
       ]
     },
@@ -3699,8 +3956,13 @@
           "column": 108
         },
         {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 71,
+          "column": 11
+        },
+        {
           "file": "shell/AppLayout.tsx",
-          "line": 53,
+          "line": 47,
           "column": 49
         }
       ]
@@ -3714,6 +3976,18 @@
           "file": "features/devin/DevinSettingsPage.tsx",
           "line": 486,
           "column": 14
+        }
+      ]
+    },
+    "539b143072c62a41": {
+      "source": "自己排查比猜更省时间。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 225,
+          "column": 52
         }
       ]
     },
@@ -3753,7 +4027,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 379,
+          "line": 380,
           "column": 44
         }
       ]
@@ -3900,7 +4174,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 430,
+          "line": 431,
           "column": 83
         }
       ]
@@ -4054,7 +4328,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 336,
+          "line": 337,
           "column": 80
         }
       ]
@@ -4080,6 +4354,18 @@
           "file": "shared/ui/ModelSelect.tsx",
           "line": 120,
           "column": 34
+        }
+      ]
+    },
+    "5c60ad64636e4a33": {
+      "source": "本地 CA 还没就绪",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 74,
+          "column": 13
         }
       ]
     },
@@ -4121,6 +4407,18 @@
           "file": "features/devin/DevinSettingsPage.tsx",
           "line": 416,
           "column": 117
+        }
+      ]
+    },
+    "5f4b3b1a612da5fa": {
+      "source": "本机生成的一份证书，用于读取 Cursor 的 HTTPS 请求。它只保存在本机数据目录，也不会安装到系统证书库。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 143,
+          "column": 18
         }
       ]
     },
@@ -4183,6 +4481,18 @@
           "file": "features/plugins/PluginResourcePanels.tsx",
           "line": 272,
           "column": 102
+        }
+      ]
+    },
+    "601aab06efc02efa": {
+      "source": "额外保存完整的请求头、请求体与响应流，便于排查问题；它会让数据库明显变大。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 146,
+          "column": 17
         }
       ]
     },
@@ -4268,6 +4578,18 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 103,
           "column": 13
+        }
+      ]
+    },
+    "618b9380083b3b9c": {
+      "source": "改写 Devin 自己的 extension.js，把它的上游地址指向本机端口。应用前会校验版本锚点并备份原文件。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 144,
+          "column": 17
         }
       ]
     },
@@ -4358,6 +4680,18 @@
           "file": "features/calls/CallTable.tsx",
           "line": 65,
           "column": 38
+        }
+      ]
+    },
+    "63a690ae396dcfcb": {
+      "source": "去 Cursor 页",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 76,
+          "column": 15
         }
       ]
     },
@@ -4459,6 +4793,18 @@
         }
       ]
     },
+    "652994304ae518e4": {
+      "source": "先保存设置：端口在保存后的下次启动才打开。如果已经重启过仍显示未监听，多半是端口被别的进程占用（本机其他路由器工具也会抢 43110-43112）。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 116,
+          "column": 15
+        }
+      ]
+    },
     "652ec5d40c29fd6a": {
       "source": "速度 {speed} tokens/s · 首字 {firstText} ms · 总耗时 {duration} ms · 输出 {tokens} tokens{estimated} · 返回：{output}",
       "kind": "template",
@@ -4495,7 +4841,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 70,
+          "line": 64,
           "column": 44
         },
         {
@@ -4568,7 +4914,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 139,
+          "line": 119,
           "column": 85
         }
       ]
@@ -4645,7 +4991,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 78,
+          "line": 72,
           "column": 47
         },
         {
@@ -4664,6 +5010,18 @@
           "file": "features/devin/DevinSettingsPage.tsx",
           "line": 357,
           "column": 14
+        }
+      ]
+    },
+    "69fc2c0afd1e9ec2": {
+      "source": "三件事：启用本机网关、把 Devin 的模型标识绑定到模型库、给 Devin 的宿主文件打补丁。绑定之后 Devin 才认识这些模型。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 81,
+          "column": 15
         }
       ]
     },
@@ -4783,6 +5141,18 @@
         }
       ]
     },
+    "6cfd4230e963f0b5": {
+      "source": "网关已启用，等待端口就绪",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 86,
+          "column": 13
+        }
+      ]
+    },
     "6d1876364ac6457d": {
       "source": "代理方式",
       "kind": "text",
@@ -4838,6 +5208,18 @@
           "file": "features/models/CursorGates.tsx",
           "line": 35,
           "column": 9
+        }
+      ]
+    },
+    "6e2d3bfd6e1f9bf1": {
+      "source": "让 Devin 用上它",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 80,
+          "column": 14
         }
       ]
     },
@@ -4917,6 +5299,18 @@
         }
       ]
     },
+    "711c5ecb6951b18b": {
+      "source": "从零到第一条调用记录的完整流程，含常见问题与术语",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 255,
+          "column": 13
+        }
+      ]
+    },
     "71897af761ed38c0": {
       "source": "已启用，端口未监听",
       "kind": "text",
@@ -4936,7 +5330,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 71,
+          "line": 65,
           "column": 29
         }
       ]
@@ -4948,7 +5342,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 334,
+          "line": 335,
           "column": 35
         }
       ]
@@ -4960,7 +5354,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 370,
+          "line": 371,
           "column": 15
         }
       ]
@@ -5035,7 +5429,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 356,
+          "line": 357,
           "column": 20
         }
       ]
@@ -5139,6 +5533,18 @@
         }
       ]
     },
+    "7abc593e95069202": {
+      "source": "按顺序做即可；这一步的状态会跟着你的实际操作变化。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 170,
+          "column": 20
+        }
+      ]
+    },
     "7b00c3d69a0c48a5": {
       "source": "个模型",
       "kind": "text",
@@ -5151,7 +5557,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 147,
+          "line": 127,
           "column": 80
         }
       ]
@@ -5180,6 +5586,18 @@
         }
       ]
     },
+    "7c7b5d23c88433b4": {
+      "source": "去模型库",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 63,
+          "column": 15
+        }
+      ]
+    },
     "7cea2f3c46565d29": {
       "source": "OpenAI 额外参数",
       "kind": "text",
@@ -5192,7 +5610,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 425,
+          "line": 426,
           "column": 67
         }
       ]
@@ -5245,6 +5663,18 @@
         }
       ]
     },
+    "7f750504c5bac7d8": {
+      "source": "待完成",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 163,
+          "column": 198
+        }
+      ]
+    },
     "7f994a83ada99ed8": {
       "source": "保存并测试连通性",
       "kind": "text",
@@ -5254,6 +5684,18 @@
           "file": "features/models/ModelLibraryPage.tsx",
           "line": 293,
           "column": 22
+        }
+      ]
+    },
+    "802a407c774302aa": {
+      "source": "刷新状态",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 171,
+          "column": 77
         }
       ]
     },
@@ -5286,6 +5728,18 @@
           "file": "features/plugins/PluginManagementPage.tsx",
           "line": 310,
           "column": 80
+        }
+      ]
+    },
+    "80dabc31021af695": {
+      "source": "开启接管期间，客户端被指向本机端口，软件不在运行时这些请求会失败。长期不用时建议先关闭接管开关（会把配置清理掉），需要时再打开。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 128,
+          "column": 15
         }
       ]
     },
@@ -5330,6 +5784,18 @@
         }
       ]
     },
+    "8241ed1d21182aea": {
+      "source": "已完成的上手步骤",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 159,
+          "column": 50
+        }
+      ]
+    },
     "82702dcfb6429b27": {
       "source": "下方单价为所选范围内的加权平均价。",
       "kind": "text",
@@ -5339,6 +5805,42 @@
           "file": "features/home/metrics/HomeMetrics.tsx",
           "line": 157,
           "column": 7
+        }
+      ]
+    },
+    "829ed17633dde839": {
+      "source": "只有模型请求被本地处理，其余原样转发。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 192,
+          "column": 49
+        }
+      ]
+    },
+    "82f127df93118898": {
+      "source": "去 Devin 页",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 91,
+          "column": 15
+        }
+      ]
+    },
+    "8365f392cdfae83a": {
+      "source": "添加一个模型",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 58,
+          "column": 14
         }
       ]
     },
@@ -5483,6 +5985,18 @@
           "file": "features/settings/PricingSettingsCard.tsx",
           "line": 123,
           "column": 10
+        }
+      ]
+    },
+    "8640d0f1d59b9882": {
+      "source": "都在本机：数据库在用户目录下的 .haxsd-byok-devin-v3 里。默认只记时间、状态与用量；开启「详细模式」才会保存完整请求与响应。清理入口在设置页的存储管理，可以只清详细记录或清空全部统计。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 136,
+          "column": 15
         }
       ]
     },
@@ -5678,6 +6192,30 @@
         }
       ]
     },
+    "8fac6e7ef63900d6": {
+      "source": "证书已就绪，还差打开接管开关",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 73,
+          "column": 13
+        }
+      ]
+    },
+    "8fe3dec68b60bece": {
+      "source": "Devin 的宿主补丁可以随时「恢复原文件」，恢复后 Devin 回到厂商直连。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 241,
+          "column": 18
+        }
+      ]
+    },
     "90800c48a1dd0655": {
       "source": "{label} 必须是 JSON 对象",
       "kind": "template",
@@ -5687,7 +6225,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 445,
+          "line": 446,
           "column": 87
         }
       ]
@@ -5812,7 +6350,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 53,
+          "line": 47,
           "column": 60
         }
       ]
@@ -5836,7 +6374,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 327,
+          "line": 328,
           "column": 20
         }
       ]
@@ -5872,7 +6410,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 390,
+          "line": 391,
           "column": 250
         }
       ]
@@ -6045,18 +6583,6 @@
         }
       ]
     },
-    "9b1b7ed518ee401d": {
-      "source": "将在系统浏览器中打开使用教程，是否继续？",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "shell/AppLayout.tsx",
-          "line": 180,
-          "column": 11
-        }
-      ]
-    },
     "9b34f3b6a48bb1a6": {
       "source": "本地 API 端口",
       "kind": "text",
@@ -6078,6 +6604,18 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 93,
           "column": 13
+        }
+      ]
+    },
+    "9b6a064241f61658": {
+      "source": "把 Cursor 和 Devin 接到你自己的模型上",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 153,
+          "column": 14
         }
       ]
     },
@@ -6161,7 +6699,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 369,
+          "line": 370,
           "column": 16
         },
         {
@@ -6283,6 +6821,18 @@
           "file": "features/home/HomePage.tsx",
           "line": 350,
           "column": 25
+        }
+      ]
+    },
+    "9fe9eea884f4b0f2": {
+      "source": "还没有模型，任何客户端都无从回答",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 61,
+          "column": 83
         }
       ]
     },
@@ -6471,12 +7021,12 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 374,
+          "line": 375,
           "column": 604
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 377,
+          "line": 378,
           "column": 193
         },
         {
@@ -6513,6 +7063,18 @@
           "file": "shared/ui/Modal.tsx",
           "line": 42,
           "column": 223
+        }
+      ]
+    },
+    "a3155c834376c799": {
+      "source": "请求怎么走",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 192,
+          "column": 24
         }
       ]
     },
@@ -6578,6 +7140,30 @@
         }
       ]
     },
+    "a43e71b705676974": {
+      "source": "模型库里的一项配置就是一个可用的模型：服务器地址、API Key、模型 ID。Cursor 与 Devin 共用这一份。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 59,
+          "column": 15
+        }
+      ]
+    },
+    "a49b4d2738573d4f": {
+      "source": "让 Cursor 用上它",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 67,
+          "column": 14
+        }
+      ]
+    },
     "a49ffd73bc85333d": {
       "source": "平均",
       "kind": "text",
@@ -6613,18 +7199,6 @@
           "file": "features/plugins/PluginManagementPage.tsx",
           "line": 199,
           "column": 36
-        }
-      ]
-    },
-    "a5fb6189a8ad011d": {
-      "source": "打开教程",
-      "kind": "text",
-      "placeholders": [],
-      "refs": [
-        {
-          "file": "shell/AppLayout.tsx",
-          "line": 176,
-          "column": 21
         }
       ]
     },
@@ -6666,7 +7240,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 374,
+          "line": 375,
           "column": 956
         }
       ]
@@ -6756,6 +7330,18 @@
         }
       ]
     },
+    "a8b02d22bf25cad2": {
+      "source": "「价值估算」的钱是怎么算的？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 123,
+          "column": 17
+        }
+      ]
+    },
     "a8c3698b5b8c485d": {
       "source": "已停用",
       "kind": "text",
@@ -6809,7 +7395,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 354,
+          "line": 355,
           "column": 20
         }
       ]
@@ -6877,6 +7463,18 @@
         }
       ]
     },
+    "aab0fe17fae0dfbb": {
+      "source": "数据存在哪？怎么清理？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 135,
+          "column": 17
+        }
+      ]
+    },
     "aab73e2ccdf8efe2": {
       "source": "Cursor 的请求需要一个本地模型来回答。",
       "kind": "text",
@@ -6920,6 +7518,18 @@
           "file": "shared/ui/ModelSelect.tsx",
           "line": 233,
           "column": 67
+        }
+      ]
+    },
+    "abc9e41439b95384": {
+      "source": "模型测试失败了怎么办？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 107,
+          "column": 17
         }
       ]
     },
@@ -7041,12 +7651,12 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 166,
+          "line": 146,
           "column": 60
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 166,
+          "line": 146,
           "column": 121
         }
       ]
@@ -7128,6 +7738,30 @@
         }
       ]
     },
+    "b0895d3694991817": {
+      "source": "先看使用教程",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/models/ModelLibraryPage.tsx",
+          "line": 298,
+          "column": 110
+        }
+      ]
+    },
+    "b0a80b0dc0635021": {
+      "source": "界面上的状态每 2 秒自动刷新一次；看到「服务未连接」说明本地管理服务没起来，先重启应用。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 245,
+          "column": 18
+        }
+      ]
+    },
     "b0e8708601e592f3": {
       "source": "模型已删除或哈希无效",
       "kind": "text",
@@ -7151,6 +7785,26 @@
           "file": "features/settings/PricingSettingsCard.tsx",
           "line": 60,
           "column": 62
+        }
+      ]
+    },
+    "b1b4227b3fa268f4": {
+      "source": "上手进度 {done}/{total}",
+      "kind": "template",
+      "placeholders": [
+        "done",
+        "total"
+      ],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 162,
+          "column": 22
+        },
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 254,
+          "column": 78
         }
       ]
     },
@@ -7207,7 +7861,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 377,
+          "line": 378,
           "column": 49
         }
       ]
@@ -7332,6 +7986,18 @@
         }
       ]
     },
+    "b72353403a3289e9": {
+      "source": "按出现频率排序，点开看答案。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 207,
+          "column": 48
+        }
+      ]
+    },
     "b72b8f9611c15901": {
       "source": "换一个时间范围，或先在 Cursor / Devin 里发起一次对话。",
       "kind": "text",
@@ -7370,6 +8036,18 @@
         }
       ]
     },
+    "b840d73cc5204ebb": {
+      "source": "还没解决的问题？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 225,
+          "column": 24
+        }
+      ]
+    },
     "b86967982067d295": {
       "source": "（估算）",
       "kind": "text",
@@ -7403,6 +8081,18 @@
           "file": "features/calls/CallTable.tsx",
           "line": 70,
           "column": 38
+        }
+      ]
+    },
+    "b97815b747ae182c": {
+      "source": "本地 CA",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 143,
+          "column": 6
         }
       ]
     },
@@ -7657,12 +8347,12 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 382,
+          "line": 383,
           "column": 45
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 385,
+          "line": 386,
           "column": 42
         }
       ]
@@ -7676,6 +8366,18 @@
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 193,
           "column": 15
+        }
+      ]
+    },
+    "bf55b7aac386a49a": {
+      "source": "客户端把请求发给本机网关，网关按你的配置调用模型服务，再把结果原样流回客户端。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 196,
+          "column": 22
         }
       ]
     },
@@ -7791,6 +8493,18 @@
         }
       ]
     },
+    "c2a3aa5d757ab1b1": {
+      "source": "缓存命中率一直是 0？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 119,
+          "column": 17
+        }
+      ]
+    },
     "c30719405cae2c65": {
       "source": "还差 {count} 步",
       "kind": "template",
@@ -7855,6 +8569,18 @@
           "file": "features/plugins/PluginManagementPage.tsx",
           "line": 129,
           "column": 28
+        }
+      ]
+    },
+    "c3daa408d7288329": {
+      "source": "自带密钥（BYOK）",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 141,
+          "column": 6
         }
       ]
     },
@@ -7958,7 +8684,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 374,
+          "line": 375,
           "column": 62
         }
       ]
@@ -7989,6 +8715,18 @@
           "file": "features/models/CursorSettingsPage.tsx",
           "line": 201,
           "column": 21
+        }
+      ]
+    },
+    "c83f4a053450797b": {
+      "source": "上手清单",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 169,
+          "column": 14
         }
       ]
     },
@@ -8050,12 +8788,12 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 352,
+          "line": 353,
           "column": 20
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 75,
+          "line": 69,
           "column": 45
         },
         {
@@ -8142,6 +8880,18 @@
         }
       ]
     },
+    "cb2f39cdeeebfbb5": {
+      "source": "Cursor 与 Devin 是两个并行的模块：各自独立的网关、端口与开关，互不影响；它们共用同一份模型库和同一份统计数据。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 155,
+          "column": 13
+        }
+      ]
+    },
     "cb6dd6bc73e2da1c": {
       "source": "正在读取按小时的用量，暂时按当前时段估价。",
       "kind": "text",
@@ -8224,6 +8974,18 @@
         }
       ]
     },
+    "cf871a6af3dae332": {
+      "source": "Bring Your Own Key：用你自己的模型服务，而不是厂商内置的模型。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 141,
+          "column": 23
+        }
+      ]
+    },
     "cfae1a14d2120c57": {
       "source": "详细模式",
       "kind": "text",
@@ -8238,6 +9000,11 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 392,
           "column": 26
+        },
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 146,
+          "column": 6
         }
       ]
     },
@@ -8430,7 +9197,7 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 382,
+          "line": 383,
           "column": 27
         }
       ]
@@ -8442,7 +9209,7 @@
       "refs": [
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 374,
+          "line": 375,
           "column": 876
         },
         {
@@ -8461,6 +9228,11 @@
           "file": "features/devin/DevinSettingsPage.tsx",
           "line": 346,
           "column": 30
+        },
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 88,
+          "column": 15
         }
       ]
     },
@@ -8553,12 +9325,12 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 151,
+          "line": 131,
           "column": 32
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 155,
+          "line": 135,
           "column": 25
         }
       ]
@@ -8663,8 +9435,20 @@
         },
         {
           "file": "features/models/ModelLibraryPage.tsx",
-          "line": 379,
+          "line": 380,
           "column": 27
+        }
+      ]
+    },
+    "d832bd1b26f037a5": {
+      "source": "换模型不用改客户端：在模型库里改完，两个客户端下次请求就会用新的。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 237,
+          "column": 18
         }
       ]
     },
@@ -8675,8 +9459,22 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 143,
+          "line": 123,
           "column": 93
+        }
+      ]
+    },
+    "d876dd077e517ee5": {
+      "source": "已有 {count} 个模型",
+      "kind": "template",
+      "placeholders": [
+        "count"
+      ],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 61,
+          "column": 35
         }
       ]
     },
@@ -8701,7 +9499,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 104,
+          "line": 95,
           "column": 54
         }
       ]
@@ -8809,6 +9607,18 @@
         }
       ]
     },
+    "db17eefb2b7c1a4d": {
+      "source": "回到 Cursor 或 Devin 里发一句话。成功后回到「调用」页，会看到这次调用的模型、耗时与 Token。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 96,
+          "column": 15
+        }
+      ]
+    },
     "db340a9896306d08": {
       "source": "测试已取消",
       "kind": "text",
@@ -8862,6 +9672,30 @@
         }
       ]
     },
+    "dbf6273735f5e84b": {
+      "source": "两个客户端都只认厂商的服务器与模型。本应用在本机拦下模型请求，用你配置的模型回答；登录、账号、遥测这些请求原样转发给厂商，所以厂商登录照常可用。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 154,
+          "column": 13
+        }
+      ]
+    },
+    "dc10ad2cb31b53cc": {
+      "source": "缓存读取 /（缓存读取 + 非缓存输入）。它衡量的是「有多少输入是从提供方的缓存里读回来的」。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 145,
+          "column": 18
+        }
+      ]
+    },
     "dd02316806e154c5": {
       "source": "本地 CA 已损坏",
       "kind": "text",
@@ -8895,6 +9729,30 @@
           "file": "features/home/charts/DailyTokenUsageChart.tsx",
           "line": 153,
           "column": 16
+        }
+      ]
+    },
+    "ddfd9cac977eee49": {
+      "source": "接管开关打开后需要手动重启 Cursor：配置在 Cursor 启动时读取。另外确认模型库里有模型，并且 Cursor 页的证书状态是「已就绪」。",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 112,
+          "column": 15
+        }
+      ]
+    },
+    "de331c98cd9580f6": {
+      "source": "Cursor 里看不到我的模型？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 111,
+          "column": 17
         }
       ]
     },
@@ -8975,7 +9833,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 76,
+          "line": 70,
           "column": 29
         }
       ]
@@ -9265,7 +10123,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 132,
+          "line": 112,
           "column": 56
         }
       ]
@@ -9308,6 +10166,18 @@
           "file": "shared/ui/Pagination.tsx",
           "line": 24,
           "column": 92
+        }
+      ]
+    },
+    "e59d495953010b21": {
+      "source": "改写模型与鉴权，其余透传",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 199,
+          "column": 55
         }
       ]
     },
@@ -9428,6 +10298,18 @@
         }
       ]
     },
+    "e816946cfa9324f5": {
+      "source": "宿主补丁",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 144,
+          "column": 6
+        }
+      ]
+    },
     "e825a2a42c22380e": {
       "source": "模型类型",
       "kind": "text",
@@ -9494,6 +10376,18 @@
         }
       ]
     },
+    "e9554e112a01940a": {
+      "source": "这是什么",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 152,
+          "column": 47
+        }
+      ]
+    },
     "e9d8d890d33584e8": {
       "source": "没有可用的重置卡。",
       "kind": "text",
@@ -9520,6 +10414,18 @@
           "file": "features/settings/SettingsPage.tsx",
           "line": 383,
           "column": 32
+        }
+      ]
+    },
+    "ea878d5d090510da": {
+      "source": "接管",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 142,
+          "column": 6
         }
       ]
     },
@@ -9637,6 +10543,20 @@
         }
       ]
     },
+    "edb9778086b9c2c4": {
+      "source": "已有 {count} 条调用记录",
+      "kind": "template",
+      "placeholders": [
+        "count"
+      ],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 98,
+          "column": 26
+        }
+      ]
+    },
     "edc70de18c6da1a6": {
       "source": "安装本地 CA",
       "kind": "text",
@@ -9732,6 +10652,18 @@
           "file": "features/home/HomePage.tsx",
           "line": 217,
           "column": 9
+        }
+      ]
+    },
+    "f28461bb49c85647": {
+      "source": "已完成",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 163,
+          "column": 72
         }
       ]
     },
@@ -9862,6 +10794,18 @@
         }
       ]
     },
+    "f746bc52bb41a5e8": {
+      "source": "退出软件后 Cursor / Devin 还能用吗？",
+      "kind": "text",
+      "placeholders": [],
+      "refs": [
+        {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 127,
+          "column": 17
+        }
+      ]
+    },
     "f78265089144369a": {
       "source": "插件配置",
       "kind": "text",
@@ -9874,7 +10818,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 77,
+          "line": 71,
           "column": 46
         },
         {
@@ -9934,7 +10878,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 146,
+          "line": 126,
           "column": 32
         }
       ]
@@ -9956,7 +10900,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 59,
+          "line": 53,
           "column": 84
         }
       ]
@@ -10198,7 +11142,7 @@
       "refs": [
         {
           "file": "shell/AppLayout.tsx",
-          "line": 142,
+          "line": 122,
           "column": 32
         }
       ]
@@ -10309,7 +11253,7 @@
         },
         {
           "file": "shell/AppLayout.tsx",
-          "line": 69,
+          "line": 63,
           "column": 39
         },
         {
@@ -10325,9 +11269,14 @@
       "placeholders": [],
       "refs": [
         {
+          "file": "features/tutorial/TutorialPage.tsx",
+          "line": 253,
+          "column": 14
+        },
+        {
           "file": "shell/AppLayout.tsx",
-          "line": 79,
-          "column": 48
+          "line": 73,
+          "column": 47
         }
       ]
     },

@@ -44,6 +44,10 @@
 
 .navItem {
   flex: 0 0 auto;
+  /* 英文标签明显比中文长；窗口不够宽时应该由标签省略，而不是把整项压成一个字母
+     （真实发生过：英文下最后一项只剩一个 "U"）。 */
+  min-width: 0;
+  max-width: 220px;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -63,6 +67,13 @@
   transition:
     color var(--oa-transition-fast),
     background var(--oa-transition-fast);
+
+  /* 图标与状态永远保留，被压缩的只能是标签。 */
+  > span:not([class]) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &:hover {
     color: var(--vscode-foreground);
