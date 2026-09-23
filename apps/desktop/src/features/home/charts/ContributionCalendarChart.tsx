@@ -129,7 +129,10 @@ export function ContributionCalendarChart({ data, onSelectDay }: {
         width={width}
         height={height + 16}
         viewBox={`0 0 ${width} ${height + 16}`}
-        role="img"
+        /* role="img" 会把所有后代从无障碍树里摘掉（img 的子节点被视为装饰），
+           而每一格是可以 Tab 到、可以按回车选中的按钮——那样键盘用户会停在
+           365 个没有任何名字的元素上。可交互时用 group，让每一格自己说话。 */
+        role={onSelectDay ? "group" : "img"}
         aria-label={t("过去一年的 Token 用量日历")}
       >
         {layout.monthTicks.map((tick) => <text

@@ -4,24 +4,17 @@ import { useI18n } from "../../i18n/store";
 import { ScrollableContent } from "../../shared/virtual/ScrollableContent";
 import { Pagination } from "../../shared/ui/Pagination";
 import { Meter } from "../../shared/ui/ProgressRing";
-import { StatusPill, type StatusTone } from "../../shared/ui/StatusPill";
+import { StatusPill } from "../../shared/ui/StatusPill";
 import { Icon } from "../../shared/ui/Icon";
 import { TooltipTrigger } from "../../shared/ui/TooltipTrigger";
 import { EmptyState } from "../../shared/ui/EmptyState";
 import { CallFacts } from "./CallFacts";
 import { chartPalette } from "../home/charts/chartTheme";
+import { callStatusLabel, callStatusTone } from "../../shared/utils/callStatus";
 import { formatCompactInteger } from "../../shared/utils/numberFormat";
 import { formatDuration, formatRelativeTime } from "../../shared/utils/relativeTime";
 import { chevronRightIcon, eyeIcon, activityIcon } from "../../shared/ui/icons";
 import styles from "./CallTable.module.scss";
-
-const STATUS_TONE: Record<string, StatusTone> = {
-  completed: "ok",
-  failed: "bad",
-  error: "bad",
-  cancelled: "warn",
-  running: "info",
-};
 
 type SortKey = "created_at" | "duration" | "tokens";
 
@@ -91,7 +84,7 @@ export function CallTable({ calls, onDetails }: { calls: LlmCall[]; onDetails: (
               >
                 <Icon icon={chevronRightIcon} size="1em" className={styles.chevron} data-open={isOpen || undefined} />
               </button>
-              <span role="cell"><StatusPill tone={STATUS_TONE[call.status] ?? "idle"}>{call.status}</StatusPill></span>
+              <span role="cell"><StatusPill tone={callStatusTone(call.status)} title={call.status}>{callStatusLabel(call.status)}</StatusPill></span>
               <span className={styles.model} role="cell">
                 <span className={styles.modelName} title={call.display_name}>{call.display_name || call.model_id}</span>
                 <span className={styles.modelId} title={call.model_id}>{call.model_id}</span>

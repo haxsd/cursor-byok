@@ -51,6 +51,20 @@ function nextRouteId(routes: DevinRoute[]): string {
   return `route-${index}`;
 }
 
+/**
+ * 新增映射时给一个还没被占用的 UID。
+ *
+ * 服务端会拒绝重复的 UID，所以按「条数 + 1」命名在删掉中间一条之后重新添加时会
+ * 撞名：改完后保存只会得到一句「duplicate Devin model UID」，用户还得自己猜是
+ * 哪一条重复了。
+ */
+function nextModelUid(bindings: DevinModelBinding[]): string {
+  const used = new Set(bindings.map((binding) => binding.model_uid.trim()));
+  let index = bindings.length + 1;
+  while (used.has(`cursor-byok-${index}`)) index += 1;
+  return `cursor-byok-${index}`;
+}
+
 export function DevinSettingsPage() {
   const message = useMessage();
   const navigate = useNavigate();
@@ -158,7 +172,7 @@ export function DevinSettingsPage() {
   const addBinding = () => {
     const model = models[0];
     update("bindings", [...settings.bindings, {
-      model_uid: `cursor-byok-${settings.bindings.length + 1}`,
+      model_uid: nextModelUid(settings.bindings),
       model_hash: model?.model_hash ?? "",
       display_name: model?.display_name ?? "",
       context_window_tokens: model?.context_window_tokens ?? null,

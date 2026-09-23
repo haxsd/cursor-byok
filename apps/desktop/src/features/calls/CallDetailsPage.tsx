@@ -3,21 +3,14 @@ import { useParams } from "react-router-dom";
 import { api, type CallDetail } from "../../shared/api";
 import { CallDetails } from "./CallDetails";
 import { EmptyState } from "../../shared/ui/EmptyState";
-import { StatusPill, type StatusTone } from "../../shared/ui/StatusPill";
+import { StatusPill } from "../../shared/ui/StatusPill";
 import { Card } from "../../shared/ui/Card";
+import { callStatusLabel, callStatusTone } from "../../shared/utils/callStatus";
 import { formatCompactInteger } from "../../shared/utils/numberFormat";
 import { formatDuration } from "../../shared/utils/relativeTime";
 import { alertCircleIcon, activityIcon } from "../../shared/ui/icons";
 import styles from "./CallDetailsPage.module.scss";
 import { ScrollableContent } from "../../shared/virtual/ScrollableContent";
-
-const STATUS_TONE: Record<string, StatusTone> = {
-  completed: "ok",
-  failed: "bad",
-  error: "bad",
-  cancelled: "warn",
-  running: "info",
-};
 
 /**
  * 调用详情，在自己的窗口里打开。
@@ -51,7 +44,7 @@ export function CallDetailsPage() {
     <ScrollableContent className={styles.scroller} contentClassName={styles.content}>
       <header className={styles.header}>
         <div className={styles.titleRow}>
-          {call && <StatusPill tone={STATUS_TONE[call.status] ?? "idle"}>{call.status}</StatusPill>}
+          {call && <StatusPill tone={callStatusTone(call.status)} title={call.status}>{callStatusLabel(call.status)}</StatusPill>}
           <h1>{call ? call.display_name || call.model_id : t("调用详情")}</h1>
           {call && <span className={styles.route} data-route={call.route}>{call.route === "cursor_official" ? t("Cursor 官方") : "BYOK"}</span>}
         </div>
