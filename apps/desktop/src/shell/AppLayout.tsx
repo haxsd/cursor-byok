@@ -8,13 +8,17 @@ import { PageLayout } from "./layout/PageLayout";
 import { ConfirmDialog } from "../shared/ui/ConfirmDialog";
 import controls from "../shared/ui/Controls.module.scss";
 import { Icon } from "../shared/ui/Icon";
+import { StatusPill } from "../shared/ui/StatusPill";
 import { TooltipTrigger } from "../shared/ui/TooltipTrigger";
 import { navCallsIcon, navDevinIcon, navModelsIcon, navOverviewIcon, navPluginsIcon, navSettingsIcon, navTutorialIcon } from "../shared/ui/navIcons";
-import { refreshIcon } from "../shared/ui/icons";
+import { refreshIcon, searchIcon } from "../shared/ui/icons";
 import { useMessage } from "../shared/ui/message";
 import { appStore, useAppStore } from "../shared/store/appStore";
 import styles from "./AppLayout.module.scss";
+import { CommandPalette } from "./CommandPalette";
+import { OfflineBanner } from "./OfflineBanner";
 import { PageActionsTarget } from "./PageActions";
+import { PageErrorBoundary } from "./PageErrorBoundary";
 
 type MenuItem =
   | { kind: "page"; path: string; label: string; icon: IconifyIcon | string }
@@ -26,7 +30,7 @@ const tutorialReadStorageKey = "haxsd-byok:tutorial-read";
 const tutorialUrl = "https://docs.leokun.cn";
 
 export function AppLayout() {
-  const { busy, cursorHarness, devinStatus } = useAppStore();
+  const { busy, cursorHarness, devinStatus, overview, models, offline } = useAppStore();
   const message = useMessage();
   const location = useLocation();
   const [leftActionTarget, setLeftActionTarget] = useState<HTMLDivElement | null>(null);
@@ -47,13 +51,13 @@ export function AppLayout() {
     if (path === "/harness/cursor" && cursorHarness) {
       return {
         label: cursorHarness.settings_applied ? t("已接管") : t("未接管"),
-        active: cursorHarness.settings_applied,
+        tone: cursorHarness.settings_applied ? "ok" as const : "idle" as const,
       };
     }
     if (path === "/harness/devin" && devinStatus) {
       return {
         label: devinStatus.listening ? t("运行中") : devinStatus.enabled ? t("待重启") : t("未启用"),
-        active: devinStatus.enabled && devinStatus.listening,
+        tone: devinStatus.enabled && devinStatus.listening ? "ok" as const : devinStatus.enabled ? "warn" as const : "idle" as const,
       };
     }
     return null;
@@ -86,7 +90,7 @@ export function AppLayout() {
           // Read state remains valid for the current session when storage is unavailable.
         }
       })
-      .catch((cause) => message(cause instanceof Error ? cause.message : String(cause)));
+      .catch((cause) => message.error(cause));
   }, [message]);
 
   const renderIcon = (icon: IconifyIcon | string) => typeof icon === "string"
@@ -94,6 +98,8 @@ export function AppLayout() {
     : <Icon icon={icon} size="1.15em" />;
 
   return <PageLayout className={styles.root}>
+    <CommandPalette />
+    <OfflineBanner />
     <div className={styles.topBar}>
       <nav className={styles.navigation} aria-label={t("主菜单")}>
         {menuItems.map((item) => item.kind === "group"
@@ -116,13 +122,44 @@ export function AppLayout() {
               {(() => {
                 const status = menuStatus(item.path);
                 if (!status) return null;
-                return <span className={styles.navStatus} data-active={status.active || undefined}>{status.label}</span>;
+                return <span className={styles.navStatus} data-tone={status.tone}>{status.label}</span>;
               })()}
             </NavLink>)}
       </nav>
-      {/* Page actions share the title's band rather than the navigation bar: a page
-          with a wide filter (the overview's time range) would otherwise squeeze the
-          bar until items were clipped on a narrow window. */}
+      {/* The state of the machine, on every page. It replaced a per-page hunt: the
+          gateway's health, how much has been called and how many models exist were
+          each only visible on one page, so "is it working" had no single answer. */}
+      <div className={styles.systemStatus} aria-label={t("运行状态")}>
+        <TooltipTrigger label={t("本机网关")}>
+          <StatusPill
+            tone={offline ? "bad" : devinStatus?.listening ? "ok" : devinStatus?.enabled ? "warn" : "idle"}
+            title={t("本机网关")}
+          >{offline
+            ? t("服务未连接")
+            : devinStatus?.listening ? t("运行中") : devinStatus?.enabled ? t("待重启") : t("已关闭")}</StatusPill>
+        </TooltipTrigger>
+        <span className={styles.statusDivider} aria-hidden="true" />
+        <TooltipTrigger label={t("调用记录中已统计的调用次数")}>
+          <span className={styles.statusFact}><strong>{overview.metrics.llm_calls}</strong>{t("次调用")}</span>
+        </TooltipTrigger>
+        <span className={styles.statusDivider} aria-hidden="true" />
+        <TooltipTrigger label={t("模型库里可用的模型")}>
+          <span className={styles.statusFact}><strong>{models.length}</strong>{t("个模型")}</span>
+        </TooltipTrigger>
+        <span className={styles.statusDivider} aria-hidden="true" />
+        {/* A keyboard shortcut nobody can see is a shortcut nobody uses. */}
+        <TooltipTrigger label={t("搜索或执行命令")}>
+          <button
+            type="button"
+            className={styles.commandButton}
+            aria-label={t("搜索或执行命令")}
+            onClick={() => window.dispatchEvent(new Event("byok:open-command-palette"))}
+          >
+            <Icon icon={searchIcon} size="1em" />
+            <kbd>Ctrl K</kbd>
+          </button>
+        </TooltipTrigger>
+      </div>
     </div>
     <div className={styles.actionRegion}>
       <div ref={setLeftActionTarget} className={styles.pageActions} />
@@ -144,14 +181,16 @@ export function AppLayout() {
     </ConfirmDialog>
     <main className={styles.content}>
       <PageActionsTarget.Provider value={{ left: leftActionTarget, right: rightActionTarget }}>
-        <KeepAliveRouteOutlet
-          activeCacheKey={location.pathname}
-          include={keptAlivePages}
-          max={keptAlivePages.length}
-          enableActivity
-          containerClassName={styles.keepAliveContainer}
-          cacheNodeClassName={styles.keepAlivePage}
-        />
+        <PageErrorBoundary resetKey={location.pathname}>
+          <KeepAliveRouteOutlet
+            activeCacheKey={location.pathname}
+            include={keptAlivePages}
+            max={keptAlivePages.length}
+            enableActivity
+            containerClassName={styles.keepAliveContainer}
+            cacheNodeClassName={styles.keepAlivePage}
+          />
+        </PageErrorBoundary>
       </PageActionsTarget.Provider>
     </main>
   </PageLayout>;

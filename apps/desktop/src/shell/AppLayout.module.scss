@@ -47,13 +47,13 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  height: 32px;
-  padding: 0 11px;
+  height: 30px;
+  padding: 0 10px;
   color: var(--vscode-descriptionForeground);
   text-decoration: none;
   background: transparent;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--oa-radius-md);
   font: inherit;
   font-size: type.$font-size-xs;
   font-weight: type.$font-weight-medium;
@@ -88,24 +88,35 @@
 .navDivider {
   flex: 0 0 auto;
   width: 1px;
-  height: 18px;
-  margin: 0 8px;
+  height: 16px;
+  margin: 0 7px;
   background: var(--oa-border);
 }
 
+/* A dot plus a word, not a filled badge: two of these sit inside a row that also
+   carries an icon and a label, and a second filled shape next to the active pill
+   made the bar read as two competing selections. */
 .navStatus {
   flex: 0 0 auto;
-  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--vscode-descriptionForeground);
-  background: color-mix(in srgb, var(--vscode-descriptionForeground) 10%, transparent);
-  border-radius: 999px;
   font-size: type.$font-size-2xs;
-  line-height: 16px;
+  font-weight: type.$font-weight-regular;
+  line-height: 1;
 
-  &[data-active] {
-    color: var(--oa-ok);
-    background: var(--oa-ok-soft);
+  &::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    background: currentColor;
+    border-radius: 50%;
   }
+
+  &[data-tone="ok"] { color: var(--oa-ok); }
+  &[data-tone="warn"] { color: var(--oa-warn); }
+  &[data-tone="bad"] { color: var(--oa-bad); }
 }
 
 .navDot {
@@ -114,6 +125,75 @@
   height: 6px;
   background: var(--oa-warn);
   border-radius: 50%;
+}
+
+/* Right end of the navigation bar: the machine's state, on every page. */
+.systemStatus {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 10px 3px 8px;
+  background: color-mix(in srgb, var(--vscode-foreground) 4%, transparent);
+  border: 1px solid var(--oa-border);
+  border-radius: 999px;
+}
+
+.statusFact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--vscode-descriptionForeground);
+  font-size: type.$font-size-2xs;
+  white-space: nowrap;
+
+  strong {
+    color: var(--vscode-foreground);
+    font-family: var(--oa-number-font);
+    font-weight: type.$font-weight-medium;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.statusDivider {
+  width: 1px;
+  height: 12px;
+  background: var(--oa-border);
+}
+
+/* 快捷键要么看得见，要么没人用。 */
+.commandButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 6px 0 4px;
+  color: var(--vscode-descriptionForeground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--oa-radius-sm);
+  font: inherit;
+  font-size: type.$font-size-2xs;
+  transition: color var(--oa-transition-fast), background var(--oa-transition-fast);
+
+  kbd {
+    padding: 0 4px;
+    background: color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
+    border-radius: var(--oa-radius-xs);
+    font-family: var(--oa-code-font);
+    font-size: type.$font-size-3xs;
+    line-height: 15px;
+  }
+
+  &:hover {
+    color: var(--vscode-foreground);
+    background: color-mix(in srgb, var(--vscode-foreground) 8%, transparent);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--oa-focus-ring);
+  }
 }
 
 /* Sits in the title band, right-aligned with the page content, so the navigation bar
@@ -158,4 +238,25 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
+}
+
+/* A page arriving. The cache node is detached from the container while inactive and
+   re-attached when its route comes back, which restarts this animation — so the
+   transition needs no routing code, and it plays under keep-alive exactly as it does
+   on a first visit. */
+.keepAlivePage:global(.active) {
+  animation: page-enter 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keepAlivePage:global(.active) {
+    animation: none;
+  }
 }
