@@ -136,17 +136,47 @@ Shell:   Windows PowerShell 5.1
 
 ---
 
-## 五、UI 设计系统（已完成一轮全面升级）
+## 五、UI 设计系统
 
 ### token 层（`apps/desktop/src/styles/`）
 
 ```
 _typography.scss   字号 + 行高 + 字重 + 字距（唯一允许定义字体的地方）
-_themes.scss       VS Code 风格 token + 半径尺度 + 阴影 + 动效 + 图表色板
+_themes.scss       VS Code 风格 token + 半径尺度 + 间距尺度 + 阴影 + 动效 + 图表色板
 globals.scss       全局默认（行高、focus ring、标题字重）
 ```
 
 **规则**：组件里**不许写死** `font-size` / `font-weight` / `line-height` / `border-radius`，一律用 token。
+
+间距同样走 token：`--oa-space-1..6`（4/8/12/16/24/32）与 `--oa-row-height`。
+状态色补齐为 `--oa-ok` / `--oa-warn` / `--oa-bad` / `--oa-info`（各带 `-soft`），
+凹陷区域用 `--oa-surface-well`，页面顶部底色用 `--oa-hero-wash`。
+组件里再出现 `--vscode-testing-iconPassed` 这类**主题没定义**的名字（会静默退回硬编码色）
+就是 bug：`--vscode-*` 只有 `_themes.scss` 里列出的那些存在。
+
+### 共享组件套件（`apps/desktop/src/shared/ui/`）
+
+页面重设计带来的原语，新页面一律复用它们，不要再各自拼一套：
+
+| 组件 | 用途 |
+|---|---|
+| `PageTitle` | 标题带里的页面名 + 状态胶囊 + 一句话说明（`PageContent`/`VirtualPage` 的 `title` 传它） |
+| `SectionHeading` | 页面内的分组标题（eyebrow + 标题 + 说明 + 操作） |
+| `StatTile` | 头条数字磁贴（label / value / hint / 右侧或底部可视化） |
+| `StatusPill` | 唯一的状态表达（ok / warn / bad / info / idle，圆点 + 文字） |
+| `StatusHero` | 接入状态整块：结论 + 请求路径 + 还差哪几步（Cursor 与 Devin 共用） |
+| `ConnectionPath` | 请求路径上的节点与连线（原来叫 `DevinPath`，已在共享层） |
+| `EmptyState` | 所有「还没有 / 需要先设置」形态（图标 + 标题 + 说明 + 步骤 + 操作） |
+| `Segmented` | 分段控件（时间范围、分组方式、筛选状态） |
+| `SearchInput` | 带清除按钮的筛选输入 |
+| `Sparkline` / `ProgressRing` / `Meter` | 迷你趋势线 / 圆环 / 占比条（SVG，读 `currentColor`） |
+| `Toolbar.module.scss` | 工具条与只读指标条的几何（`.bar` / `.facts` / `.fact` / `.count`） |
+| `PageErrorBoundary` | 页面级错误边界：一页渲染异常不再让整个应用白屏 |
+
+页面骨架：`shell/AppLayout`（横向导航 + 右上角全局状态条）、`shell/layout/PageContent`、
+`VirtualPage`（虚拟滚动页面）。**切换页面时会播放 220ms 的入场动画**，实现方式见
+`AppLayout.module.scss` 的 `.keepAlivePage:global(.active)`——缓存节点在非激活时会从容器
+上摘下来，重新挂上时 CSS 动画自然重放，不需要路由层参与。
 
 ### 主题
 
@@ -241,6 +271,12 @@ foreach ($f in $files) {
 | 工具 | 用途 |
 |---|---|
 | `tools/preview-ui.ps1` | **看新 UI 用这个**：独立进程服务工作区构建的前端 + 真实数据库，不安装、不影响已运行应用 |
+| `tools/shot-routes.mjs` | **改完 UI 先跑这个**：逐路由截图（可带 `--theme`），一眼看出哪一页塌了 |
+| `tools/shot.mjs` | 截当前页面（不导航），配合 `eval-cdp` 先交互再截图 |
+| `tools/eval-cdp.mjs` | 在页面里执行表达式并打印结果。查 DOM 结构、点元素、读状态都用它 |
+| `tools/console-cdp.mjs` | 导航到某路由并打印全部 console 与未捕获异常。**白屏时第一个该跑的工具** |
+| `tools/check-overflow.mjs` | 逐路由报告横向溢出（哪个容器、溢出多少像素）。布局问题用数字判断 |
+| `tools/find-english-t.mjs` | 列出不含中文的 `t("...")`（构建插件会拒绝，它一次只报一个） |
 | `tools/measure-layout.mjs` | 通过 CDP 在**真实视口**量元素几何。**判断布局必须用它** |
 | `tools/measure-typography.mjs` | 量实际生效的字号/行高/字重 |
 | `tools/measure-bars.mjs` | 量 canvas 图表的柱子几何（位置、数量、每根的高度）。注意网格线会横跨所有列，会干扰"找最高墨迹"的判读 |
@@ -399,12 +435,12 @@ node D:\cursor-byok\byok-dev\.e2e-devin\tools\verify-update-signature.mjs `
 | ~~高~~ | ~~同步产品仓库~~ | 已完成，两仓库逐文件一致（只差那 4 个文档） |
 | ~~高~~ | ~~发布正式 Release~~ | 已完成：`haxsd-byok-v1.0.3`（Latest），签名链与匿名下载都已实测验证 |
 | ~~低~~ | ~~`latest.json` 下载地址走 `api.github.com`~~ | 已修：finalize 阶段改写成不限流的 `github.com/.../releases/download/...`，并在改写失败时中断发布 |
-| 中 | 图表**形态**重设计 | 已修：空柱等高、日历数据源、三主题色板、仪表盘硬编码绿色、tooltip 走 token。**形态本身（柱状/热力图）未做** |
-| 中 | 日期选择器、命令面板等长尾控件 | 未逐一走查 |
+| 中 | ~~图表**形态**重设计~~ | 已完成：日历改成 SVG（可悬停/聚焦/点击、跟随主题、有星期与月份标签与图例）；柱状图按分桶决定圆角、有图例、可点击放大到该时段；磁贴带迷你趋势线；缓存命中率改成圆环 |
+| ~~中~~ | ~~命令面板（Ctrl+K）~~ | 已完成：`shell/CommandPalette.tsx`，搜页面 / 动作 / 模型 / 调用（含 Call ID 与会话 ID），导航条右侧有一个显示快捷键的按钮负责被发现 |
 | 低 | 偶发测试 `database is locked` | `newer_run_request_on_one_bidi_stream_replaces_the_active_run` 出现过一次；源仓库 12 次运行未复现。**无复现证据前不要改池配置** |
-| 低 | 页面切换过渡动效 | 只做了基础动效（按钮/弹窗/折叠） |
-| 低 | 图表的 memo 不依赖主题 | `DailyTokenUsageChart` / `ContributionCalendarChart` 的 `useMemo` / `useLayoutEffect` 依赖里没有主题，主题变了颜色不会重算。**当前不可见**（主题开关只在设置页，切主题时首页已卸载，回来是重新挂载），但如果哪天把主题开关挪到常驻位置就会露出来 |
-| 待定 | 把 `midnight` 设为默认主题 | 用户尚未表态 |
+| ~~低~~ | ~~页面切换过渡动效~~ | 已完成：缓存节点重新挂载时重放 220ms 入场动画（`AppLayout.module.scss`） |
+| ~~低~~ | ~~图表的 memo 不依赖主题~~ | 已解决：图表在渲染期读 `chartPalette()`，色值进了依赖数组；日历图完全不碰 canvas |
+| 待定 | 把 `midnight` 设为默认主题 | 代码里 `defaultThemeId` 已经是 `midnight`，机器上装的旧版本仍存有旧主题选择 |
 
 ### 明确挂起（不要擅自推进）
 
@@ -542,3 +578,193 @@ cursor.general.disableHttp2 / http.experimental.systemCertificatesV2
 `search/` 的 User-Agent 曾经自称 `CursorBYOK/0.1`，已改为 `haxsd-byok/0.1`（对外可见的品牌泄漏）。
 插件运行时的 import map 名（`cursor-byok:plugin` 等）和 Monaco 主题名 `cursor-byok` 属于纯内部标识，
 改名要动上百处且收益为零，未动。
+
+---
+
+## 十五、界面重设计（2026-09-23，第二轮）
+
+用户要求「几乎每个页面都重新设计」，并授权自行决策。这一轮只动前端呈现，
+**没有改后端接口、数据库结构、依赖**。
+
+### 每个页面现在的样子
+
+| 页面 | 这轮做了什么 |
+|---|---|
+| 概览 | 四个指标磁贴（命中率圆环 + 其余三条迷你趋势线）、`Token 用量` 独立卡片（副标题给合计/日均/峰值、可点柱子放大到该时段）、`每日用量` 日历独立成卡（SVG、有星期与月份标签、图例、悬停提示、点一天把范围收到那天）、`最近调用` 与 `模型用量` 并排 |
+| 调用 | 顶部只读指标条（调用/成功率/平均耗时/平均 TTFB/Token）＋ 搜索、状态、路由、模型四个筛选 ＋ 表格缩到 9 列（含 Token 构成占比条），其余 20 多个字段进展开面板并分四组；详情页改成标题带 + 同一套字段分组 |
+| 模型库 | 卡片补上协议徽章、上下文/输出上限/思考强度等胶囊、测试结果与「测试/编辑/更多」；工具条给搜索、平铺/供应商/类型切换、一键测试；空库时给三步引导 |
+| Cursor | 与 Devin 同构：结论 + 请求路径（Cursor→本机代理→模型库）+ 只差哪几步 + 接管开关与 CA 状态；本地证书独立成卡（状态、命令、复制、打开终端）；模型库摘要卡 |
+| Devin | 接入状态改用共享 `StatusHero`；三张卡加副标题与状态胶囊（基础设置/接入 Devin/高级） |
+| 插件配置 | 标题带显示运行时状态；未初始化时给三步引导与内联下载进度；就绪后是带搜索的插件卡（账号数/模型数为数字排版） |
+| 系统设置 | 左侧分组导航（12 项按用途分四组）＋ 右侧滚动内容，卡片位置决定导航高亮；主题选择器画成三张预览色卡；存储行给出「占用 · 调用数 · 追踪数」 |
+
+### 顺带修掉的真实缺陷
+
+1. **设置页让整个应用白屏**：把 `t` 当成 `useMemo` 依赖（`[t]`）——`t` 是构建期注入的
+   模块级函数，**不是变量**，运行时报 `ReferenceError: t is not defined`，React 卸载整棵树。
+   已修，并加了 `PageErrorBoundary` 兜住以后同类问题。
+2. **横排导航条状态滞后**：Cursor/Devin 的状态原来只在导航项里，现在导航条右侧常驻
+   「网关状态 · 调用次数 · 模型数」。
+3. `--vscode-testing-iconPassed` 等主题里不存在的名字会在成功/失败状态上静默退回硬编码色，
+   模型卡与插件卡已改用 `--oa-ok` / `--oa-bad`。
+4. 日历图原来会把格子拉伸到卡片宽度（1280px 页面上是 13px 方块），已改为按可用宽度自适应、
+   上限 17px；`Pagination` 原来是透明背景、贴在页面底部，现在是表格卡片的一部分。
+
+### ⚠️ 同步产品仓库时会踩的坑
+
+这一轮**删除了 4 个文件**：
+
+```
+apps/desktop/src/features/devin/DevinPath.tsx / .module.scss            → shared/ui/ConnectionPath.*
+apps/desktop/src/features/home/metrics/CacheHitRateChart.tsx / .module.scss
+apps/desktop/src/shared/ui/DataTable.tsx / .module.scss                 → 调用表格自绘
+```
+
+`tar -x` 只覆盖不删除（见第七节），同步后这些文件会残留在产品仓库里。
+同步后**必须**跑第七节的 blob 哈希比对，并手工删除这几个残留。
+
+---
+
+## 十六、第三轮：命令面板、token 审计与失败提示（2026-09-23）
+
+### 新增：命令面板（Ctrl / ⌘ + K）
+
+`shell/CommandPalette.tsx`。一个输入框同时做三件事：跳页面、执行动作（刷新数据、
+切换三个主题、打开教程）、按名字 / 模型 ID / **Call ID / 会话 ID** 找到一次调用。
+调用 ID 以前在界面上没有任何搜索入口，这是它存在的首要理由。
+
+- 空查询只列页面、动作与模型；调用记录要输入才出现（几百条全列等于没有重点）。
+- 匹配是分级的：前缀 > 包含 > 任意字段包含 > 按顺序的子序列（`dvn` 命中 `Devin`）。
+- 键盘：↑↓ 选择、Enter 执行、Esc 关闭；导航条右侧有个显示 `Ctrl K` 的按钮负责被发现。
+- 已知取舍：Monaco 编辑器（调用详情的请求/响应体）自己绑定了 Ctrl+K 的和弦，在编辑器
+  获得焦点时可能抢不到这个键；未处理，因为影响面小且加捕获监听会破坏编辑器快捷键。
+
+### 失败提示不再和成功长得一样
+
+`shared/ui/message.ts` 增加 `tone`，并加了 `message.error(cause)` 这个入口：
+红色边框 + 警示图标 + 6 秒停留（普通信息仍是 2.4 秒）。**30 处 catch 调用点**已统一
+改成 `message.error(cause)`，包括 appStore 的错误通道（`App.tsx`）。
+
+### token 审计：又一类静默失效
+
+新工具 `tools/audit-tokens.mjs` 找出「代码读、但没有任何主题声明」的自定义属性。
+主题 token 由 `vscode-theme()` / `chart-palette()` mixin 生成，所以审计必须认得 mixin 与
+内联声明，否则全是误报。
+
+结论：**9 个 `--vscode-*` 名字从未被声明**（15 处使用）。这些不是小事，CSS 会把整条声明
+判为 invalid at computed-value time：
+
+| 未声明的名字 | 实际后果 | 已改为 |
+|---|---|---|
+| `--vscode-testing-iconPassed` | 成功状态全部退回硬编码绿色，不跟主题 | `--oa-ok` / `--oa-ok-soft` |
+| `--vscode-widget-border` | 设置卡片的行分隔线退回 `currentColor`（一条刺眼的白线） | `--oa-border` |
+| `--vscode-textLink-activeForeground` | 链接悬停退回继承色（蓝变白） | 三个主题各补一个值 |
+| `--vscode-editor-font-family` | 退回默认字体 | `--oa-code-font` |
+| `--vscode-list-hoverForeground` / `-inactiveSelectionBackground` / `-toolbar-hoverBackground` / `-progressBar-background` / `-editorWarning-foreground` | 悬停色、进度条、警告色分别退回继承或硬编码 | 语义 token / `--oa-accent` |
+
+审计现在返回 0，**改样式后跑一次**：`node .e2e-devin/tools/audit-tokens.mjs apps/desktop/src`。
+
+### 静态检查补了一条：裸 `t` 引用
+
+`tools/find-english-t.mjs` 现在同时检查两类问题，因为第二类今天让应用白屏了两次：
+
+1. `t("...")` 的 source 不含中文（构建插件会拒绝，且一次只报一个）；
+2. **裸 `t` 引用**——构建插件只重写 `t(` 调用，写成 `useMemo(..., [t])` 能编译通过，
+   首次渲染时抛 `ReferenceError: t is not defined`，React 卸载整棵树 → 白屏。
+
+工具要处理 CRLF：行尾有 `\r` 时 `.*$` 不匹配，中文注释里出现 `t` 会被误报（踩过）。
+
+### 其它一致性修正
+
+- 设置页各子卡片的 `padding: 16px` 改为 `var(--oa-card-padding)`：默认主题（midnight）
+  的卡片标题用 20px，内容 16px，差 4px 对不齐。
+- 插件面板、设置卡片里的 `gap: 10/12/14px` 统一到间距 token。
+
+### 这一轮的验证
+
+```powershell
+cd apps/desktop; npm run check                       # 绿
+node D:\cursor-byok\byok-dev\.e2e-devin\tools\audit-tokens.mjs src        # 0 / 0 / 0
+node D:\cursor-byok\byok-dev\.e2e-devin\tools\find-english-t.mjs src      # 0 / 0
+node D:\cursor-byok\byok-dev\.e2e-devin\tools\check-overflow.mjs <url>    # 七个路由全部无横向溢出
+```
+
+截图：`v11-palette.png`、`v11-palette-search.png`（按 `devin-call` 过滤到 4 条调用）、
+`v11-palette-light.png`。
+
+### 这轮新增/修改的文件（在本轮之前是「未触碰」的次级界面）
+
+```
+新增  apps/desktop/src/shell/CommandPalette.tsx / .module.scss
+修改  apps/desktop/src/shared/ui/message.ts / MessageProvider.tsx / .module.scss
+修改  apps/desktop/src/App.tsx（错误通道带 tone）
+修改  apps/desktop/src/features/{settings,plugins,models,devin}/**（消息 tone + 间距 token）
+修改  apps/desktop/src/styles/_themes.scss（补 textLink-activeForeground）
+新增  .e2e-devin/tools/audit-tokens.mjs
+```
+
+---
+
+## 十七、第四轮：漏译审计、服务不可达（2026-09-23）
+
+### 漏译：`t()` 之外的中文
+
+新增 `tools/find-untranslated.mjs`：找出**没有包在 `t()` 里**的中文。构建插件只看 `t()`
+调用，所以漏掉的字符串能编译、中文界面正常、**英文界面静默显示中文**，没有任何检查会报。
+
+修掉的 4 处（英文界面此前会说中文）：
+
+| 位置 | 内容 |
+|---|---|
+| `shared/utils/modelPresets.ts` | 预设名称（智谱 GLM / 火山引擎方舟）与 5 条取 Key 提示 |
+| `devin/DevinSettingsPage.tsx` | 「Devin 宿主补丁已应用…」与「Devin 宿主文件已恢复」两条提示 |
+| `devin/DevinSettingsPage.tsx` | 字段标签「Devin / Windsurf extension.js 路径」 |
+
+预设数据有个陷阱：`name` / `keyHint` **不能**在模块顶层调 `t()`——模块求值早于
+`setRuntimeLocale`，字符串会被固定成首次导入时的语言。它们现在是 `() => t("…")`，
+渲染期解析。工具默认跳过 `src/demo/**` 与 `parseTimeInput.ts`（前者是演示用假接口，
+后者是时间输入文法），`--all` 可以包含它们；剩下 2 处是语言选择器里的「简体中文」，
+是有意保留的。
+
+### 服务不可达 ≠ 没有数据
+
+本地管理服务没起来时，界面以前只是弹一条提示，然后一直显示 0——看起来像「还没有记录」。
+现在：
+
+- `api.ts` 的 `ServiceUnreachableError` 把「连不上」与「服务返回了错误」分开；
+- `appStore` 增加 `offline`，`refresh()` / `refreshCalls()` 都会设置它；
+- `shell/OfflineBanner.tsx`：底部常驻提示，每 3 秒自动重试，带「立即重试」；
+- 导航条右侧的状态胶囊在离线时显示「服务未连接」（红色），而不是「已关闭」；
+- `shared/ui/ServiceOfflineState.tsx`：模型库、调用、插件三个页面在**空且离线**时
+  显示这个状态，不再说「库还是空的」。调用页保留上次取到的数据（陈旧但真实），
+  由提示条解释原因——清空表格比展示旧数据更糟。
+
+### 无障碍抽查
+
+`tools/audit-a11y.mjs`：逐路由检查未命名的控件、缺 `alt` 的图片、标题层级、地标。
+七个路由全部通过（1 个 `main`、1 个 `h1`、导航有名字）。
+
+注意第一版误报了所有 `FormField` 里的输入框：**表单控件的名字来自包裹它的 `<label>`**，
+要用 `element.labels` 判断，不能只看 `aria-label` 与 `title`。
+
+### 两个方法论提醒（都踩过）
+
+1. **CDP 的 `Network.setBlockedURLs` 是会话级的**：脚本一断开就失效。想在离线状态下
+   截图，必须在**同一个会话**里拦截并截图——`shot.mjs` 因此增加了 `--block` 参数。
+2. **PowerShell 传参不能带中文**：`node tools/eval-cdp.mjs "...\"展开详情\"..."` 里的中文
+   会被编码破坏，表现为「元素找不到」或整条表达式语法错误。选择器一律用 ASCII
+   （`[role=alert]`、`[aria-expanded=false]`），中文只出现在**输出**里。
+
+### 这一轮的验证
+
+```powershell
+cd apps/desktop; npm run check                      # 绿
+node ...\audit-tokens.mjs src                        # 0 / 0 / 0
+node ...\find-english-t.mjs src                      # 0 / 0
+node ...\find-untranslated.mjs src                   # 2（均为有意保留的语言名）
+node ...\check-overflow.mjs <url>                    # 七路由无横向溢出
+node ...\audit-a11y.mjs <url>                        # 七路由全部通过
+```
+
+截图：`v12-offline.png`（模型库离线）、`v12-offline-calls.png`（调用页离线：保留旧数据
++ 提示条）。恢复后提示条自动消失，已实测。
