@@ -46,7 +46,7 @@ function AppMessages() {
   const showMessage = useMessage();
 
   useEffect(() => {
-    if (error && error !== previousError.current) showMessage(error);
+    if (error && error !== previousError.current) showMessage(error, { tone: "error" });
     previousError.current = error;
   }, [error, showMessage]);
 

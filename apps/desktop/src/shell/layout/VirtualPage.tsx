@@ -22,7 +22,9 @@ export function VirtualPage({ title, sections, className, contentClassName }: { 
     estimateSize={estimateSize}
     renderItem={renderItem}
     overscan={2}
-    itemGap={16}
+    /* The gap lives in the section's own padding so it comes from the theme's
+       rhythm token, which the virtual list's pixel prop could not read. */
+    itemGap={0}
     scrollbarSize={7}
     scrollbarInsetTop="var(--app-content-top)"
     className={[styles.root, "scroll-shadow-top", className].filter(Boolean).join(" ")}
