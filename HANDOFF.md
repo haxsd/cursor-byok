@@ -768,3 +768,54 @@ node ...\audit-a11y.mjs <url>                        # 七路由全部通过
 
 截图：`v12-offline.png`（模型库离线）、`v12-offline-calls.png`（调用页离线：保留旧数据
 + 提示条）。恢复后提示条自动消失，已实测。
+
+---
+
+## 十八、1.0.5 本机构建与安装（2026-09-23）
+
+### 已完成
+
+- 开发仓库分 7 个提交收好本轮全部改动（最后一个提交是版本号）。
+- 版本号四处一致：`apps/desktop/package.json`、`package-lock.json`、
+  `src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` + `Cargo.lock`
+  （`cargo check --locked -p haxsd-byok-desktop` 验证过）。
+- 本机安装包：`target\release\bundle\nsis\haxsd byok_1.0.5_x64-setup.exe`
+  （27,510,466 字节，构建日志 `.e2e-devin\build-1.0.5.log`；结尾的签名失败是预期的）。
+- 已安装并启动，`%LOCALAPPDATA%\haxsd byok\haxsd-byok-desktop.exe` 版本 1.0.5，
+  四个端口（1634 / 43110 / 43111 / 43112）都归它所有，`/api/devin/status` 报
+  `listening: true`。
+- **隔离核对**：安装前后 `%APPDATA%\Cursor\User\settings.json` 的 SHA-256 都是
+  `6915B883…9B8B`，未被动过。`cursor_takeover_enabled` 在库里仍是 `false`。
+- 真实窗口截图：`.e2e-devin\app-1.0.5-*.png`（七页）。
+
+### 怎么验证已安装应用（不需要 Pillow，也不怕窗口被挡）
+
+给 WebView2 加远程调试端口再启动，就能用现成的 CDP 工具直接看**已安装应用自己的界面**：
+
+```powershell
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9223"
+Start-Process "$env:LOCALAPPDATA\haxsd byok\haxsd-byok-desktop.exe"
+# 之后所有工具加 --port 9223；切页面用 eval-cdp 改 location.hash（页内路由，不重载）
+node .e2e-devin\tools\eval-cdp.mjs "location.hash = '#/calls'" --port 9223
+node .e2e-devin\tools\shot.mjs out.png --port 9223
+```
+
+**用完记得不带这个环境变量重启一次**，否则调试端口会一直开着。
+`capture-window.py` 需要 Pillow（本机没装，pip 装不动），上面这条路更好：不受遮挡影响。
+
+### 踩到的坑：预览服务会抢网关端口
+
+`tools/preview-ui.ps1` 起的 `cursor-server.exe` **也会去绑 43110/43111/43112**，
+谁先起谁拿到。结果是后起的那个进程绑不上，`/api/devin/status` 如实报
+`listening: false`——界面显示「已启用，端口未监听」是**正确**的，不是界面 bug。
+本轮就因此误判过一次。
+
+所以：**验证已安装应用时先把预览服务停掉**，用完再起。`preview-ui.ps1` 里那句
+「网关端口保持关闭」的前提是「已安装应用先占住了端口」，不是它不会去绑。
+
+### 另一个假象
+
+截图缩略图里「服务端口 1634」看起来像 `16:34`。放大 3 倍后确认是正常的 `1634`：
+1500px 视口缩到 1024px 图片时小字号被压糊了。**小字号的判读一律放大看**
+（`shot.mjs --clip x,y,w,h --scale N`），不要凭缩略图下结论——这个原则文档里已有，
+这次又差点被它带偏。
