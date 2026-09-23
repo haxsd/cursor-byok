@@ -45,6 +45,9 @@
 
   &[data-tone="ok"] { background: var(--oa-ok); }
   &[data-tone="bad"] { background: var(--oa-bad); }
+  &[data-tone="info"] { background: var(--oa-info); }
+  /* 未知状态用中性色，不要默认成「警告」：黄色在这里表示「出错了」。 */
+  &[data-tone="idle"] { background: var(--vscode-descriptionForeground); }
 }
 
 .identity {

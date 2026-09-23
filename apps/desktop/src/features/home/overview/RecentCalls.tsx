@@ -1,18 +1,12 @@
 import type { LlmCall } from "../../../shared/api";
 import { useI18n } from "../../../i18n/store";
+import { callStatusTone } from "../../../shared/utils/callStatus";
 import { formatCompactInteger } from "../../../shared/utils/numberFormat";
 import { formatDuration, formatRelativeTime } from "../../../shared/utils/relativeTime";
 import { Icon } from "../../../shared/ui/Icon";
 import { TooltipTrigger } from "../../../shared/ui/TooltipTrigger";
 import { eyeIcon } from "../../../shared/ui/icons";
 import styles from "./RecentCalls.module.scss";
-
-const STATUS_TONE: Record<string, "ok" | "warn" | "bad"> = {
-  completed: "ok",
-  failed: "bad",
-  error: "bad",
-  cancelled: "warn",
-};
 
 /**
  * 最近几条调用。
@@ -33,7 +27,7 @@ export function RecentCalls({ calls, limit = 6, onOpen }: {
       const tokens = call.total_tokens ?? (call.input_tokens ?? 0) + (call.output_tokens ?? 0);
       return <li key={call.call_id}>
         <button type="button" className={styles.row} onClick={() => onOpen(call)}>
-          <span className={styles.tone} data-tone={STATUS_TONE[call.status] ?? "warn"} aria-hidden="true" />
+          <span className={styles.tone} data-tone={callStatusTone(call.status)} aria-hidden="true" />
           <span className={styles.identity}>
             <span className={styles.name}>{call.display_name || call.model_id}</span>
             <span className={styles.meta}>

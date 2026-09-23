@@ -7,7 +7,6 @@ import { api } from "../shared/api";
 import { useI18n } from "../i18n/store";
 import { appStore, useAppStore } from "../shared/store/appStore";
 import { Icon } from "../shared/ui/Icon";
-import { useMessage } from "../shared/ui/message";
 import { themeOptions } from "../shared/theme/theme";
 import { navCallsIcon, navDevinIcon, navModelsIcon, navOverviewIcon, navPluginsIcon, navSettingsIcon, navTutorialIcon } from "../shared/ui/navIcons";
 import { activityIcon, arrowRightIcon, eyeIcon, refreshIcon, searchIcon } from "../shared/ui/icons";
@@ -35,7 +34,6 @@ export function CommandPalette() {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const navigate = useNavigate();
-  const message = useMessage();
   const { locale } = useI18n();
   const { models, calls, theme } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -79,6 +77,7 @@ export function CommandPalette() {
       { id: "page-models", group: t("页面"), label: t("模型库"), icon: navModelsIcon, run: go("/models") },
       { id: "page-plugins", group: t("页面"), label: t("插件配置"), icon: navPluginsIcon, run: go("/plugins") },
       { id: "page-settings", group: t("页面"), label: t("系统设置"), icon: navSettingsIcon, run: go("/settings") },
+      { id: "page-tutorial", group: t("页面"), label: t("使用教程"), icon: navTutorialIcon, run: go("/tutorial") },
     ];
     const actions: Command[] = [
       {
@@ -101,12 +100,11 @@ export function CommandPalette() {
       {
         id: "action-tutorial",
         group: t("动作"),
+        // 教程是这个应用自己的一页，不是上游产品的文档站：打开外部网页会把用户带到
+        // 另一套界面和步骤上去。
         label: t("打开使用教程"),
         icon: navTutorialIcon,
-        run: () => {
-          setOpen(false);
-          void api.openExternalUrl("https://docs.leokun.cn").catch((cause) => message.error(cause));
-        },
+        run: go("/tutorial"),
       },
     ];
     const modelCommands: Command[] = models.slice(0, 8).map((model) => ({
@@ -128,7 +126,7 @@ export function CommandPalette() {
       run: () => { void api.openCallDetails(call.call_id); setOpen(false); },
     }));
     return [...pages, ...actions, ...modelCommands, ...callCommands];
-  }, [calls, locale, message, models, navigate, theme]);
+  }, [calls, locale, models, navigate, theme]);
 
   const matches = useMemo(() => {
     const trimmed = query.trim().toLowerCase();

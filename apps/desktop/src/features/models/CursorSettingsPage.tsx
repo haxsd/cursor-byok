@@ -96,7 +96,6 @@ export function CursorSettingsPage() {
     !models.length && { key: "models", label: t("往模型库里加一个模型"), hint: t("Cursor 的请求需要一个本地模型来回答。") },
     !caReady && { key: "ca", label: t("初始化并信任本地 CA"), hint: t("没有证书就无法解析 Cursor 的 HTTPS 请求。") },
     caReady && !cursorTakenOver && { key: "takeover", label: t("打开接管开关"), hint: t("写入本地代理配置后，需要手动重启 Cursor。") },
-    cursorTakenOver && { key: "restart", label: t("重启 Cursor"), hint: t("配置在启动时读取，重启后请求才会走本机代理。") },
   ].filter(Boolean) as Array<{ key: string; label: string; hint: string }>;
 
   const content = <div className={styles.page}>
@@ -108,10 +107,13 @@ export function CursorSettingsPage() {
         connected={connected}
         title={connected ? t("已接管") : t("还没有接管")}
         description={connected
-          ? t("Cursor 的请求正经过本机代理，由模型库里的 {count} 个模型回答。", { count: models.length })
+          ? t("代理配置已写入；重启 Cursor 之后，请求会由模型库里的 {count} 个模型回答。", { count: models.length })
           : outstanding[0]?.label ?? t("读取中…")}
         stages={stages}
         steps={outstanding}
+        footnotes={connected
+          ? t("Cursor 只在启动时读取这份配置：如果它是在开启接管之前打开的，需要重启一次。")
+          : undefined}
         aside={<>
           <StatusPill tone={caTone}>{t("本地 CA：{state}", { state: caLabel })}</StatusPill>
           <TooltipTrigger label={takeoverLabel}>

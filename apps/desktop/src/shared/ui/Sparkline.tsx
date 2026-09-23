@@ -29,13 +29,18 @@ export function Sparkline({ values, tone = "accent", height = 30, fill = true, a
  * Maps the series onto a 0..100 box. The baseline is the series minimum rather than
  * zero: a spike from 99 to 100 tokens is the shape people are looking for, and a
  * zero-based axis would draw it as a flat line.
+ *
+ * A constant series — including an all-zero one, which is what a range with no usage
+ * looks like — returns null rather than a line along the bottom. Drawing it made an
+ * empty range look like a measured flat trend.
  */
 function buildPath(values: number[]) {
   const points = values.filter((value) => Number.isFinite(value));
   if (points.length < 2) return null;
   const maximum = Math.max(...points);
   const minimum = Math.min(...points);
-  const span = maximum - minimum || Math.max(1, Math.abs(maximum));
+  if (maximum === minimum) return null;
+  const span = maximum - minimum;
   const step = 100 / (points.length - 1);
   const line = points
     .map((value, index) => {
