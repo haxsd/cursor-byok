@@ -33,3 +33,5 @@ cursor-tab-server/cursor-tab-server-linux-amd64.tar
 /scripts/cursor-proto/proto/*
 !/scripts/cursor-proto/proto/agent_v1.proto
 !/scripts/cursor-proto/proto/aiserver_v1.proto
+# 本机构建配置（GNU 链接参数、并发数），不进仓库也不随 CI 变化
+/.cargo/
