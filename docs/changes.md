@@ -116,3 +116,29 @@ npm --prefix apps/desktop run i18n:scan
 - 逐小时计价与独立复算脚本对账，四项费用完全一致；
 - 分桶用量之和与服务端汇总数据相等，不存在漏算；
 - 币种跟随语言的映射用真实模块跑过覆盖（中/英 × 币种 × 价格表 × 金额格式化）全部通过。
+
+## 构建与验证
+
+依赖：Node.js 22、Rust stable，以及 Tauri 的系统依赖（Windows 下为 WebView2 与 MSVC 工具链）。
+
+```bash
+npm --prefix apps/desktop run check                # 前端：类型检查 + 生产构建
+cargo fmt --all -- --check                         # 后端：格式
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace --all-targets
+make build-desktop                                 # 桌面端打包
+```
+
+> Windows 上请把仓库的行尾策略按原样检出，否则 `prefix_stability` 会因为提示词模板被检出成 CRLF 而失败（`include_str!` 会把 CRLF 一起编进模板）：`git config core.autocrlf false`、`git config core.eol lf`，然后 `git checkout -- .`。
+
+## 同步上游
+
+历史是重新导入的（初始提交与上游没有共同祖先），因此不能直接 `git merge upstream/main`；同步的做法是先看清上游的变更范围，再逐文件套用：
+
+```bash
+git fetch https://github.com/leookun/cursor-byok.git main
+git diff --stat <上次同步的上游提交> FETCH_HEAD     # 先看范围：改了哪些文件、增删多少行
+git diff <上次同步的上游提交> FETCH_HEAD -- <文件> | git apply
+```
+
+已同步到上游 **v1.0.1**（提交 `2068ab2`），基线是上游 **v1.0.0**（提交 `3725f27`）。若上游改动了价格或广告相关文件，按本文列出的文件逐一处理即可。
