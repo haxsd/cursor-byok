@@ -10,6 +10,10 @@
 
 ![cursor-byok 仪表盘](./images/en-home-1.png)
 
+## 下载
+
+Windows x64 安装包（NSIS）：从 [Releases](https://github.com/haxsd/cursor-byok/releases/latest) 下载名称含 `x64-setup.exe` 的文件；应用内更新也指向本仓库的 Release。
+
 ## 本分支改了什么
 
 | 改动 | 说明 |

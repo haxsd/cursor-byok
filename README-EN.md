@@ -10,6 +10,10 @@ A personal fork of [leookun/cursor-byok](https://github.com/leookun/cursor-byok)
 
 ![cursor-byok dashboard](./images/en-home-1.png)
 
+## Download
+
+Windows x64 installer (NSIS): download the file whose name contains `x64-setup.exe` from [Releases](https://github.com/haxsd/cursor-byok/releases/latest); in-app updates point at this repository's releases too.
+
 ## What this fork changes
 
 | Change | Notes |
